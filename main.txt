@@ -101,7 +101,7 @@ while $BarrierIND == true
     // State 1: Monitoring approach
     if and
         $PlayerOutside == false
-        Player.LocateAnyMeans3D($player, 791.40, -930.17, 40.73, 15.0, 15.0, 3.0, False)
+        Player.LocateAnyMeans3D($player, 791.40, -930.17, 40.73, 60.0, 15.0, 3.0, False)
     then
         if Player.IsInFlyingVehicle($player)
         then
@@ -115,11 +115,12 @@ while $BarrierIND == true
         Hud.DisplayTimer($BarrierTimer)
     end
 
-    // State 2: Countdown / Warning phase
+    // State 2: Countdown & Warning phase
     while $PlayerOutside == true
         wait 0
 
-        if not Player.LocateAnyMeans3D($player, 791.40, -930.17, 40.73, 25.0, 25.0, 5.0, False)
+        // If the player leaves the bridge, stop the countdown
+        if not Player.LocateAnyMeans3D($player, 791.40, -930.17, 40.73, 60.0, 25.0, 5.0, False)
         then
             $PlayerOutside = false
             Text.ClearHelp()
@@ -127,7 +128,8 @@ while $BarrierIND == true
             break // Exit countdown loop back to monitoring
         end
 
-        if $BarrierTimer == false
+        // The timer ran out, kill the player
+        if $BarrierTimer == 0
         then
             Hud.ClearTimer($BarrierTimer)
 
@@ -151,9 +153,10 @@ while $BarrierIND == true
                 end
                 Player.SetHealth($player, $PlayerHealth)
 
+                // ☠ Death penalty
+                // FIXME: The player is a ghost if they're given the death penalty inside a vehicle
                 if $PlayerHealth < 5
                 then
-                    // Death penalty
                     Player.SetControl($player, False)
                     Camera.DoFade(500, Fade.Out)
                     wait 500
