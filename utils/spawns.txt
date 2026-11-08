@@ -1,0 +1,7 @@
+Restart.AddHospital(1147.25, -597.0, 14.98, 260)
+Restart.AddHospital(182.81, -17.03, 16.21, 180)
+Restart.AddHospital(-1247.80, -150.34, 59.04, 89.0)
+Restart.AddPolice(1148.0776, -674.9393, 14.98, 88.0)
+Restart.AddPolice(-148.00, 1285.68, 112.63, 90.0)
+Restart.AddPolice(340.08, -1121.65, 25.98, 180.0)
+Restart.AddPolice(-1255.87, -44.76, 58.89, 88.0)

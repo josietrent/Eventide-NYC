@@ -1,0 +1,201 @@
+DEFINE OBJECTS 3
+DEFINE OBJECT SANNY BUILDER 4.1.0
+DEFINE OBJECT INDHELIX_BARRIER
+DEFINE OBJECT LOD_LAND014
+
+DEFINE MISSIONS 0
+// TODO: DEFINE MISSION {ID} 0 AT {LABEL} @mission
+
+{$USE CLEO, AUDIO, ini}
+nop
+
+//=============
+// Main thread
+//=============
+script_name 'MAIN'
+
+// Global state
+declare_mission_flag $onmission
+$onmission = false
+
+// Load Portland
+Game.SetMaxWantedLevel(2)
+set_deatharrest_state 0
+Clock.SetTimeOfDay(20, 0)
+Streaming.LoadCollision(LevelName.Industrial)
+wait 0 // QUESTION: Should we wait for the world to load first, or just let the game do its thing?
+
+// Spawn the player
+int $player = Player.Create(0, 933.66, -252.64, 4.50)
+Player.SetHeading($player, 287.49)
+int $scplayer = Player.GetChar($player)
+Camera.SetBehindPlayer()
+wait 0
+
+// FIXME: Claude has a doppelganger. What's up with that?
+
+//
+World.SetVisibilityOfClosestObjectOfType(1027.25, -933.6875, 15.0, 50.0, #INDHELIX_BARRIER, False)
+World.SwapNearestBuildingModel(1027.25, -933.6875, 15.0, 50.0, #INDHELIX_BARRIER, #LOD_LAND014)
+Weather.ForceNow(WeatherType.Foggy)
+
+// Dressup the player
+Char.Undress($scplayer, 'PLAYER')
+Char.Dress($scplayer)
+wait 0
+
+// Setup vehicles
+World.SetCarDensityMultiplier(0.85)
+World.SetPedDensityMultiplier(0.1)
+wait 0
+
+// Setup all the game shit
+LoadGameAssets()
+World.SwapNearestBuildingModel(1027.25, -933.75, 15.0, 50.0, #LOD_LAND014, #INDHELIX_BARRIER)
+World.SetVisibilityOfClosestObjectOfType(1027.25, -933.75, 15.0, 50.0, #INDHELIX_BARRIER, True)
+
+// All done!
+Camera.SetFadingColor(0, 0, 0)
+Camera.DoFade(1000, Fade.In)
+
+// Spawn BG threads and begin the loading sequence
+start_new_script @Barrier
+// TODO
+// FIXME: spawn_cleo_thread 'packages.cs'
+
+// Trigger the first mission
+// FIXME: Mission.LoadAndLaunchInternal(0)
+
+// Spin wait while other threads do their magic
+while true
+    wait 250 ms
+end
+
+/// Load core game assets and spawn points cleanly
+:LoadGameAssets
+{$INCLUDE utils/assets.txt}
+{$INCLUDE utils/garages.txt}
+
+// Spawn a Canyonero near the spawn point
+$Canyonero = CarGenerator.Create(935.2039, -218.0919, 4.956, 110, #LANDSTAL, {primaryColor} 3, {secondaryColor} 3, {forceSpawn} true, {alarmChance} 0, {doorLockChance} 0, {minDelay} 0, {maxDelay} 9000)
+CarGenerator.Switch($Canyonero, 1)
+return
+
+//==============
+// Introduction
+//==============
+// TODO: Teach the player how to play the game before we launch the mission
+
+:Barrier
+script_name 'Barrier'
+
+/// Whether the player is stuck in Portland
+int $BarrierIND = true
+int $PlayerOutside = false
+int $BarrierTimer = 0
+int $PlayerHealth = 0
+
+while $BarrierIND == true
+    wait 0
+
+    // State 1: Monitoring approach
+    if and
+        $PlayerOutside == false
+        Player.LocateAnyMeans3D($player, 791.40, -930.17, 40.73, 15.0, 15.0, 3.0, False)
+    then
+        if Player.IsInFlyingVehicle($player)
+        then
+            Text.ClearHelp()
+            continue
+        end
+
+        $BarrierTimer = 15000
+        Text.PrintHelp('BARPORT')
+        $PlayerOutside = true
+        Hud.DisplayTimer($BarrierTimer)
+    end
+
+    // State 2: Countdown / Warning phase
+    while $PlayerOutside == true
+        wait 0
+
+        if not Player.LocateAnyMeans3D($player, 791.40, -930.17, 40.73, 25.0, 25.0, 5.0, False)
+        then
+            $PlayerOutside = false
+            Text.ClearHelp()
+            Hud.ClearTimer($BarrierTimer)
+            break // Exit countdown loop back to monitoring
+        end
+
+        if $BarrierTimer == false
+        then
+            Hud.ClearTimer($BarrierTimer)
+
+            // State 3: Penalty Drain Phase
+            while $PlayerOutside == true
+                wait 50
+                if not Player.LocateAnyMeans3D($player, 791.40, -930.17, 40.73, 25.0, 25.0, 5.0, False)
+                then
+                    $PlayerOutside = false
+                    Text.ClearHelp()
+                    Player.SetHealth($player, 100)
+                    break
+                end
+
+                $PlayerHealth = Player.GetHealth($player)
+                if $PlayerHealth > 20
+                then
+                    $PlayerHealth -= 10
+                else
+                    $PlayerHealth -= 1
+                end
+                Player.SetHealth($player, $PlayerHealth)
+
+                if $PlayerHealth < 5
+                then
+                    // Death penalty
+                    Player.SetControl($player, False)
+                    Camera.DoFade(500, Fade.Out)
+                    wait 500
+                    Player.SetCoordinates($player, 760.70, 92.53, 4.79)
+                    wait 500
+                    Camera.DoFade(500, Fade.In)
+                    Text.PrintHelp('BARTELP')
+                    Player.SetControl($player, True)
+                    Player.SetHealth($player, 0)
+                    $PlayerOutside = false
+                    break
+                end
+            end
+        end
+    end
+end
+
+//==========
+// Missions
+//==========
+
+/// Trigger mission 1: "Driving Mr. Mute"
+:Vehicle
+script_name 'Vehicle'
+
+while not Player.LocateAnyMeans3D($player, 1025.755, -471.541, 14.927, 2.0, 2.0, 2.0, False)
+    wait 0
+    if and
+        $onmission == false
+        $Intro_Passed == true
+    then
+        if Player.LocateAnyMeans3D($player, 1025.755, -471.541, 14.927, 2.0, 2.0, 2.0, False)
+        then
+            Blip.Remove($MissionTriggerBlip)
+            Sphere.Remove($MissionTriggerSphere)
+            Text.PrintBigString("Driving Mr. Mute...", 5000, TextStyle.BottomRight)
+            Camera.DoFade(1500, Fade.Out)
+            wait 1500
+            terminate_all_scripts_with_this_name 'Pistol'
+            // FIXME: Mission.LoadAndLaunchInternal(1)
+            Text.PrintHelpString("Unimplemented exception. Try again later.")
+            terminate_this_script
+        end
+    end
+end

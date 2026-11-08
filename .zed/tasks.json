@@ -1,0 +1,7 @@
+[
+  {
+    "label": "Run",
+    "command": "deno",
+    "args": ["task", "run"],
+  },
+]

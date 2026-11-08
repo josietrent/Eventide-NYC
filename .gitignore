@@ -1,0 +1,9 @@
+# Environment Variables
+.env
+
+# Artifacts
+dist/
+main.scm
+
+# Node.js
+node_modules/

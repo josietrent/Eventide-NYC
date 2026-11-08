@@ -1,0 +1,114 @@
+{$CLEO .cs}
+nop
+
+:PackageTracker
+script_name 'PACKAGE'
+
+int 0@ = Game.GetCollectablesCollected()    // Tracking Pointer
+int 1@ = 1                                  // Blip Update Flag
+int 2@ = 0                                  // Barrier Block Notice Flag
+int Bat = 0                                 // Baseball bat pickup
+int CurrentPackBlip = 0
+int PackHunt = 0
+float PackCoordX = 0.0
+float PackCoordY = 0.0
+float PackCoordZ = 0.0
+
+while Player.IsPlaying($player1)
+    wait 250
+
+    if not Player.IsPlaying($player1)
+    then
+        continue
+    end
+
+    // FIXME: 0@ = Game.GetCollectablesCollected()
+
+    // Out-of-order resync check
+    while 0@ > 0@
+        0@ += 1
+        1@ = 1
+    end
+
+    if $PackHunt == 0
+    then
+        continue
+    end
+
+    // --- REWARDS LOGIC (Guard-clause flattened) ---
+    if and
+        0@ >= 6
+        $Reward1Given == 0
+    then
+        $Reward1Given = 1
+        Stat.PlayerMadeProgress(1)
+        Pager.AddMessage('PACK6', 140, 2, 0)
+        Bat = Pickup.Create(#BAT, PickupType.OnStreet, 1482.88, -200.08, 55.59)
+    end
+
+    if and
+        0@ >= 12
+        $Reward2Given == 0
+    then
+        $Reward2Given = 1
+        Stat.PlayerMadeProgress(1)
+        Pager.AddMessage('PACK12', 140, 2, 0)
+        Pickup.CreateWithAmmo(#COLT45, PickupType.OnStreet, 500, 1472.27, -192.85, 55.47, $MansionPistol)
+    end
+
+    // ... [Similar flattened reward checks for 18 through 54] ...
+
+    if and
+        0@ >= 60
+        $Reward10Given == 0
+    then
+        $Reward10Given = 1
+        Stat.PlayerMadeProgress(1)
+        Text.PrintBig('PACKALL', 5000, TextStyle.Middle)
+        wait 5000
+        Text.PrintBig('PACKREW', 5000, TextStyle.Middle)
+        Player.AddScore($player1, 10000)
+    end
+
+    // --- AUTOMATED RADAR GUIDE LOGIC ---
+    if 0@ >= 60
+    then
+        Blip.Remove(CurrentPackBlip)
+        terminate_this_script
+    end
+
+    if and
+        0@ >= 24
+        $BarrierIND == 1)
+    then
+        if 2@ == 0
+        then
+            2@ = 1
+            Blip.Remove(CurrentPackBlip)
+            Text.PrintHelp('PACKBAR')
+        end
+        continue
+    end
+
+    if 2@ == 1
+    then
+        2@ = 0
+        1@ = 1
+    end
+
+    // FIXME: GetPackageCoordinates(0@)
+
+    if 1@ == 1
+    then
+        1@ = 0
+        Blip.Remove(CurrentPackBlip)
+        CurrentPackBlip = Blip.AddForCoord(PackCoordX, PackCoordY, PackCoordZ)
+        Blip.ChangeColor(CurrentPackBlip, BlipColor.Red)
+    end
+
+    if Player.LocateAnyMeans3D($player1, PackCoordX, PackCoordY, PackCoordZ, 3.0, 3.0, 3.0, False)
+    then
+        0@ += 1
+        1@ = 1
+    end
+end
