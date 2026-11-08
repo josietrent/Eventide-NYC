@@ -1,0 +1,150 @@
+:Help
+script_name 'Help'
+
+$CarTutorialPlayed = false
+$BribeHelpPlayed = false
+$BoatHelpPlayed = false
+$SprintHelpPlayed = false
+$DeathHelp = false
+
+while Player.IsPlaying($player1)
+    wait 250
+
+    if not Player.IsPlaying($player1)
+    then
+        // Spin wait for the player to be alive and well
+        while not Player.IsPlaying($player1)
+            wait 250
+        end
+        continue
+    end
+
+    //====================================================
+    // Mega-switch on player state for specific tutorials
+    //====================================================
+
+    // 1. Car Tutorial Check
+    if and
+        Player.IsInAnyCar($player1)
+        $CarTutorialPlayed == false
+    then
+        PrintHowToDrive()
+        continue
+    end
+
+    // 2. Wasted / Death Tutorial Check
+    if and
+        Pickup.HasBeenCollected($WastedInfo)
+        $DeathHelp == false
+    then
+        HowToDie()
+        continue
+    end
+
+    // 3. Bribe Pickup Help Check
+    if $BribeHelpPlayed == false
+    then
+        if or
+            Pickup.HasBeenCollected($BRIBE_IND1)
+            Pickup.HasBeenCollected($BRIBE_IND2)
+            Pickup.HasBeenCollected($BRIBE_IND3)
+            Pickup.HasBeenCollected($BRIBE_IND4)
+        then
+            PrintHowToBribe()
+            continue
+        end
+    end
+
+    // 4. Boat Tutorial Check
+    if and
+        Player.IsInAnyBoat($player1)
+        $BoatHelpPlayed == false
+    then
+        PrintHowToBoat()
+        continue
+    end
+
+    // 5. Sprint Help Check (triggered after Car Mission is done)
+    if and
+        $CarMissionDone == true
+        $SprintHelpPlayed == false
+    then
+        PrintHowToSprint()
+        continue
+    end
+
+    // 6. Completion Check: Exit script if all tutorials have been completed
+    if and
+        $BoatHelpPlayed == true
+        $SprintHelpPlayed == true
+        $CarTutorialPlayed == true
+    then
+        terminate_this_script
+    end
+end
+
+//=============
+// Subroutines
+//=============
+
+:PrintHowToDrive
+    $CarTutorialPlayed = true
+    wait 100
+    Text.PrintHelp('DRIVE2')
+    wait 5000
+    Text.PrintHelp('DRIVE3')
+    wait 5000
+    Text.PrintHelp('DRIVE4')
+    wait 5000
+    Text.ClearHelp()
+return
+
+:PrintHowToBoat
+    $BoatHelpPlayed = true
+    wait 100
+    Text.PrintHelp('BOAT')
+    wait 5000
+    Text.PrintHelp('BOAT2')
+    wait 5000
+    Text.PrintHelp('BOAT3')
+    wait 5000
+    Text.ClearHelp()
+return
+
+:PrintHowToBribe
+    $BribeHelpPlayed = true
+    wait 100
+    Text.PrintHelp('BRIBE')
+    wait 5000
+    Text.ClearHelp()
+return
+
+:PrintHowToSprint
+    $SprintHelpPlayed = true
+    Text.PrintHelp('SPRINT')
+    wait 5000
+    Text.PrintHelp('SPRINT2')
+    wait 5000
+return
+
+:HowToDie
+    $DeathHelp = true
+    Player.SetControl($player1, False)
+    Camera.SetFixedPosition(1116.83, -590.72, 25.27, 0.0, 0.0, 0.0)
+    Camera.PointAtPoint(1130.80, -590.75, 23.01, SwitchType.JumpCut)
+    wait 1000
+    Text.PrintHelpString("When you die, you'll end up back here.")
+    wait 4000
+    Text.PrintHelpString("You'll lose a bit of cash, but at least you're still alive!")
+    wait 4000
+    Hud.FlashObject(HudObject.Health)
+    Text.PrintHelpString("This is your health. Make sure to keep tabs on it.")
+    wait 5000
+    Hud.FlashObject(0)
+    Camera.SetFixedPosition(1405.12, -390.75, 49.97, 0.0, 0.0, 0.0)
+    Camera.PointAtPoint(1400.00, -390.75, 50.0, SwitchType.JumpCut)
+    Text.PrintHelpString("If you spend some time looking around, you'll find health pickups. Cherish them.")
+    wait 5000
+    Camera.RestoreJumpcut()
+    Player.SetControl($player1, True)
+return

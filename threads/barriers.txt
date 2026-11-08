@@ -1,0 +1,87 @@
+:Barrier
+script_name 'Barrier'
+
+/// Whether the player is stuck in Portland
+int $BarrierIND = true
+int $PlayerOutside = false
+int $BarrierTimer = 0
+int $PlayerHealth = 0
+
+while $BarrierIND == true
+    wait 0
+
+    // State 1: Monitoring approach
+    if and
+        $PlayerOutside == false
+        Player.LocateAnyMeans3D($player, 791.40, -930.17, 40.73, 60.0, 15.0, 3.0, False)
+    then
+        if Player.IsInFlyingVehicle($player)
+        then
+            Text.ClearHelp()
+            continue
+        end
+
+        $BarrierTimer = 15000
+        Text.PrintHelp('BARPORT')
+        $PlayerOutside = true
+        Hud.DisplayTimer($BarrierTimer)
+    end
+
+    // State 2: Countdown & Warning phase
+    while $PlayerOutside == true
+        wait 0
+
+        // If the player leaves the bridge, stop the countdown
+        if not Player.LocateAnyMeans3D($player, 791.40, -930.17, 40.73, 60.0, 25.0, 5.0, False)
+        then
+            $PlayerOutside = false
+            Text.ClearHelp()
+            Hud.ClearTimer($BarrierTimer)
+            break // Exit countdown loop back to monitoring
+        end
+
+        // The timer ran out, kill the player
+        if $BarrierTimer == 0
+        then
+            Hud.ClearTimer($BarrierTimer)
+
+            // State 3: Penalty Drain Phase
+            while $PlayerOutside == true
+                wait 50
+                if not Player.LocateAnyMeans3D($player, 791.40, -930.17, 40.73, 25.0, 25.0, 5.0, False)
+                then
+                    $PlayerOutside = false
+                    Text.ClearHelp()
+                    Player.SetHealth($player, 100)
+                    break
+                end
+
+                $PlayerHealth = Player.GetHealth($player)
+                if $PlayerHealth > 20
+                then
+                    $PlayerHealth -= 10
+                else
+                    $PlayerHealth -= 1
+                end
+                Player.SetHealth($player, $PlayerHealth)
+
+                // ☠ Death penalty
+                // FIXME: The player is a ghost if they're given the death penalty inside a vehicle
+                if $PlayerHealth < 5
+                then
+                    Player.SetControl($player, False)
+                    Camera.DoFade(500, Fade.Out)
+                    wait 500
+                    Player.SetCoordinates($player, 760.70, 92.53, 4.79)
+                    wait 500
+                    Camera.DoFade(500, Fade.In)
+                    Text.PrintHelp('BARTELP')
+                    Player.SetControl($player, True)
+                    Player.SetHealth($player, 0)
+                    $PlayerOutside = false
+                    break
+                end
+            end
+        end
+    end
+end
