@@ -1,38 +1,48 @@
 :Barrier
 script_name 'Barrier'
 
-/// Whether the player is stuck in Portland
+/// Whether the player is prevented from entering Staunton
 int $BarrierIND = true
+/// Whether the player is prevented from entering Shoreside
+int $BarrierCOM = true
 int $PlayerOutside = false
 int $BarrierTimer = 0
 int $PlayerHealth = 0
+int $CollisionWaitTimer = 0 // Safety counter to prevent an infinite hang if collision stalls
 
+:BarrierSniffer
 while $BarrierIND == true
+    int isOnFoot = Player.IsOnFoot($player)
     wait 0
 
-    // State 1: Monitoring approach
-    if and
-        $PlayerOutside == false
-        Player.LocateAnyMeans3D($player, 791.40, -930.17, 40.73, 60.0, 15.0, 3.0, False)
+    // State 1: Monitoring approach (player drives onto the Callahan Bridge)
+    // ROADBR1 covers the main bridge span (X: 617-1065, Y: -958 to -908)
+    // ROADBR2 covers the western approach ramp (X: 444-614, Y: -958 to -908)
+    if or
+        Player.IsInZone($player, 'ROADBR1')
+        Player.IsInZone($player, 'ROADBR2')
     then
-        if Player.IsInFlyingVehicle($player)
+        // FIXME: Exclude when the player is under the bridge (this gets complicated b/c the bridge deck height is variable...)
+        // QUESTION: What is the verital extents of the bridge deck
+        if and
+            isOnFoot == false
+            $PlayerOutside == false
         then
-            Text.ClearHelp()
-            continue
+            $BarrierTimer = 15000
+            Text.PrintHelp('BARPORT')
+            $PlayerOutside = true
+            Hud.DisplayTimer($BarrierTimer)
         end
-
-        $BarrierTimer = 15000
-        Text.PrintHelp('BARPORT')
-        $PlayerOutside = true
-        Hud.DisplayTimer($BarrierTimer)
     end
 
     // State 2: Countdown & Warning phase
     while $PlayerOutside == true
         wait 0
 
-        // If the player leaves the bridge, stop the countdown
-        if not Player.LocateAnyMeans3D($player, 791.40, -930.17, 40.73, 60.0, 25.0, 5.0, False)
+        // If the player left both bridge zones, cancel the countdown
+        if and
+            not Player.IsInZone($player, 'ROADBR1')
+            not Player.IsInZone($player, 'ROADBR2')
         then
             $PlayerOutside = false
             Text.ClearHelp()
@@ -41,23 +51,15 @@ while $BarrierIND == true
         end
 
         // The timer ran out, kill the player
-        if $BarrierTimer == 0
+        if
+            $BarrierTimer == 0
         then
             Hud.ClearTimer($BarrierTimer)
 
             // State 3: Penalty Drain Phase
-            while $PlayerOutside == true
-                wait 50
-                if not Player.LocateAnyMeans3D($player, 791.40, -930.17, 40.73, 25.0, 25.0, 5.0, False)
-                then
-                    $PlayerOutside = false
-                    Text.ClearHelp()
-                    Player.SetHealth($player, 100)
-                    break
-                end
-
                 $PlayerHealth = Player.GetHealth($player)
-                if $PlayerHealth > 20
+                if
+                    $PlayerHealth > 20
                 then
                     $PlayerHealth -= 10
                 else
@@ -65,23 +67,42 @@ while $BarrierIND == true
                 end
                 Player.SetHealth($player, $PlayerHealth)
 
-                // ☠ Death penalty
-                // FIXME: The player is a ghost if they're given the death penalty inside a vehicle
-                if $PlayerHealth < 5
+                // ☠ Death penalty with safety collision check
+                if
+                    $PlayerHealth < 5
                 then
+                    Streaming.LoadCollision(LevelName.Industrial)
+                    while not Streaming.IsCollisionInMemory(LevelName.Industrial)
+                        wait 0
+                        $CollisionWaitTimer += 1
+                        if $CollisionWaitTimer > 200 // Roughly 5 seconds max wait
+                        then
+                            break
+                        end
+                    end
+
                     Player.SetControl($player, False)
                     Camera.DoFade(500, Fade.Out)
                     wait 500
-                    Player.SetCoordinates($player, 760.70, 92.53, 4.79)
+
+                    if
+                        Player.IsInAnyCar($player)
+                    then
+                        Player.WarpFromCarToCoord($player, 760.70, 92.53, 4.79)
+                    else
+                        Player.SetCoordinates($player, 760.70, 92.53, 4.79)
+                    end
+
                     wait 500
                     Camera.DoFade(500, Fade.In)
-                    Text.PrintHelp('BARTELP')
+                    wait 500
+                    Text.PrintHelp('BARTELP') // Do not set foot on our lands again!
                     Player.SetControl($player, True)
                     Player.SetHealth($player, 0)
                     $PlayerOutside = false
-                    break
                 end
-            end
         end
     end
 end
+
+terminate_this_script
