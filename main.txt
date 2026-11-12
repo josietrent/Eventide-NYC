@@ -77,8 +77,7 @@ Player.SetControl($player, True)
 $CarMissionDone = false
 
 // Spawn BG threads
-start_new_script @Barrier
-start_new_script @Packing
+start_new_script @Packing // fudge 😏😈
 
 // Terminate the main initialization thread cleanly now that setup is complete
 terminate_this_script
@@ -91,9 +90,14 @@ terminate_this_script
 {$INCLUDE_ONCE utils/assets.txt}
 {$INCLUDE_ONCE utils/garages.txt}
 
-// Spawn a Canyonero near the spawn point
-$Canyonero = CarGenerator.Create(935.2039, -218.0919, 4.956, 110, #LANDSTAL,  3, 3, true, 0, 0, 0, 9000)
-CarGenerator.Switch($Canyonero, 101)
+// Spawn a Canyonero near in front of the player
+Streaming.RequestModel(#LANDSTAL)
+Streaming.LoadAllModelsNow()
+wait 0
+$Canyonero = Car.Create(#LANDSTAL, 935.2039, -218.0919, 4.956)
+// FIXME: The car ought point West
+Car.SetHeading($Canyonero, 110)
+
 return
 
 //=========================================
@@ -102,7 +106,6 @@ return
 //=========================================
 
 // Include external thread files here
-{$INCLUDE_ONCE threads/barriers.txt}
 {$INCLUDE_ONCE threads/packages.txt}
 
 /// Trigger mission 1: "Driving Mr. Mute"
