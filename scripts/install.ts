@@ -17,6 +17,21 @@ if (!gta3Base) {
 
 const cwd = Deno.cwd();
 const dragDropZip = join(cwd, "dist", "Drag-N-Drop.zip");
+const tarExe = Deno.build.os === "windows"
+  ? (() => {
+    const sysTar = join(
+      Deno.env.get("SystemRoot") || "C:\\Windows",
+      "System32",
+      "tar.exe",
+    );
+    try {
+      if (Deno.statSync(sysTar).isFile) return sysTar;
+    } catch {
+      // Fallback
+    }
+    return "tar.exe";
+  })()
+  : "tar";
 
 try {
   const stat = await Deno.stat(dragDropZip);
@@ -41,7 +56,7 @@ try {
   // Ignored if directory doesn't exist
 }
 
-const cmd = new Deno.Command("tar", {
+const cmd = new Deno.Command(tarExe, {
   args: ["-xf", dragDropZip, "-C", gta3Base],
 });
 const { success, stderr } = await cmd.output();

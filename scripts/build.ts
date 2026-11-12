@@ -192,6 +192,21 @@ const modName = "Eventide";
 const stagingDir = join(distDir, "staging");
 const modStagingDir = join(stagingDir, "modloader", modName);
 const dragDropZip = join(distDir, "Drag-N-Drop.zip");
+const tarExe = Deno.build.os === "windows"
+  ? (() => {
+    const sysTar = join(
+      Deno.env.get("SystemRoot") || "C:\\Windows",
+      "System32",
+      "tar.exe",
+    );
+    try {
+      if (Deno.statSync(sysTar).isFile) return sysTar;
+    } catch {
+      // Fallback
+    }
+    return "tar.exe";
+  })()
+  : "tar";
 
 // Ensure clean staging directory
 try {
@@ -206,7 +221,7 @@ try {
   const stat = await Deno.stat(dragDropZip);
   if (stat.isFile) {
     say.info("Preserving existing zip assets from Drag-N-Drop.zip...");
-    const cmd = new Deno.Command("tar", {
+    const cmd = new Deno.Command(tarExe, {
       args: ["-xf", dragDropZip, "-C", stagingDir],
     });
     await cmd.output();
@@ -278,7 +293,7 @@ if (topLevelEntries.length === 0) {
   Deno.exit(1);
 }
 
-const tarCmd = new Deno.Command("tar", {
+const tarCmd = new Deno.Command(tarExe, {
   args: ["-a", "-cf", dragDropZip, "-C", stagingDir, ...topLevelEntries],
 });
 const { success: tarSuccess, stderr: tarStderr } = await tarCmd.output();
