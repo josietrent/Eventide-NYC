@@ -80,14 +80,19 @@ PACK40	A Flamethrower has been delivered to the Mansion!
 PACK44	Grenades have been delivered to the Mansion!
 PACK48	A Rocket Launcher has been delivered to the Mansion!
 PACKALL	Nice! That's all the packages!
-PACKBAR	You cannot proceed in the ~y~Package Hunt~w~ until you unlock Staunton.
-PACKDON Package Tracking has become redundant. You can keep tapping, but nothing interesting will happen.
-PACKON  Package Tracking System Enabled! Disable by pressing the ~y~ O Key.
-PACKOFF Package Tracking System Disabled! Enable by pressing the ~y~ P Key.
+PACK_ST	You cannot proceed in the ~y~Package Hunt~w~ until you unlock Staunton Island.
+PACK_SH	You cannot proceed in the ~y~Package Hunt~w~ until you unlock Shoreside Vale.
+PACKDEC	Package count decreased by 1.
+PACKDON Package Tracking has become obsolete. You can keep tapping, but nothing interesting will happen.
+PACKINC	Package count increased by 1.
+PACKON  Package Tracking System Enabled! Disable with the ~y~ O Key.
+PACKON1	The Package Tracking System is already on, ~r~dumbass!
+PACKOFF Package Tracking System Disabled! Press the ~y~ P Key to re-enable it.
 PACKREW	Here's a bonus! $10000
 PAKTUT1	You have found a ~y~Hidden Package!
 PAKTUT2	If you find and collect them all, you will be greatly rewarded!
-PAKTUT3	A ~y~Package Tracking System~w~ is available. Press the ~y~ P Key~w~ to turn it on.
+PAKTUT3	A ~y~Package Tracking System~w~ is available. Pressing the ~y~ P Key~w~ will turn it on.
+PAKTUT4 Pressing the ~y~Comma~w~ or ~y~Period~w~ keys will change the currently tracked package.
 SAVE_1  This abandoned house will serve as a nice hideout.
 SAVE_2  For now, at least...
 SAVE_3  Walking into this sphere behind the bar will save the game.
