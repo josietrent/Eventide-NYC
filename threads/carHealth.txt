@@ -1,0 +1,43 @@
+:CarHealth
+script_name 'CarHlth'
+
+:CarHealth101
+while not Player.IsInAnyCar($player)
+    wait 0
+    if
+        Player.CanStartMission($player)
+    then
+        if
+            Player.IsInAnyCar($player)
+        then
+            Player.StoreCarIsInNoSave($player, $AnyCar)
+            goto @CarHealth102
+        end
+    end
+end
+
+:CarHealth102
+while Player.IsPlaying($player)
+    wait 0
+    Car.GetHealth($AnyCar, $CarHealth)
+    $CarHealthBar = $CarHealth
+    $CarHealthBar *= 100
+    $CarHealthBar /= 1000
+    Hud.DisplayCounterWithString($CarHealthBar, CounterDisplay.Bar, 'VEHHEAL')
+
+    if
+        not Player.IsPlaying($player)
+    then
+        Car.Delete($AnyCar)
+        Hud.ClearCounter($CarHealthBar)
+        start_new_script @CarHealth
+        terminate_this_script
+    end
+
+    if
+        not Player.IsInCar($player, $AnyCar)
+    then
+        Hud.ClearCounter($CarHealthBar)
+        goto @CarHealth101
+    end
+end
