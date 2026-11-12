@@ -9,8 +9,12 @@ DEFINE MISSIONS 0
 {$USE CLEO, AUDIO, ini}
 nop
 
+const PACKAGE_COUNT = 61
+
 var
     $BarrierIND: int
+    $CarHealthBar: int
+    $CarHealth: int
     $CurrentPackages: int
     $LastPackCount: int
     $Packages: int
@@ -18,6 +22,7 @@ var
     $PackHunt: int
     $PackIndex: int
     $CarMissionDone: int
+    $AnyCar: Car
 end
 
 //=============
@@ -77,6 +82,7 @@ Player.SetControl($player, True)
 $CarMissionDone = false
 
 // Spawn BG threads
+start_new_script @CarHealth
 start_new_script @Packing // fudge 😏😈
 
 // Terminate the main initialization thread cleanly now that setup is complete
@@ -107,6 +113,7 @@ return
 
 // Include external thread files here
 {$INCLUDE_ONCE threads/packages.txt}
+{$INCLUDE_ONCE threads/carHealth.txt}
 
 /// Trigger mission 1: "Driving Mr. Mute"
 :Vehicle
