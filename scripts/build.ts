@@ -15,7 +15,6 @@
 import { basename, dirname, extname, join } from "@std/path";
 import { ensureDir } from "@std/fs/ensure-dir";
 import { includeTree } from "./includes.ts";
-import { capitalCase } from "change-case";
 import { say } from "./log.ts";
 
 // Bisection / filtering arguments
@@ -249,8 +248,21 @@ if (shouldRun(1, "main")) {
 
   const dataStagingDir = join(modStagingDir, "data");
   await ensureDir(dataStagingDir);
-  await Deno.copyFile(mainOutput, join(dataStagingDir, "main.scm"));
-  say.done(`  Packaged modloader/${modName}/data/main.scm`);
+  await Deno.copyFile(mainOutput, join(dataStagingDir, basename(mainOutput)));
+  say.done(`  Packaged modloader/${modName}/data/${basename(mainOutput)}`);
+}
+
+// Step 1: Help Thread
+if (shouldRun(1, "help")) {
+  say.heading("Step 1 (help): Compiling help thread...");
+  const helpInput = join(cwd, "threads", "help.txt");
+  const helpOutput = join(cwd, "threads", "help.cs");
+  await compileIfChanged(helpInput, helpOutput);
+
+  const cleoStagingDir = join(modStagingDir, "CLEO");
+  await ensureDir(cleoStagingDir);
+  await Deno.copyFile(helpOutput, join(cleoStagingDir, basename(helpOutput)));
+  say.done(`  Packaged modloader/${modName}/CLEO/${basename(helpOutput)}`);
 }
 
 // Packaging archive into dist/Drag-N-Drop.zip
