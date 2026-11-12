@@ -1,5 +1,6 @@
-Game.SetCollectableTotal(60)
+Game.SetCollectableTotal(PACKAGE_COUNT)
 // Portland
+Game.CreateCollectable(986.40, -441.32, 19.34)
 Game.CreateCollectable(805.68, -1061.48, 17.20)
 Game.CreateCollectable(1485.04, -931.96, 21.79)
 Game.CreateCollectable(1512.27, 24.67, 5.00)
