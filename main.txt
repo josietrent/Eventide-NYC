@@ -9,31 +9,42 @@ DEFINE MISSIONS 0
 {$USE CLEO, AUDIO, ini}
 nop
 
+var
+    $BarrierIND: int
+    $CurrentPackages: int
+    $LastPackCount: int
+    $Packages: int
+    $PackBlip: int
+    $PackHunt: int
+    $PackIndex: int
+    $CarMissionDone: int
+end
+
 //=============
 // Main thread
 //=============
 script_name 'MAIN'
-
-// Global state
-declare_mission_flag $onmission
-$onmission = false
 
 // Load Portland
 Game.SetMaxWantedLevel(2)
 set_deatharrest_state 0
 Clock.SetTimeOfDay(20, 0)
 Streaming.LoadCollision(LevelName.Industrial)
-wait 0 // QUESTION: Should we wait for the world to load first, or just let the game do its thing?
 
 // Spawn the player
-int $player = Player.Create(0, 933.66, -252.64, 4.50)
+$player = Player.Create(0, 933.66, -252.64, 4.50)
 Player.SetHeading($player, 287.49)
-int $scplayer = Player.GetChar($player)
+$scplayer = Player.GetChar($player)
 Camera.SetBehindPlayer()
 wait 0
+// QUESTION: Claude has a doppelganger. What's up with that?
 
-// FIXME: Claude has a doppelganger. What's up with that?
+// NOTE: When using Sanny Builder, pressing F7 creates a .cs file in the CLEO folder.
+// DO NOT use this button unless you're working with a CLEO script. (What fucking nonsense... 🙄)
 
+// Global state
+declare_mission_flag $onmission
+$onmission = false
 //
 World.SetVisibilityOfClosestObjectOfType(1027.25, -933.6875, 15.0, 50.0, #INDHELIX_BARRIER, False)
 World.SwapNearestBuildingModel(1027.25, -933.6875, 15.0, 50.0, #INDHELIX_BARRIER, #LOD_LAND014)
@@ -45,7 +56,7 @@ Char.Dress($scplayer)
 wait 0
 
 // Setup vehicles
-World.SetCarDensityMultiplier(0.85)
+World.SetCarDensityMultiplier(0.25)
 World.SetPedDensityMultiplier(0.1)
 wait 0
 
@@ -57,52 +68,48 @@ World.SetVisibilityOfClosestObjectOfType(1027.25, -933.75, 15.0, 50.0, #INDHELIX
 // All done!
 Camera.SetFadingColor(0, 0, 0)
 Camera.DoFade(1000, Fade.In)
+Player.SetControl($player, False)
+Player.SetNeverGetsTired($player, True)
+Player.SetControl($player, True)
+
+// Setup global state
+/// Whether some vaguely defined "car" mission is done
+$CarMissionDone = false
 
 // Spawn BG threads
 start_new_script @Barrier
-start_new_script @Help
-// TODO
-// FIXME: spawn_cleo_thread 'packages.cs'
+start_new_script @Packing
 
-// Trigger the first mission
-// FIXME: Mission.LoadAndLaunchInternal(0)
+// Terminate the main initialization thread cleanly now that setup is complete
+terminate_this_script
 
-// Spin wait while other threads do their magic
-while true
-    wait 250 ms
-end
+//==============================================
+// SUBROUTINES (Called via GoSub / Direct Call)
+//==============================================
 
-/// Load core game assets and spawn points cleanly
 :LoadGameAssets
-{$INCLUDE utils/assets.txt}
-{$INCLUDE utils/garages.txt}
+{$INCLUDE_ONCE utils/assets.txt}
+{$INCLUDE_ONCE utils/garages.txt}
 
 // Spawn a Canyonero near the spawn point
-$Canyonero = CarGenerator.Create(935.2039, -218.0919, 4.956, 110, #LANDSTAL, {primaryColor} 3, {secondaryColor} 3, {forceSpawn} true, {alarmChance} 0, {doorLockChance} 0, {minDelay} 0, {maxDelay} 9000)
-CarGenerator.Switch($Canyonero, 1)
+$Canyonero = CarGenerator.Create(935.2039, -218.0919, 4.956, 110, #LANDSTAL,  3, 3, true, 0, 0, 0, 9000)
+CarGenerator.Switch($Canyonero, 101)
 return
 
-//==============
-// Introduction
-//==============
-// TODO: Teach the player how to play the game before we launch the mission
+//=========================================
+// BACKGROUND THREADS & MISSIONS
+// (Each standalone thread/mission needs its own scope)
+//=========================================
 
-//=========
-// Threads
-//=========
-
-{$INCLUDE threads/barriers.txt}
-{$INCLUDE threads/help.txt}
-
-//==========
-// Missions
-//==========
+// Include external thread files here
+{$INCLUDE_ONCE threads/barriers.txt}
+{$INCLUDE_ONCE threads/packages.txt}
 
 /// Trigger mission 1: "Driving Mr. Mute"
 :Vehicle
 script_name 'Vehicle'
 
-while not Player.LocateAnyMeans3D($player, 1025.755, -471.541, 14.927, 2.0, 2.0, 2.0, False)
+while true
     wait 0
     if and
         $onmission == false
@@ -115,8 +122,6 @@ while not Player.LocateAnyMeans3D($player, 1025.755, -471.541, 14.927, 2.0, 2.0,
             Text.PrintBigString("Driving Mr. Mute...", 5000, TextStyle.BottomRight)
             Camera.DoFade(1500, Fade.Out)
             wait 1500
-            terminate_all_scripts_with_this_name 'Pistol'
-            // FIXME: Mission.LoadAndLaunchInternal(1)
             Text.PrintHelpString("Unimplemented exception. Try again later.")
             terminate_this_script
         end

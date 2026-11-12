@@ -119,6 +119,7 @@ return
     Text.ClearHelp()
 return
 
+// FIXME: This never happens. What gives?
 :PrintHowToSprint
     $SprintHelpPlayed = true
     Text.PrintHelp('SPRINT')
