@@ -1,5 +1,3 @@
-{$INCLUDE utils/package coords.txt}
-
 :Packing
 script_name 'Packing'
 // --- LOCAL REGISTER ALLOCATION MAP ---
@@ -134,19 +132,19 @@ while true
             $PackIndex = 0
         end
         $BlipActive = 1
-        Text.PrintHelp('PACKDEC') // Or a custom print like 'INDEX_DEC'
+        Text.PrintHelp('PACKDEC')
         wait 300 // Debounce so it doesn't fly down 10 indices per second
     end
 
     if Pad.IsKeyPressed(KeyCode.OemPeriod) // Press '.' to skip to next package
     then
         $PackIndex += 1
-        if $PackIndex > 59
+        if $PackIndex > 60
         then
-            $PackIndex = 59
+            $PackIndex = 60
         end
         $BlipActive = 1
-        Text.PrintHelp('PACKINC') // Or a custom print like 'INDEX_INC'
+        Text.PrintHelp('PACKINC')
         wait 300 // Debounce
     end
 
@@ -246,7 +244,7 @@ while true
                 $Reward8Given = 1
                 Stat.PlayerMadeProgress(1)
                 Pager.AddMessage('PACK48', 140, 2, 0)
-                Pickup.CreateWithAmmo(#GRENADE, PickupType.OnStreet, 30, 1454.60, -164.78, 55.40, 7@)
+                Pickup.CreateWithAmmo(#GRENADE, PickupType.OnStreet, 30, 1454.PACKAGE_COUNT, -164.78, 55.40, 7@)
             end
         end
 
@@ -261,7 +259,7 @@ while true
             end
         end
 
-        if $Packages >= 60
+        if $Packages >= PACKAGE_COUNT
         then
             if $Reward10Given == 0
             then
@@ -284,7 +282,7 @@ while true
 
         if $PackHunt == 1
         then
-            if $Packages < 60
+            if $Packages < PACKAGE_COUNT
             then
                 // Map the current collection count directly to your coordinate index
                 $CurrentPackages = $Packages
@@ -310,7 +308,7 @@ while true
                         $BlipActive = 1
                     end
     
-                    gosub @Get_Package_Coords
+                    GetPackageCoords()
     
                     // If $PackCoordX is 0.0, the lookup table index is missing or out of bounds!
                     if $BlipActive == 1
@@ -356,3 +354,373 @@ while true
         end
     end
 end
+
+// TODO(chances): Automate this into geography scripts
+:GetPackageCoords
+if $PackIndex == 0
+then
+    $PackCoordX = 986.40
+    $PackCoordY = -441.32
+    $PackCoordZ = 19.34
+end
+if $PackIndex == 1
+then
+    $PackCoordX = 805.68
+    $PackCoordY = -1061.48
+    $PackCoordZ = 17.20
+end
+if $PackIndex == 2
+then
+    $PackCoordX = 1485.04
+    $PackCoordY = -931.96
+    $PackCoordZ = 21.79
+end
+if $PackIndex == 3
+then
+    $PackCoordX = 1512.27
+    $PackCoordY = 24.67
+    $PackCoordZ = 5.00
+end
+if $PackIndex == 4
+then
+    $PackCoordX = 938.41
+    $PackCoordY = -200.88
+    $PackCoordZ = 5.61
+end
+if $PackIndex == 5
+then
+    $PackCoordX = 1138.00
+    $PackCoordY = -254.66
+    $PackCoordZ = 22.75
+end
+if $PackIndex == 6
+then
+    $PackCoordX = 1141.35
+    $PackCoordY = 67.96
+    $PackCoordZ = 0.55
+end
+if $PackIndex == 7
+then
+    $PackCoordX = 899.12
+    $PackCoordY = -304.20
+    $PackCoordZ = 8.72
+end
+if $PackIndex == 8
+then
+    $PackCoordX = 861.18
+    $PackCoordY = -987.39
+    $PackCoordZ = 5.24
+end
+if $PackIndex == 9
+then
+    $PackCoordX = 1272.50
+    $PackCoordY = -609.90
+    $PackCoordZ = 12.45
+end
+if $PackIndex == 10
+then
+    $PackCoordX = 1179.21
+    $PackCoordY = -566.37
+    $PackCoordZ = 27.32
+end
+if $PackIndex == 11
+then
+    $PackCoordX = 1295.05
+    $PackCoordY = -249.72
+    $PackCoordZ = 44.08
+end
+if $PackIndex == 12
+then
+    $PackCoordX = 1073.65
+    $PackCoordY = -984.26
+    $PackCoordZ = 15.59
+end
+if $PackIndex == 13
+then
+    $PackCoordX = 761.59
+    $PackCoordY = 137.26
+    $PackCoordZ = 3.55
+end
+if $PackIndex == 14
+then
+    $PackCoordX = 1166.57
+    $PackCoordY = -547.10
+    $PackCoordZ = 21.60
+end
+if $PackIndex == 15
+then
+    $PackCoordX = 773.29
+    $PackCoordY = -590.16
+    $PackCoordZ = 23.86
+end
+if $PackIndex == 16
+then
+    $PackCoordX = 764.88
+    $PackCoordY = -899.50
+    $PackCoordZ = 15.69
+end
+if $PackIndex == 17
+then
+    $PackCoordX = 1161.74
+    $PackCoordY = -72.59
+    $PackCoordZ = 7.58
+end
+if $PackIndex == 18
+then
+    $PackCoordX = 1000.59
+    $PackCoordY = -890.28
+    $PackCoordZ = 15.37
+end
+if $PackIndex == 19
+then
+    $PackCoordX = 1466.37
+    $PackCoordY = -149.61
+    $PackCoordZ = 26.95
+end
+if $PackIndex == 20
+then
+    $PackCoordX = 931.62
+    $PackCoordY = -718.41
+    $PackCoordZ = 14.67
+end
+if $PackIndex == 21
+then
+    $PackCoordX = 1186.02
+    $PackCoordY = -843.07
+    $PackCoordZ = 15.15
+end
+if $PackIndex == 22
+then
+    $PackCoordX = 833.85
+    $PackCoordY = -1114.16
+    $PackCoordZ = 1.83
+end
+if $PackIndex == 23
+then
+    $PackCoordX = 1295.85
+    $PackCoordY = -957.13
+    $PackCoordZ = 18.00
+end
+if $PackIndex == 24
+then
+    $PackCoordX = 1629.29
+    $PackCoordY = -274.58
+    $PackCoordZ = 19.80
+end
+if $PackIndex == 25
+then
+    $PackCoordX = 438.11
+    $PackCoordY = -480.76
+    $PackCoordZ = 11.11
+end
+if $PackIndex == 26
+then
+    $PackCoordX = 391.18
+    $PackCoordY = -555.94
+    $PackCoordZ = 26.17
+end
+if $PackIndex == 27
+then
+    $PackCoordX = 750.12
+    $PackCoordY = -1685.81
+    $PackCoordZ = 23.40
+end
+if $PackIndex == 28
+then
+    $PackCoordX = 272.77
+    $PackCoordY = -787.53
+    $PackCoordZ = 28.08
+end
+if $PackIndex == 29
+then
+    $PackCoordX = 222.70
+    $PackCoordY = -543.62
+    $PackCoordZ = 25.98
+end
+if $PackIndex == 30
+then
+    $PackCoordX = 103.20
+    $PackCoordY = -484.36
+    $PackCoordZ = 15.92
+end
+if $PackIndex == 31
+then
+    $PackCoordX = 285.76
+    $PackCoordY = -258.10
+    $PackCoordZ = 17.70
+end
+if $PackIndex == 32
+then
+    $PackCoordX = 294.57
+    $PackCoordY = -69.45
+    $PackCoordZ = 26.40
+end
+if $PackIndex == 33
+then
+    $PackCoordX = 279.88
+    $PackCoordY = -952.22
+    $PackCoordZ = 22.74
+end
+if $PackIndex == 34
+then
+    $PackCoordX = 235.50
+    $PackCoordY = -301.97
+    $PackCoordZ = 31.73
+end
+if $PackIndex == 35
+then
+    $PackCoordX = 104.87
+    $PackCoordY = -930.78
+    $PackCoordZ = 27.09
+end
+if $PackIndex == 36
+then
+    $PackCoordX = 189.06
+    $PackCoordY = 237.74
+    $PackCoordZ = 11.53
+end
+if $PackIndex == 37
+then
+    $PackCoordX = 333.84
+    $PackCoordY = -1371.88
+    $PackCoordZ = 26.16
+end
+if $PackIndex == 38
+then
+    $PackCoordX = 389.84
+    $PackCoordY = -1162.09
+    $PackCoordZ = 15.89
+end
+if $PackIndex == 39
+then
+    $PackCoordX = 97.29
+    $PackCoordY = -1430.50
+    $PackCoordZ = 31.66
+end
+if $PackIndex == 40
+then
+    $PackCoordX = 478.15
+    $PackCoordY = -609.85
+    $PackCoordZ = 14.47
+end
+if $PackIndex == 41
+then
+    $PackCoordX = 2.00
+    $PackCoordY = -514.93
+    $PackCoordZ = 26.12
+end
+if $PackIndex == 42
+then
+    $PackCoordX = -150.99
+    $PackCoordY = 784.43
+    $PackCoordZ = 146.03
+end
+if $PackIndex == 43
+then
+    $PackCoordX = -193.01
+    $PackCoordY = 364.40
+    $PackCoordZ = 84.95
+end
+if $PackIndex == 44
+then
+    $PackCoordX = -562.38
+    $PackCoordY = 310.61
+    $PackCoordZ = 70.80
+end
+if $PackIndex == 45
+then
+    $PackCoordX = -1040.00
+    $PackCoordY = 542.43
+    $PackCoordZ = 64.79
+end
+if $PackIndex == 46
+then
+    $PackCoordX = -1385.74
+    $PackCoordY = 568.86
+    $PackCoordZ = 77.64
+end
+if $PackIndex == 47
+then
+    $PackCoordX = -1365.51
+    $PackCoordY = -22.18
+    $PackCoordZ = 51.71
+end
+if $PackIndex == 48
+then
+    $PackCoordX = -1433.74
+    $PackCoordY = -437.54
+    $PackCoordZ = 22.08
+end
+if $PackIndex == 49
+then
+    $PackCoordX = -1616.32
+    $PackCoordY = -780.96
+    $PackCoordZ = 12.66
+end
+if $PackIndex == 50
+then
+    $PackCoordX = -1557.19
+    $PackCoordY = -866.96
+    $PackCoordZ = 18.66
+end
+if $PackIndex == 51
+then
+    $PackCoordX = -1491.04
+    $PackCoordY = -1057.51
+    $PackCoordZ = 3.48
+end
+if $PackIndex == 52
+then
+    $PackCoordX = -886.09
+    $PackCoordY = -1331.87
+    $PackCoordZ = 1.32
+end
+if $PackIndex == 53
+then
+    $PackCoordX = -1060.24
+    $PackCoordY = -1162.36
+    $PackCoordZ = 3.45
+end
+if $PackIndex == 54
+then
+    $PackCoordX = -846.15
+    $PackCoordY = -649.64
+    $PackCoordZ = 14.34
+end
+if $PackIndex == 55
+then
+    $PackCoordX = 304.87
+    $PackCoordY = -506.73
+    $PackCoordZ = 36.27
+end
+if $PackIndex == 56
+then
+    $PackCoordX = 93.16
+    $PackCoordY = -724.08
+    $PackCoordZ = 31.59
+end
+if $PackIndex == 57
+then
+    $PackCoordX = 37.93
+    $PackCoordY = -732.17
+    $PackCoordZ = 22.72
+end
+if $PackIndex == 58
+then
+    $PackCoordX = -1209.33
+    $PackCoordY = -184.39
+    $PackCoordZ = 58.74
+end
+if $PackIndex == 59
+then
+    $PackCoordX = -562.38
+    $PackCoordY = 310.61
+    $PackCoordZ = 70.80
+end
+if $PackIndex == 60
+then
+    $PackCoordX = 1295.85
+    $PackCoordY = -957.13
+    $PackCoordZ = 18.00
+end
+return
