@@ -21,6 +21,7 @@ while $BarrierIND == true
     if or
         Player.IsInZone($player, 'ROADBR1')
         Player.IsInZone($player, 'ROADBR2')
+        Player.IsInAnyBoat($player)
     then
         // FIXME: Exclude when the player is under the bridge (this gets complicated b/c the bridge deck height is variable...)
         // QUESTION: What is the verital extents of the bridge deck
