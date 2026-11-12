@@ -2,14 +2,6 @@
  * build.ts
  *
  * Compiles Sanny Builder scripts and packages mod assets into dist/Drag-N-Drop.zip:
- * - modloader/Noodles/data/main.scm (Main script)
- * - modloader/Noodles/cleo/*.cm (Mission threads)
- * - modloader/Noodles/models/gta3.img/ (*.dff, *.txd, *.col models)
- * - modloader/Noodles/data/maps/ (Map placements and IDE/IPL)
- * - modloader/Noodles/noodles_custom.txt (Map manifest directives)
- * - modloader/Noodles/txd/ (UI, splash, and loading screens)
- * - modloader/Noodles/cleo/cleo_text/UL_TEXT.fxt (Text strings)
- * - CLEO/sockets.cleo & CLEO/CLEO_PLUGINS/sockets.cleo (UDP Telemetry Plugin)
  *
  * Supports interactive bisection and step filtering via:
  * --bisect, -b, --step=<N>, --only=<name>, --skip=<name>
@@ -18,8 +10,6 @@
  * Model assets are bisected with --skip-asset=<asset|model|model:asset>[,...]
  * where <asset> is dff, txd, or col (e.g. --skip-asset=dinerind:col,dff), and a
  * bare <model> skips all of that model's assets (e.g. --skip-asset=dinerind).
- * A skipped COL is also commented out of the staged noodles_custom.txt. With
- * --bisect, each manifested model asset is prompted for instead.
  */
 
 import { basename, dirname, extname, join } from "@std/path";
@@ -197,80 +187,11 @@ async function copyFollowingSymlinks(src: string, dest: string) {
   }
 }
 
-/**
- * Writes each manifested model's `*.pos` coordinates into data/maps/noodles/custom.ipl.
- * A `*.pos` file in the model's folder wins; without one, the IPL line is left as is.
- * IDE lines carry no coordinates, so custom.ide is never touched.
- */
-async function syncPositions() {
-  const iplPath = join(cwd, "data", "maps", "noodles", "custom.ipl");
-  const manifestText = await Deno.readTextFile(
-    join(cwd, "models", "manifest.csv"),
-  );
-  const iplText = await Deno.readTextFile(iplPath);
-  const eol = iplText.includes("\r\n") ? "\r\n" : "\n";
-  const iplLines = iplText.split(/\r?\n/);
-
-  const rows = manifestText.trim().split(/\r?\n/);
-  const header = rows[0].split(",").map((s) => s.trim());
-  for (const rowText of rows.slice(1)) {
-    const cells = rowText.split(",").map((s) => s.trim());
-    if (cells.length < header.length) continue;
-    const entry: Record<string, string> = {};
-    header.forEach((k, idx) => (entry[k] = cells[idx]));
-    if (!entry.dff) continue;
-
-    const folderPath = join(cwd, "models", entry.folder);
-    let posFile: string | undefined;
-    try {
-      for await (const f of Deno.readDir(folderPath)) {
-        if (f.isFile && f.name.toLowerCase().endsWith(".pos")) {
-          posFile = f.name;
-          break;
-        }
-      }
-    } catch {
-      continue;
-    }
-    if (!posFile) continue;
-
-    const coords = (await Deno.readTextFile(join(folderPath, posFile)))
-      .trim().split(/[\s,]+/).map(Number);
-    if (coords.length < 3 || coords.slice(0, 3).some(Number.isNaN)) {
-      say.warn(`  Warning: ${posFile} is not "x y z"; skipped`);
-      continue;
-    }
-    const [x, y, z] = coords.map((n) => n.toFixed(6));
-
-    const modelName = basename(entry.dff, extname(entry.dff)).toLowerCase();
-    const instLine =
-      /^(\s*#?\s*\d+\s*,\s*(\S+?)\s*,\s*)[-+\d.eE]+(\s*,\s*)[-+\d.eE]+(\s*,\s*)[-+\d.eE]+(.*)$/;
-    for (let i = 0; i < iplLines.length; i++) {
-      const m = iplLines[i].match(instLine);
-      if (!m || m[2].toLowerCase() !== modelName) continue;
-      const synced = `${m[1]}${x}${m[3]}${y}${m[4]}${z}${m[5]}`;
-      if (synced !== iplLines[i]) {
-        iplLines[i] = synced;
-        say.info(`  custom.ipl ${modelName} <- ${posFile}`);
-      }
-    }
-  }
-
-  const synced = iplLines.join(eol);
-  if (synced !== iplText) await Deno.writeTextFile(iplPath, synced);
-}
-
-function formatMissionName(name: string): string {
-  name = capitalCase(name);
-  return name.startsWith("Side")
-    ? name.replace(/^Side/, "Side:")
-    : name.replace(/^(\d+)/, "$1:");
-}
-
 const cwd = Deno.cwd();
 const distDir = join(cwd, "dist");
-const stagingDir = join(distDir, ".staging");
-const noodlesStagingDir = join(stagingDir, "modloader", "Noodles");
+const modName = "Eventide";
+const stagingDir = join(distDir, "staging");
+const modStagingDir = join(stagingDir, "modloader", modName);
 const dragDropZip = join(distDir, "Drag-N-Drop.zip");
 
 // Ensure clean staging directory
@@ -279,7 +200,7 @@ try {
 } catch {
   // Ignored if stagingDir does not exist
 }
-await ensureDir(stagingDir);
+await ensureDir(modStagingDir);
 
 // 0. Preserve existing zip assets (modloader/.data, modloader.ini, movies/GTAtitles.mpg)
 try {
@@ -290,9 +211,9 @@ try {
       args: ["-xf", dragDropZip, "-C", stagingDir],
     });
     await cmd.output();
-    // Clear out old Noodles mod directory in staging so only selected steps are packaged
+    // Clear out old mod directory in staging so only selected steps are packaged
     try {
-      await Deno.remove(noodlesStagingDir, { recursive: true });
+      await Deno.remove(modStagingDir, { recursive: true });
     } catch {
       // Ignored
     }
@@ -317,7 +238,7 @@ try {
   // Archive does not exist yet
 }
 
-await ensureDir(noodlesStagingDir);
+await ensureDir(modStagingDir);
 
 // Step 1: Main Script
 if (shouldRun(1, "main")) {
@@ -326,10 +247,10 @@ if (shouldRun(1, "main")) {
   const mainOutput = join(cwd, "main.scm");
   await compileIfChanged(mainInput, mainOutput);
 
-  const dataStagingDir = join(noodlesStagingDir, "data");
+  const dataStagingDir = join(modStagingDir, "data");
   await ensureDir(dataStagingDir);
   await Deno.copyFile(mainOutput, join(dataStagingDir, "main.scm"));
-  say.done("  Packaged modloader/Noodles/data/main.scm");
+  say.done(`  Packaged modloader/${modName}/data/main.scm`);
 }
 
 // Packaging archive into dist/Drag-N-Drop.zip

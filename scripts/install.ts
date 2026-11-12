@@ -32,11 +32,11 @@ try {
 
 say.heading(`Installing mod from ${dragDropZip} into ${gta3Base}...`);
 
-// Clean existing modloader/Noodles directory before extraction
-const noodlesDestDir = join(gta3Base, "modloader", "Noodles");
+// Clean existing modloader/Eventide directory before extraction
+const modDestDir = join(gta3Base, "modloader", "Eventide");
 try {
-  await Deno.remove(noodlesDestDir, { recursive: true });
-  say.done("  Cleaned existing modloader/Noodles directory");
+  await Deno.remove(modDestDir, { recursive: true });
+  say.done("  Cleaned existing modloader/Eventide directory");
 } catch {
   // Ignored if directory doesn't exist
 }
@@ -86,17 +86,17 @@ async function findShadowingCleoFiles(
 
 const shadowedFiles = [
   ...await findShadowingCleoFiles(
-    join(noodlesDestDir, "cleo"),
+    join(modDestDir, "cleo"),
     join(gta3Base, "CLEO"),
   ),
   ...await findShadowingCleoFiles(
-    join(noodlesDestDir, "cleo", "cleo_text"),
+    join(modDestDir, "cleo", "cleo_text"),
     join(gta3Base, "CLEO", "CLEO_TEXT"),
   ),
 ];
 if (shadowedFiles.length > 0) {
   say.error(
-    "Conflict: these files in [gta3]/CLEO duplicate packaged modloader/Noodles files and may be stale:",
+    "Conflict: these files in [gta3]/CLEO duplicate packaged modloader/Eventide files and may be stale:",
   );
   for (const file of shadowedFiles) say.fail(`      ${file}`);
   say.fail("    Remove them so the modloader copies are the ones that run.");
