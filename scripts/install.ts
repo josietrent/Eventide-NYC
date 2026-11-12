@@ -1,7 +1,7 @@
 /**
  * install.ts
  *
- * Installs the Noodles to Nightmares mod by extracting dist/Drag-N-Drop.zip
+ * Installs the Eventide mod by extracting dist/Drag-N-Drop.zip
  * over into the GTA III game directory, and ensuring the unflagged runner
  * hard-link exists.
  */
@@ -157,4 +157,4 @@ try {
   }
 }
 
-say.pass("Noodles to Nightmares mod installation complete");
+say.pass("Eventide mod installation complete");
