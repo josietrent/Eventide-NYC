@@ -8,12 +8,13 @@ Gang.SetWeapons(GangType.Triad, WeaponType.BaseballBat, WeaponType.Pistol)
 // Hidden packages filled with drugs 😬
 {$INCLUDE packages.txt}
 
+//=========================
+// Bribe, Health, and Gunz
+//=========================
+// NOTE: Important tutorial-related pickups are managed by the help thread (../threads/help.txt)
+
 // Bribes
 // FIXME: Kill all redundant/unused globals! 🔥
-$BRIBE = Pickup.Create(#BRIBE, PickupType.OnStreet, 1125.60, -251.54, 17.66)
-$BRIBE = Pickup.Create(#BRIBE, PickupType.OnStreet, 953.71, -423.23, 15.25)
-$BRIBE = Pickup.Create(#BRIBE, PickupType.OnStreet, 820.21, -1076.76, 6.82)
-$BRIBE = Pickup.Create(#BRIBE, PickupType.OnStreet, 1148.39, -923.51, 14.71)
 $BRIBE = Pickup.Create(#BRIBE, PickupType.OnStreet, 985.10, -469.83, 14.93)
 $BRIBE = Pickup.Create(#BRIBE, PickupType.OnStreet, 163.88, -801.43, 26.17)
 $BRIBE = Pickup.Create(#BRIBE, PickupType.OnStreet, 157.46, -93.54, 20.17)
@@ -21,9 +22,10 @@ $BRIBE = Pickup.Create(#BRIBE, PickupType.OnStreet, 185.97, -620.82, 26.01)
 $BRIBE = Pickup.Create(#BRIBE, PickupType.OnStreet, 378.78, -1069.47, 16.04)
 // Near Lift Bridge
 $BRIBE = Pickup.Create(#BRIBE, PickupType.OnStreet, -73.22, -754.04, 26.16)
+$BRIBE = 0
+wait 0
 
 // First-Aid
-$HEAL_IND1 = Pickup.Create(#HEALTH, PickupType.OnStreet, 1399.89, -390.78, 50.56)
 $HEAL_IND2 = Pickup.Create(#HEALTH, PickupType.OnStreet, 1220.40, -248.26, 24.97)
 $HEAL_IND3 = Pickup.Create(#HEALTH, PickupType.OnStreet, 903.60, -599.16, 17.35)
 $HEAL_IND4 = Pickup.Create(#HEALTH, PickupType.OnStreet, 1152.93, -527.67, 22.04)
@@ -44,10 +46,6 @@ $WangHealth = Pickup.Create(#HEALTH, PickupType.OnStreet, 1325.83, 1674.62, 131.
 // All the gunz! 🔫
 $PistolSpawn = Pickup.CreateWithAmmo(#colt45, PickupType.OnStreet, 250, 1400.68, -857.80, 12.01)
 $Shotgun = Pickup.CreateWithAmmo(#SHOTGUN, PickupType.OnStreet, 48, 1093.14, -239.40, 9.16)
-
-// Info pickups
-$CBridgeInfo = Pickup.Create(#INFO, PickupType.Once, 1026.04, -932.74, 14.97)
-$WastedInfo = Pickup.Create(#INFO, PickupType.Once, 1148.41, -585.33, 15.00)
 wait 0
 
 {$INCLUDE zones.txt}

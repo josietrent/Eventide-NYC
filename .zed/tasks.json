@@ -3,5 +3,6 @@
     "label": "Run",
     "command": "deno",
     "args": ["task", "run"],
+    "hide": "on_success"
   },
 ]

@@ -1,7 +1,9 @@
 {$CLEO .cs}
+{$USE CLEO, ini}
 nop
 
 Blip PorterTunnel = 0
+// TODO: Save these flags to the game save
 int CarTutorialPlayed = false
 int BribeHelpPlayed = false
 int BoatHelpPlayed = false
@@ -15,7 +17,7 @@ end
 
 wait 1000 // Brief buffer to ensure world streaming is settled
 
-// Spawn your pickups with corrected coordinates
+// Spawn bribes
 Pickup BRIBE_IND1 = Pickup.Create(#BRIBE, PickupType.OnStreet, 1125.60, -251.54, 17.66)
 Pickup BRIBE_IND2 = Pickup.Create(#BRIBE, PickupType.OnStreet, 953.71, -423.23, 15.25)
 Pickup BRIBE_IND3 = Pickup.Create(#BRIBE, PickupType.OnStreet, 820.21, -1076.76, 6.82)
@@ -23,7 +25,7 @@ Pickup BRIBE_IND4 = Pickup.Create(#BRIBE, PickupType.OnStreet, 1148.39, -923.51,
 
 Pickup health1 = Pickup.Create(#HEALTH, PickupType.OnStreet, 1399.89, -390.78, 50.56)
 
-// Swapped Spawns:
+// Info pickups
 Pickup CBridgePickup = Pickup.Create(#INFO, PickupType.Once, 1026.04, -932.74, 14.97) // Callahan Bridge coordinate
 Pickup WastedInfo    = Pickup.Create(#INFO, PickupType.Once, 1148.41, -585.33, 15.00) // Hospital coordinate
 
@@ -79,13 +81,13 @@ while Player.IsPlaying($player)
     // 3. Bribe Pickup Help Check
     if BribeHelpPlayed == false
     then
+        // When the player picks up any of Portland's bribes
         if or
             Pickup.HasBeenCollected(BRIBE_IND1)
             Pickup.HasBeenCollected(BRIBE_IND2)
             Pickup.HasBeenCollected(BRIBE_IND3)
             Pickup.HasBeenCollected(BRIBE_IND4)
         then
-            // FIXME: Why are we seeing the bribe tutorial?
             PrintHowToBribe()
             continue
         end
