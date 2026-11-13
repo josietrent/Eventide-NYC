@@ -18,8 +18,8 @@ var
     $CurrentPackages: int
     $Intro_Passed: int
     $LastPackCount: int
-    MissionTriggerBlip: Blip
-    MissionTriggerSphere: Sphere
+    $MissionTriggerBlip: Blip
+    $MissionTriggerSphere: Sphere
     $APOC_LEVEL: int
     $CarMissionDone: int
     $Intro_Passed: int
@@ -81,15 +81,20 @@ Camera.SetFadingColor(0, 0, 0)
 Camera.DoFade(1000, Fade.In)
 Player.SetControl($player, False)
 Player.SetNeverGetsTired($player, True)
-Player.SetControl($player, True)
+wait 2000
 
 // Setup global state
 /// Whether some vaguely defined "car" mission is done
 $CarMissionDone = false
 
 // Spawn BG threads
+start_new_script @Driving
 start_new_script @CarHealth
 start_new_script @Packing // fudge 😏😈
+
+// FIXME: Text doesn't appear.
+Text.PrintHelp('BEACH')
+Player.SetControl($player, True)
 
 // Terminate the main initialization thread cleanly now that setup is complete
 terminate_this_script
@@ -109,9 +114,8 @@ wait 0
 $Canyonero = Car.Create(#LANDSTAL, 935.2039, -218.0919, 4.956)
 // FIXME: The car ought point West
 Car.SetHeading($Canyonero, 110)
-MissionTriggerBlip = Blip.AddBlipForCoord(900.0, -370.0, 9.80)
-MissionTriggerSphere = Sphere.Create(900.0, -370.0, 9.80)
-Text.PrintHelp('BEACH')
+$MissionTriggerBlip = Blip.AddForCoord(900.0, -370.0, 9.80)
+$MissionTriggerSphere = Sphere.Create(900.0, -370.0, 9.80, 3.0)
 return
 
 //=========================================
@@ -136,13 +140,19 @@ while true
     then
         if Player.LocateOnFoot3D($player, 900.0, -370.0, 9.80, 3.0, 3.0, 3.0, False)
         then
-            Blip.Remove(MissionTriggerBlip)
-            Sphere.Remove(MissionTriggerSphere)
+            Blip.Remove($MissionTriggerBlip)
+            Sphere.Remove($MissionTriggerSphere)
             start_new_script @INIT
             terminate_this_script
         end
     else
-        Text.PrintHelp('FUCKOFF')
+        if and
+            $onmission == 1
+            Player.LocateOnFoot3D($player, 900.0, -370.0, 9.80, 3.0, 3.0, 3.0, False)
+        then
+            Text.PrintHelp('FUCKOFF')
+            wait 5000
+        end
     end
 end
 
