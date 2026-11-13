@@ -114,6 +114,8 @@ wait 0
 $Canyonero = Car.Create(#LANDSTAL, 935.2039, -218.0919, 4.956)
 // FIXME: The car ought point West
 Car.SetHeading($Canyonero, 110)
+
+// FIXME: Blip and Sphere are not on mini-map.
 $MissionTriggerBlip = Blip.AddForCoord(900.0, -370.0, 9.80)
 $MissionTriggerSphere = Sphere.Create(900.0, -370.0, 9.80, 3.0)
 return
