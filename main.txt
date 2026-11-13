@@ -16,7 +16,13 @@ var
     $CarHealthBar: int
     $CarHealth: int
     $CurrentPackages: int
+    $Intro_Passed: int
     $LastPackCount: int
+    MissionTriggerBlip: Blip
+    MissionTriggerSphere: Sphere
+    $APOC_LEVEL: int
+    $CarMissionDone: int
+    $Intro_Passed: int
     $Packages: int
     $PackBlip: int
     $PackHunt: int
@@ -103,7 +109,9 @@ wait 0
 $Canyonero = Car.Create(#LANDSTAL, 935.2039, -218.0919, 4.956)
 // FIXME: The car ought point West
 Car.SetHeading($Canyonero, 110)
-
+MissionTriggerBlip = Blip.AddBlipForCoord(900.0, -370.0, 9.80)
+MissionTriggerSphere = Sphere.Create(900.0, -370.0, 9.80)
+Text.PrintHelp('BEACH')
 return
 
 //=========================================
@@ -114,6 +122,29 @@ return
 // Include external thread files here
 {$INCLUDE_ONCE threads/packages.txt}
 {$INCLUDE_ONCE threads/carHealth.txt}
+{$INCLUDE_ONCE threads/INIT.txt}
+
+// Trigger mission 0: Driving Tutorial
+:Driving
+script_name 'Driving'
+
+while true
+    wait 0
+    if and
+        $onmission == false
+        $Intro_Passed == false
+    then
+        if Player.LocateOnFoot3D($player, 900.0, -370.0, 9.80, 3.0, 3.0, 3.0, False)
+        then
+            Blip.Remove(MissionTriggerBlip)
+            Sphere.Remove(MissionTriggerSphere)
+            start_new_script @INIT
+            terminate_this_script
+        end
+    else
+        Text.PrintHelp('FUCKOFF')
+    end
+end
 
 /// Trigger mission 1: "Driving Mr. Mute"
 :Vehicle
@@ -132,7 +163,6 @@ while true
             Text.PrintBigString("Driving Mr. Mute...", 5000, TextStyle.BottomRight)
             Camera.DoFade(1500, Fade.Out)
             wait 1500
-            Text.PrintHelpString("Unimplemented exception. Try again later.")
             terminate_this_script
         end
     end
