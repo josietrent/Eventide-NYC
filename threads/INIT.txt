@@ -1,0 +1,304 @@
+:INIT
+script_name 'INIT'
+gosub @INIT_Load
+
+:INIT_BustDead
+wait 0
+if
+    has_deatharrest_been_executed
+then
+    gosub @INIT_Fail
+    terminate_this_script
+else
+    goto @INIT_BustDead
+end
+
+:INIT_Load
+int Arrived = 0
+int CarBlipRemoved = 0
+int PlayerNotInIdaho = 0
+$OnCarMission = 0
+$OnGunMission = 0
+$onmission = 1
+wait 0
+$APOC_LEVEL = 0
+$CarMissionDone = 0
+$Intro_Passed = 0
+TIMERA = 10000
+wait 0
+
+:INIT_Car
+wait 500
+if
+    Car.IsStillAlive(Idaho)
+then
+    Car.MarkAsNoLongerNeeded(Idaho)
+    Blip.Remove(CarBlip)
+end
+
+Idaho = Car.Create(#IDAHO, 750.85, 84.69, 3.55)
+Car.SetHeading(Idaho, 270.0)
+wait 100
+CarBlip = Blip.AddForCar(Idaho)
+//$BansheeBlip = Blip.AddForCoord(900.0, -370.0, 9.80)
+Blip.ChangeColor(CarBlip, BlipColor.Yellow)
+Text.Print('FINDCAR', 5000, 0)
+
+:Car_Out
+while not Player.LocateAnyMeans3D($player, 750.85, 84.69, 3.55, 30.0, 30.0, 30.0, False)
+    wait 0
+end
+
+Text.PrintHelp('DRIVE')
+wait 5000
+jump @Car_Enter
+
+:Car_Dead
+Text.PrintHelp('CARDIE')
+Blip.Remove(CarBlip)
+wait 500
+jump @INIT_Car
+
+:Car_Enter
+while not Player.IsInCar($player, Idaho)
+    wait 0
+    if
+        not Player.IsPlaying($player)
+    then
+        jump @INIT_Fail
+    end
+
+    if
+        Car.IsInWater(Idaho)
+    then
+        jump @INIT_Fail
+    end
+
+    if
+        not Car.IsStillAlive(Idaho)
+    then
+        jump @Car_Dead
+    end
+
+    if
+        Player.IsInCar($player, Idaho)
+    then
+        jump @INIT_Drive
+    end
+end
+
+:INIT_Drive
+CarBlipRemoved = 1
+Blip.Remove(CarBlip)
+Player.SetControl($player, False)
+Text.Print('STARVE', 3000, 0)
+wait 3000
+if
+    $CarTutorialPlayed == 0
+then
+    Player.SetControl($player, True)
+    Text.PrintHelp('DRIVE2')
+    wait 5000
+    Text.PrintHelp('DRIVE3')
+    wait 5000
+    Text.PrintHelp('DRIVE4')
+    $CarTutorialPlayed = 1
+    wait 5000
+    jump @INIT_Noodle
+else
+    Player.SetControl($player, True)
+    jump @INIT_Noodle
+end
+
+:INIT_Noodle
+PunkNoodles = Blip.AddSpriteForCoord(1041.73, -653.05, 14.82, RadarSprite.Love)
+Sphere = Sphere.Create(1041.73, -653.05, 14.82, 3.0)
+Text.PrintHelp('NOODLE')
+wait 7500
+Text.PrintHelp('TOMMY')
+CarDealerBlip = Blip.AddSpriteForCoord(1233.78, -129.02, 15.05, RadarSprite.Tony)
+
+:INIT_Near
+while not Player.LocateAnyMeans3D($player, 1041.73, -653.05, 14.82, 15.0, 15.0, 5.0, False)
+    wait 0
+
+    if
+        not Player.IsPlaying($player)
+    then
+        jump @INIT_Fail
+    end
+
+    if or
+        not Car.IsStillAlive(Idaho)
+        Car.IsInWater(Idaho)
+    then
+        jump @INIT_Fail
+    end
+
+    if
+        not Player.IsInCar($player, Idaho)
+    then
+        Blip.Remove(PunkNoodles)
+        Sphere.Remove(Sphere)
+        Blip.AddForCar(Idaho, CarBlip)
+        Text.Print('INCAR', 5000, 0)
+        CarBlipRemoved = 0
+        PlayerNotInIdaho = 1
+        jump @INIT_ReturnCar
+    end
+
+    if
+        Car.IsUpsidedown(Idaho)
+    then
+        jump @INIT_Upside
+    end
+
+    if
+        Player.LocateAnyMeans3D($player, 1041.73, -653.05, 14.82, 15.0, 15.0, 5.0, False)
+    then
+        Text.Print('MARKER', 3000, 0) // Drive into the marker.
+        wait 1000
+        jump @INIT_Arrived
+    end
+end
+
+:INIT_Arrived
+while not Player.LocateAnyMeans3D($player, 1041.73, -653.05, 14.82, 2.0, 2.0, 3.0, False)
+    wait 0
+
+    if
+        not Player.IsPlaying($player)
+    then
+        jump @INIT_Fail
+    end
+
+    if or
+        not Car.IsStillAlive(Idaho)
+        Car.IsInWater(Idaho)
+    then
+        jump @INIT_Fail
+    end
+
+    if
+        Car.IsUpsidedown(Idaho)
+    then
+        jump @INIT_Upside
+    end
+
+    if
+        not Player.IsInCar($player, $Idaho)
+    then
+        Blip.AddForCar($Idaho, $CarBlip)
+        Text.Print('INCAR', 5000, 0)
+        CarBlipRemoved = 0
+        PlayerNotInIdaho = 1
+        jump @INIT_ReturnCar
+    end
+end
+
+jump @INIT_Pass
+
+:INIT_ReturnCar
+while PlayerNotInIdaho == 1
+    wait 0
+    if or
+        Player.IsDead($player)
+        Player.HasBeenArrested($player)
+        not Car.IsStillAlive(Idaho)
+        Car.IsInWater(Idaho)
+    then
+        break
+    end
+
+    if
+        Player.IsInCar($player, $Idaho)
+    then
+        Blip.Remove(CarBlip)
+        $PunkNoodles = Blip.AddSpriteForCoord(1041.73, -653.05, 14.82, RadarSprite.Love)
+        Sphere = Sphere.Create(1041.73, -653.05, 14.82, 3.0)
+        Text.PrintHelp('NOODLE')
+        CarBlipRemoved = 1
+        PlayerNotInIdaho = 0
+        jump @INIT_Near
+    end
+
+    if or
+        Player.HasBeenArrested($player)
+        Player.IsDead($player)
+    then
+        jump @INIT_Fail
+    end
+end
+
+:INIT_Upside
+while Car.IsUpsidedown($Idaho)
+wait 0
+    Text.Print('UPSIDE', 5000, 0)
+    wait 5000
+    if
+        Car.IsUpright($Idaho)
+    then
+        jump @INIT_Near
+    else
+        break
+    end
+end
+
+:INIT_Fail
+IniFile.WriteString("Entered INIT_Fail block", "Trace.ini", "Enter", "Trace")
+//Mission.Fail()
+$onmission = 0
+$Intro_Passed = 0
+Blip.Remove(PunkNoodles)
+Blip.Remove(CarBlip)
+Blip.Remove(CarDealerBlip)
+Sphere.Remove(Sphere)
+Hud.ClearTimer($TIMER)
+wait 0
+Player.SetControl($player, False)
+Text.PrintBig('MISFAIL', 3000, TextStyle.Middle)
+
+IniFile.WriteString("Passed mission fail, checking Idaho", "Trace.ini", "Before", "Trace")
+// Clean up Idaho safely if it exists
+if
+    Car.IsStillAlive($Idaho)
+then
+    Car.Delete($Idaho)
+end
+
+// RE-INITIALIZE THE IDAHO AND ITS BLIP HERE:
+Idaho = Car.Create(#IDAHO, 750.85, 84.69, 3.55)
+Car.SetHeading($Idaho, 270.0)
+wait 100
+CarBlip = Blip.AddForCar($Idaho)
+Blip.ChangeColor($CarBlip, BlipColor.Yellow)
+$CarBlipRemoved = 0
+IniFile.WriteString("Idaho respawned and blip added", "Trace.ini", "Respawn", "Trace")
+wait 500
+IniFile.WriteString("Jumped back to Car_Out", "Trace.ini", "Loop", "Trace")
+Player.SetControl($player, True)
+jump @Car_Out
+
+:INIT_Pass
+Player.SetControl($player, False)
+Blip.Remove(PunkNoodles)
+stop_audio_stream_1channel
+wait 0
+Sphere.Remove(MissionTriggerSphere)
+wait 0
+Text.PrintBig('MISPASS', 5000, TextStyle.MiddleSmaller)
+Audio.PlayMissionPassedTune(1)
+Streaming.MarkModelAsNoLongerNeeded(#IDAHO)
+Mission.Finish()
+$Intro_Passed = 1
+$onmission = 0
+$APOC_LEVEL = 1
+wait 2000
+start_new_script @Fires
+Text.PrintHelp('SUBWAY')
+MissionTriggerBlip = Blip.AddSpriteForContactPoint(1025.755, -471.541, 14.927, RadarSprite.Salvatore)
+MissionTriggerSphere = Sphere.Create(1025.755, -471.541, 14.927, 3.0)
+Player.SetControl($player, True)
+wait 5000
+start_new_script @Vehicle
+terminate_this_script
