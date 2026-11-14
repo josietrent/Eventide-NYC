@@ -29,9 +29,12 @@ terminate_this_script
 
 :PackageToggle
 script_name 'Packer'
-while Player.IsPlaying($player)
+while true
     wait 0
-    
+    while not Player.IsPlaying($player)
+        wait 250
+    end
+
     $Packages = Game.GetCollectablesCollected()
     if
         $Packages >= 1
@@ -49,9 +52,9 @@ while Player.IsPlaying($player)
             3@ = 1
         end
     end
-    
+
     if
-        not $Packages == 59
+        not $Packages == PACKAGE_COUNT
     then
         if
             Pad.IsKeyPressed(KeyCode.O)
@@ -66,11 +69,11 @@ while Player.IsPlaying($player)
             terminate_all_scripts_with_this_name 'PACKAGE'
             wait 500
         end
-        
+
         if
             Pad.IsKeyPressed(KeyCode.P)
         then
-            
+
             if $PackHunt == 1 // If it's already running, insult the player for being an imbecile.
             then
                 Text.Print('PACKON1', 3000, 0)
@@ -82,7 +85,7 @@ while Player.IsPlaying($player)
                 start_new_script @PACKAGE
             end
             // Debounce delay so holding the key doesn't trigger this 30 times a second
-            wait 500 
+            wait 500
         end
     else
         if or
@@ -93,13 +96,9 @@ while Player.IsPlaying($player)
             wait 500
         end
     end
-    
-    if
-        not Player.IsPlaying($player)
-    then
-        continue
-    end
 end
+
+terminate_this_script
 
 :PACKAGE
 script_name 'PACKAGE'
@@ -117,10 +116,10 @@ while true
         while not Player.IsPlaying($player)
             wait 250
         end
-    
+
     // Fetch current packages collected from game save
     $Packages = Game.GetCollectablesCollected()
-    
+
     // ==========================================
     // MANUAL INDEX OVERRIDE SNIFFER (COMMA / PERIOD)
     // ==========================================
@@ -156,9 +155,9 @@ while true
             // If the Package count goes up automatically, advance the index as well
             $PackIndex = $Packages
             $LastPackCount = $Packages
-            $BlipActive = 1 
+            $BlipActive = 1
         end
-        
+
         // --- REWARDS LOGIC ---
         if $Packages >= 6
         then
@@ -244,7 +243,7 @@ while true
                 $Reward8Given = 1
                 Stat.PlayerMadeProgress(1)
                 Pager.AddMessage('PACK48', 140, 2, 0)
-                Pickup.CreateWithAmmo(#GRENADE, PickupType.OnStreet, 30, 1454.PACKAGE_COUNT, -164.78, 55.40, 7@)
+                Pickup.CreateWithAmmo(#GRENADE, PickupType.OnStreet, 30, 1454.61, -164.78, 55.40, 7@)
             end
         end
 
@@ -277,7 +276,7 @@ while true
             not $LastPackCount == $Packages
         then
             $LastPackCount = $Packages
-            $BlipActive = 1 
+            $BlipActive = 1
         end
 
         if $PackHunt == 1
@@ -286,7 +285,7 @@ while true
             then
                 // Map the current collection count directly to your coordinate index
                 $CurrentPackages = $Packages
-    
+
                 if and
                     $Packages >= 24
                     $BarrierIND == 1
@@ -307,20 +306,20 @@ while true
                         2@ = 0
                         $BlipActive = 1
                     end
-    
+
                     GetPackageCoords()
-    
+
                     // If $PackCoordX is 0.0, the lookup table index is missing or out of bounds!
                     if $BlipActive == 1
                     then
                         $BlipActive = 0
-                        
+
                         if $PackBlip > 0
                         then
                             Blip.Remove($PackBlip)
                             $PackBlip = 0
                         end
-                        
+
                         // Safety check to ensure that a blip isn't added at 0,0,0
                         if
                             not $PackCoordX == 0.0
@@ -329,7 +328,7 @@ while true
                             Blip.ChangeColor($PackBlip, BlipColor.Red)
                         end
                     end
-    
+
                     if Player.LocateAnyMeans3D($player, $PackCoordX, $PackCoordY, $PackCoordZ, 3.0, 3.0, 3.0, False)
                     then
                         $PackIndex += 1
