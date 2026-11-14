@@ -129,6 +129,7 @@ return
 // Include external thread files here
 {$INCLUDE_ONCE threads/packages.txt}
 {$INCLUDE_ONCE threads/carHealth.txt}
+{$INCLUDE_ONCE threads/savep.txt}
 
 // Trigger mission 0: Driving Tutorial
 :Driving
@@ -193,7 +194,104 @@ while true
             Text.PrintBigString("Driving Mr. Mute...", 5000, TextStyle.BottomRight)
             Camera.DoFade(1500, Fade.Out)
             wait 1500
-            terminate_this_script
+            $OnCarMission = 1
+            stream_custom_script "car.cm"
+            break
+        end
+    else
+        if and
+            $onmission == 1
+            Player.LocateOnFoot3D($player, 1025.755, -471.541, 14.927, 3.0, 3.0, 3.0, False)
+        then
+            Text.PrintHelp('FUCKOFF')
+            wait 5000
         end
     end
+end
+
+while $OnCarMission == 1
+    wait 250
+end
+
+if
+    $CarMissionDone == 1
+then
+    start_new_script @SaveP
+    start_new_script @Pistol
+    terminate_this_script
+else
+    $OnCarMission = 0
+    goto @Vehicle
+end
+
+/// Trigger mission 2: "Finding Your Bearings..."
+:Pistol
+script_name 'Pistol'
+wait 500
+Text.Print('JUNKYRD', 5000, 0)
+$MissionTriggerBlip = Blip.AddSpriteForContactPoint(1120.63, 27.91, 2.12, RadarSprite.Joey)
+$MissionTriggerSphere = Sphere.Create(1120.63, 27.91, 2.12, 3.0)
+
+:Pistol_Loop
+while $OnGunMission == 0
+    wait 250
+
+    // Heat Check Logic
+    if and
+        Player.LocateAnyMeans3D($player, 1120.63, 27.91, 2.12, 3.0, 3.0, 3.0, False)
+        Player.IsWantedLevelGreater($player, 0)
+    then
+        if
+            $SprayShop_Active == 0
+        then
+            Text.PrintHelp('HEAT')
+            $SprayShopIND = Blip.AddSpriteForCoord(924.0, -361.0, 10.0, RadarSprite.Spray)
+            $SprayShop_Active = 1
+        end
+    else
+        if
+            $SprayShop_Active == 1
+        then
+            Blip.Remove($SprayShopIND)
+            $SprayShop_Active = 0
+        end
+    end
+
+    // Trigger Logic
+    if and
+        Player.CanStartMission($player)
+        $onmission == 0
+        not Player.IsWantedLevelGreater($player, 0)
+        Player.LocateAnyMeans3D($player, 1120.63, 27.91, 2.12, 3.0, 3.0, 2.0, False)
+    then
+        Blip.Remove($MissionTriggerBlip)
+        Sphere.Remove($MissionTriggerSphere)
+        if $SprayShop_Active == 1
+        then
+            Blip.Remove($SprayShopIND)
+            $SprayShop_Active = 0
+        end
+        Player.SetControl($player, False)
+        Text.PrintBigString("Finding Your Bearings...", 5000, TextStyle.BottomRight)
+        Camera.DoFade(1500, Fade.Out)
+        wait 1500
+        $OnGunMission = 1
+        stream_custom_script "pistol.cm"
+        break
+    end
+end
+
+// Wait for the mission to complete or fail
+while $OnGunMission == 1
+    wait 250
+end
+
+// Post-Mission Logic
+if
+    $SafeAndSound == 1
+then
+    terminate_this_script
+else
+    $OnGunMission = 0
+    goto @Pistol
 end
