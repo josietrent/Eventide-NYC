@@ -1,0 +1,37 @@
+{$CLEO .cs}
+{$USE CLEO}
+{$INCLUDE ../utils/globals.txt}
+nop
+
+script_name 'COORDS'
+
+float x = 0.0
+float y = 0.0
+float z = 0.0
+
+while not Player.IsPlaying($player)
+    wait 250
+end
+
+while not Player.CanStartMission($player)
+    wait 0
+end
+
+wait 6500
+Text.PrintHelp('CORHELP')
+
+while true
+    wait 0
+    if not Player.IsPlaying($player)
+    then
+        continue
+    end
+    if Pad.IsKeyPressed(KeyCode.Oem5)
+    then
+        x, y, z = Player.GetCoordinates($player)
+        Text.PrintHelpFormatted("Current Coordinates: %.2f, %.2f, %.2f", x, y, z)
+        while Pad.IsKeyPressed(KeyCode.Oem5)
+            wait 0
+        end
+    end
+end
