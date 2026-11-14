@@ -6,7 +6,7 @@
  * hard-link exists.
  */
 
-import { join } from "@std/path";
+import { dirname, join } from "@std/path";
 import { say } from "./log.ts";
 
 const gta3Base = Deno.env.get("GTA3");
@@ -17,21 +17,22 @@ if (!gta3Base) {
 
 const cwd = Deno.cwd();
 const dragDropZip = join(cwd, "dist", "Drag-N-Drop.zip");
-const tarExe = Deno.build.os === "windows"
-  ? (() => {
-    const sysTar = join(
-      Deno.env.get("SystemRoot") || "C:\\Windows",
-      "System32",
-      "tar.exe",
-    );
-    try {
-      if (Deno.statSync(sysTar).isFile) return sysTar;
-    } catch {
-      // Fallback
-    }
-    return "tar.exe";
-  })()
-  : "tar";
+const tarExe =
+  Deno.build.os === "windows"
+    ? (() => {
+        const sysTar = join(
+          Deno.env.get("SystemRoot") || "C:\\Windows",
+          "System32",
+          "tar.exe",
+        );
+        try {
+          if (Deno.statSync(sysTar).isFile) return sysTar;
+        } catch {
+          // Fallback
+        }
+        return "tar.exe";
+      })()
+    : "tar";
 
 try {
   const stat = await Deno.stat(dragDropZip);
@@ -100,14 +101,14 @@ async function findShadowingCleoFiles(
 }
 
 const shadowedFiles = [
-  ...await findShadowingCleoFiles(
+  ...(await findShadowingCleoFiles(
     join(modDestDir, "cleo"),
     join(gta3Base, "CLEO"),
-  ),
-  ...await findShadowingCleoFiles(
+  )),
+  ...(await findShadowingCleoFiles(
     join(modDestDir, "cleo", "cleo_text"),
     join(gta3Base, "CLEO", "CLEO_TEXT"),
-  ),
+  )),
 ];
 if (shadowedFiles.length > 0) {
   say.error(
@@ -118,30 +119,30 @@ if (shadowedFiles.length > 0) {
   Deno.exit(1);
 }
 
-// Ensure custom strings are installed in CLEO/cleo_text
+// Sync custom strings to CLEO/cleo_text only when missing or changed
+const localStrings = join(cwd, "data", "CLEO", "strings.fxt");
 const customStrings = join(gta3Base, "CLEO", "cleo_text", "strings.fxt");
 try {
-  const stat = await Deno.stat(customStrings);
-  if (stat.isFile) {
-    say.done("  Verified custom strings installed in CLEO");
+  const localBytes = await Deno.readFile(localStrings);
+  let destBytes: Uint8Array | null = null;
+  try {
+    destBytes = await Deno.readFile(customStrings);
+  } catch {
+    // Not installed yet
+  }
+  const isUnchanged =
+    destBytes !== null &&
+    destBytes.length === localBytes.length &&
+    localBytes.every((b, i) => b === destBytes![i]);
+  if (isUnchanged) {
+    say.skip("  Custom strings in CLEO are up to date");
+  } else {
+    await Deno.mkdir(dirname(customStrings), { recursive: true });
+    await Deno.copyFile(localStrings, customStrings);
+    say.done("  Copied updated custom strings into CLEO");
   }
 } catch {
-  const localBuilt = join(
-    cwd,
-    "data",
-    "CLEO",
-    "strings.fxt",
-  );
-  try {
-    if ((await Deno.stat(localBuilt)).isFile) {
-      const cleoDir = join(gta3Base, "CLEO");
-      await Deno.mkdir(cleoDir, { recursive: true });
-      await Deno.copyFile(localBuilt, customStrings);
-      say.done("  Copied custom strings into CLEO");
-    }
-  } catch {
-    // Optional
-  }
+  // Optional if source strings.fxt does not exist
 }
 
 // Ensure unflagged runner hard-link exists (bypasses Windows UAC elevation)
