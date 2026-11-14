@@ -1,5 +1,9 @@
 {$CLEO .cm}
 
+{$USE Audio, INI}
+
+{$INCLUDE ../utils/globals.txt}
+
 :INIT
 script_name 'INIT'
 gosub @INIT_Load
@@ -10,7 +14,7 @@ if
     has_deatharrest_been_executed
 then
     gosub @INIT_Fail
-    terminate_this_script
+    terminate_this_custom_script
 else
     goto @INIT_BustDead
 end
@@ -43,6 +47,8 @@ then
     Blip.Remove(CarBlip)
 end
 
+Streaming.RequestModel(#IDAHO)
+Streaming.LoadAllModelsNow()
 Idaho = Car.Create(#IDAHO, 750.85, 84.69, 3.55)
 Car.SetHeading(Idaho, 270.0)
 wait 100
@@ -195,7 +201,7 @@ while not Player.LocateAnyMeans3D($player, 1041.73, -653.05, 14.82, 2.0, 2.0, 3.
     if
         not Player.IsInCar($player, Idaho)
     then
-        Blip.AddForCar($Idaho, CarBlip)
+        Blip.AddForCar(Idaho, CarBlip)
         Text.Print('INCAR', 5000, 0)
         CarBlipRemoved = 0
         PlayerNotInIdaho = 1
@@ -297,15 +303,14 @@ Text.PrintBig('MISPASS', 5000, TextStyle.MiddleSmaller)
 Audio.PlayMissionPassedTune(1)
 Streaming.MarkModelAsNoLongerNeeded(#IDAHO)
 Mission.Finish()
-$Intro_Passed = 1
-$onmission = 0
 $APOC_LEVEL = 1
 wait 2000
 //start_new_script @Fires
 Text.PrintHelp('SUBWAY')
 $MissionTriggerBlip = Blip.AddSpriteForContactPoint(1025.755, -471.541, 14.927, RadarSprite.Salvatore)
 $MissionTriggerSphere = Sphere.Create(1025.755, -471.541, 14.927, 3.0)
+$Intro_Passed = 1
+$onmission = 0
 Player.SetControl($player, True)
 wait 5000
-start_new_script @Vehicle
-terminate_this_script
+terminate_this_custom_script
