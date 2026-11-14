@@ -134,6 +134,7 @@ return
 // Trigger mission 0: Driving Tutorial
 :Driving
 script_name 'Driving'
+0@ = 0
 
 while true
     wait 0
@@ -147,6 +148,13 @@ while true
             Sphere.Remove($MissionTriggerSphere)
             stream_custom_script "INIT.cm"
             break
+        end
+        if and
+            0@ == 0
+            Player.LocateAnyMeans3D($player, 774.45, -880.88, 14.74, 17.0, 17.0, 10.0, False)
+        then
+            Text.Print('MARKERW', 3000, 0) // Walk into the blue marker to continue.
+            0@ = 1
         end
     else
         if and
