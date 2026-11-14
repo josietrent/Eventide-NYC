@@ -58,8 +58,14 @@ Blip.ChangeColor(CarBlip, BlipColor.Yellow)
 Text.Print('FINDCAR', 5000, 0)
 
 :Car_Out
-while not Player.LocateAnyMeans3D($player, 750.85, 84.69, 3.55, 30.0, 30.0, 30.0, False)
+while true
     wait 0
+    if and
+        Player.IsPlaying($player)
+        Player.LocateAnyMeans3D($player, 750.85, 84.69, 3.55, 30.0, 30.0, 2.5, False)
+    then
+        break
+    end
 end
 
 Text.PrintHelp('DRIVE')
@@ -96,6 +102,7 @@ while not Player.IsInCar($player, Idaho)
     if
         Player.IsInCar($player, Idaho)
     then
+        stop_audio_stream_1channel
         jump @INIT_Drive
     end
 end
@@ -262,6 +269,7 @@ IniFile.WriteString("Entered INIT_Fail block", "Trace.ini", "Enter", "Trace")
 //Mission.Fail()
 $onmission = 0
 $Intro_Passed = 0
+stop_audio_stream_1channel
 Blip.Remove(PunkNoodles)
 Blip.Remove(CarBlip)
 Blip.Remove(CarDealerBlip)
@@ -270,7 +278,7 @@ Hud.ClearTimer($TIMER)
 wait 0
 Player.SetControl($player, False)
 Text.PrintBig('MISFAIL', 3000, TextStyle.Middle)
-
+play_audio_stream_1channel "audio/EC/miasma.wav", True, 1.0
 IniFile.WriteString("Passed mission fail, checking Idaho", "Trace.ini", "Before", "Trace")
 // Clean up Idaho safely if it exists
 if
