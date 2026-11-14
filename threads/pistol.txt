@@ -149,7 +149,7 @@ while not Player.LocateAnyMeans3D($player, 933.66, -252.64, 4.50, 1.0, 1.0, 1.0,
     if
         Player.IsInAnyCar($player)
     then
-        Player.StoreCarIsIn($player, MyCar)
+        Player.StoreCarIsInNoSave($player, MyCar)
         if
             NeedsCar == -1
         then
@@ -184,7 +184,7 @@ while not Player.LocateAnyMeans3D($player, 933.66, -252.64, 4.50, 1.0, 1.0, 1.0,
         Player.IsInAnyCar($player)
         Player.LocateAnyMeans3D($player, 933.66, -252.64, 4.50, 6.0, 6.0, 1.0, False)
     then
-        Player.StoreCarIsIn($player, MyCar)
+        Player.StoreCarIsInNoSave($player, MyCar)
         Char.SetObjWaitOnFoot(Misty)
         Sphere.Remove(GunSphere)
         Blip.Remove(Destination)
@@ -229,12 +229,11 @@ while not Player.LocateAnyMeans3D($player, 933.66, -252.64, 4.50, 1.0, 1.0, 1.0,
         Char.SetObjWaitOnFoot(Misty)
         Char.TurnToFacePlayer(Misty, $player)
         Char.SetWaitState(Misty, WaitState.PlayAnimTaxi, 3000)
-        Player.StoreCarIsIn($player, MyCar)
+        Player.StoreCarIsInNoSave($player, MyCar)
         Text.Print('FOUNDMS', 3000, 0)
         Blip.Remove(MistyBlip)
         Sphere.Remove(GunSphere)
         Blip.Remove(Destination)
-        Player.SetControl($player, False)
         break
     end
 end
@@ -254,11 +253,10 @@ while true
     if
         Player.IsInAnyCar($player)
     then
-        Player.StoreCarIsIn($player, MyCar)
+        Player.StoreCarIsInNoSave($player, MyCar)
         if
             Pad.IsKeyPressed(KeyCode.LeftShift)
         then
-            Player.SetControl($player, False)
             Blip.Remove(MistyBlip)
             Char.SetWaitState(Misty, WaitState.False, 0)
             Char.SetObjGotoPlayerOnFoot(Misty, $player)
@@ -289,7 +287,7 @@ while true
     if
         Player.IsInAnyCar($player)
     then
-        Player.StoreCarIsIn($player, MyCar)
+        Player.StoreCarIsInNoSave($player, MyCar)
     end
 
     if
@@ -357,7 +355,7 @@ end
 if
     Player.IsInAnyCar($player)
 then
-    Player.StoreCarIsIn($player, MyCar)
+    Player.StoreCarIsInNoSave($player, MyCar)
 end
 while true
     wait 0
