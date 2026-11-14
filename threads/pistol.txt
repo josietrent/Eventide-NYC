@@ -1,0 +1,604 @@
+{$CLEO .cm}
+
+{$USE CLEO, Audio}
+
+{$INCLUDE ../utils/globals.txt}
+
+//-------------Mission 2 (triggered by :Pistol)---------------
+:Gun
+script_name 'Gun'
+
+int FindMisty = 0
+int PistolCollected = 0
+int NeedsCar = 0
+int ZoeyHealth = 0
+Pickup PistolPickup = 0
+Blip GunBlip = 0
+Blip Destination = 0
+Blip MistyBlip = 0
+Blip CarBlip = 0
+Sphere GunSphere = 0
+Car Cheetah = 0
+Car MyCar = 0
+Char Misty = 0
+
+$onmission = 1
+$OnGunMission = 1
+$SafeAndSound = 0
+$SprayShop_Active = 0
+wait 100
+
+:Gun_Loading
+Streaming.RequestModel(#COLT45)
+Streaming.RequestModel(#CHEETAH)
+Streaming.LoadSpecialCharacter(1, 'MISTY')
+wait 500
+Streaming.LoadAllModelsNow()
+
+:Gun_LoadCheck
+while not Streaming.HasModelLoaded(#COLT45)
+    wait 250
+    if and
+        Streaming.HasSpecialCharacterLoaded(1)
+        Streaming.HasModelLoaded(#CHEETAH)
+        Streaming.HasModelLoaded(#COLT45)
+    then
+        break
+    else
+        continue
+    end
+end
+
+:Gun_Spawn
+PistolPickup = Pickup.CreateWithAmmo(#COLT45, PickupType.OnStreet, 600, 1272.72, -123.51, 15.16)
+GunBlip = Blip.AddForPickup(PistolPickup)
+Cheetah = Car.Create(#CHEETAH, 1243.45, -129.20, 14.63)
+Blip.ChangeColor(GunBlip, BlipColor.LightBlue)
+Player.SetControl($player, True)
+wait 0
+Camera.DoFade(500, Fade.In)
+wait 500
+Text.PrintNow('FINDPIS', 2000, 0)
+
+:Gun_Collected
+while not Pickup.HasBeenCollected(PistolPickup)
+    wait 0
+end
+
+wait 0
+
+PistolCollected = 1
+Blip.Remove(GunBlip)
+wait 500
+
+Misty = Char.Create(PedType.CivFemale, #SPECIAL01, 1119.10, -437.00, 19.97)
+Char.SetObjWaitOnFoot(Misty)
+wait 250
+
+Text.Print('GOGAS', 5000, 0)
+Destination = Blip.AddForCoord(1147.61, -95.21, 7.02)
+Blip.ChangeColor(Destination, BlipColor.Yellow)
+GunSphere = Sphere.Create(1147.61, -95.21, 7.02, 1.0)
+
+:NearGasStation
+while not Player.LocateOnFoot3D($player, 1147.61, -95.21, 7.02, 15.0, 15.0, 15.0, False)
+    wait 0
+    if
+        Player.LocateAnyMeans3D($player, 1147.61, -95.21, 7.02, 15.0, 15.0, 15.0, False)
+    then
+        Text.Print('MARKERW', 3000, 0) // Walk into the blue marker to continue.
+        break
+    end
+end
+
+:AtGasStation
+while not Player.LocateOnFoot3D($player, 1147.61, -95.21, 7.02, 1.0, 1.0, 0.75, False)
+    wait 0
+    if
+        Player.LocateOnFoot3D($player, 1147.61, -95.21, 7.02, 1.0, 1.0, 0.75, False)
+    then
+        Blip.Remove(Destination)
+        Sphere.Remove(GunSphere)
+        Player.SetControl($player, False)
+        Camera.DoFade(1500, Fade.Out)
+        wait 1500
+        Hud.SwitchWidescreen(True)
+        Camera.SetFixedPosition(1162.58, -75.06, 20.53, 0.0, 0.0, 0.0)
+        Camera.PointAtPoint(1161.11, -105.09, 7.64, SwitchType.JumpCut)
+        Char.SetUsePednodeSeek(Misty, True)
+        Char.SetObjGotoCoordOnFoot(Misty, 933.66, -252.64)
+        wait 500
+        Camera.DoFade(500, Fade.In)
+        wait 500
+        Text.Print('VAGRANT', 4000, 0)
+        wait 4000
+        Text.Print('VAGRONT', 5000, 0)
+        wait 5000
+        Camera.DoFade(1500, Fade.Out)
+        wait 1500
+        Camera.PointAtChar(Misty, CameraMode.FollowPed, SwitchType.JumpCut)
+        wait 1000
+        Camera.DoFade(500, Fade.In)
+        wait 500
+        Text.PrintHelp('LIQUOR')
+        wait 5000
+        Camera.DoFade(1500, Fade.Out)
+        wait 1500
+        Camera.RestoreJumpcut()
+        Hud.SwitchWidescreen(False)
+        Camera.DoFade(500, Fade.In)
+        wait 500
+        Player.SetControl($player, True)
+        break
+    end
+end
+
+:Misty
+MistyBlip = Blip.AddForChar(Misty)
+Blip.ChangeDisplay(MistyBlip, BlipDisplay.Both)
+Blip.ChangeColor(MistyBlip, BlipColor.Cyan)
+GunSphere = Sphere.Create(933.6613, -252.648, 4.501, 3.0)
+Destination = Blip.AddForCoord(933.6613, -252.648, 4.501)
+Blip.ChangeColor(Destination, BlipColor.Yellow)
+Text.Print('MEETUP', 4000, 0)
+NeedsCar = -1
+
+:NotAtApartment
+while not Player.LocateAnyMeans3D($player, 933.66, -252.64, 4.50, 1.0, 1.0, 1.0, True)
+    wait 0
+    if
+        Player.IsInAnyCar($player)
+    then
+        Player.StoreCarIsIn($player, MyCar)
+        if
+            NeedsCar == -1
+        then
+            NeedsCar = 0
+        end
+        if
+            NeedsCar == 1
+        then
+            Hud.ClearTimer($TIMER)
+            Blip.Remove(CarBlip)
+            NeedsCar = 0
+        end
+    else
+        if and
+            not NeedsCar == 1
+            not Player.LocateAnyMeans3D($player, 1147.61, -95.21, 7.02, 20.0, 20.0, 10.0, False)
+        then
+            NeedsCar = 0
+        end
+        if
+            NeedsCar == 0
+        then
+            $TIMER = 20000
+            Text.Print('WHEELS', 3000, 0)
+            Text.PrintHelp('FINACAR')
+            Hud.DisplayTimer($TIMER)
+            NeedsCar = 1
+        end
+    end
+
+    if and
+        Player.IsInAnyCar($player)
+        Player.LocateAnyMeans3D($player, 933.66, -252.64, 4.50, 6.0, 6.0, 1.0, False)
+    then
+        Player.StoreCarIsIn($player, MyCar)
+        Char.SetObjWaitOnFoot(Misty)
+        Sphere.Remove(GunSphere)
+        Blip.Remove(Destination)
+        Player.SetControl($player, False)
+        Camera.DoFade(1000, Fade.Out)
+        wait 1000
+        if
+            not Char.LocateAnyMeans3D(Misty, 933.66, -255.65, 4.50, 10.0, 10.0, 10.0, False)
+        then
+            Char.SetCoordinates(Misty, 933.66, -255.65, 4.50)
+        end
+        wait 500
+        Camera.DoFade(1000, Fade.In)
+        wait 1000
+        Player.SetControl($player, True)
+        break
+    end
+
+    if
+        $TIMER == 0
+    then
+        jump @GunFail
+    end
+
+    if
+        Car.IsDead(Cheetah)
+    then
+        Text.PrintBig('CARDIE', 5000, TextStyle.MiddleSmallerHigher) // The vehicle has been destroyed!
+        jump @GunFail
+    end
+
+    if
+        Char.IsDead(Misty)
+    then
+        jump @GunFail
+    end
+
+    if and
+        Player.IsInAnyCar($player)
+        Char.LocateAnyMeansChar3D($scplayer, Misty, 8.0, 8.0, 3.0, False)
+    then
+        Char.SetObjWaitOnFoot(Misty)
+        Char.TurnToFacePlayer(Misty, $player)
+        Char.PlayAnimation(Misty, 12, 12, 4.0)
+        Player.StoreCarIsIn($player, MyCar)
+        Text.Print('FOUNDMS', 3000, 0)
+        Blip.Remove(MistyBlip)
+        Sphere.Remove(GunSphere)
+        Blip.Remove(Destination)
+        Player.SetControl($player, False)
+        break
+    end
+end
+
+:CarHorn
+Player.SetControl($player, True)
+Text.Print('CARHORN', 3000, 0)
+TIMERA = 0
+while true
+    wait 0
+    if
+        not Char.IsStillAlive(Misty)
+    then
+        jump @GunFail
+    end
+
+    if
+        Player.IsInAnyCar($player)
+    then
+        Player.StoreCarIsIn($player, MyCar)
+        if
+            Pad.IsKeyPressed(KeyCode.LeftShift)
+        then
+            Player.SetControl($player, False)
+            Blip.Remove(MistyBlip)
+            Char.SetObjGotoPlayerOnFoot(Misty, $player)
+            wait 50
+            break
+        end
+    end
+
+    if
+        TIMERA >= 3000
+    then
+        Text.Print('CARHORN', 3000, 0)
+        TIMERA = 0
+    end
+end
+
+:CarMisty
+NeedsCar = 0
+while true
+    wait 0
+
+    if
+        not Char.IsStillAlive(Misty)
+    then
+        jump @GunFail
+    end
+
+    if
+        Player.IsInAnyCar($player)
+    then
+        Player.StoreCarIsIn($player, MyCar)
+    end
+
+    if
+        not Car.IsStillAlive(MyCar)
+    then
+        if or
+            NeedsCar == 0
+            TIMERA >= 3000
+        then
+            Text.Print('WHEELS', 3000, 0)
+            TIMERA = 0
+            NeedsCar = 1
+        end
+        continue
+    end
+    NeedsCar = 0
+
+    if
+        Char.IsInCar(Misty, MyCar)
+    then
+        break
+    end
+
+    // 1. Health Check - Prevent her from entering a wrecked vehicle
+    Car.GetHealth(MyCar, $CarHealth)
+    if
+        $CarHealth < 600
+    then
+        Text.Print('MISWREK', 1000, 0)
+        Char.SetObjWaitOnFoot(Misty)
+        if
+            $SprayShop_Active == 0
+        then
+            $SprayShopIND = Blip.AddSpriteForCoord(924.0, -361.0, 10.0, RadarSprite.Spray)
+            $SprayShop_Active = 1
+        end
+    else
+        if
+            $SprayShop_Active == 1
+        then
+            Blip.Remove($SprayShopIND)
+            $SprayShop_Active = 0
+        end
+
+        // 2. Proximity check - Task her to enter ONLY if car is healthy
+        if
+            Char.LocateAnyMeansCar3D(Misty, MyCar, 20.0, 20.0, 20.0, False)
+        then
+            Char.SetObjEnterCarAsPassenger(Misty, MyCar)
+            Char.SetRunning(Misty, True)
+            break
+        else
+            Text.Print('MISFIND', 3000, 0)
+            Char.SetObjWaitOnFoot(Misty)
+            FindMisty = 1
+            MistyBlip = Blip.AddForChar(Misty)
+            Blip.ChangeDisplay(MistyBlip, BlipDisplay.BlipOnly)
+            Blip.ChangeColor(MistyBlip, BlipColor.Cyan)
+            jump @FindMisty
+        end
+    end
+end
+
+:MistyInCar
+if
+    Player.IsInAnyCar($player)
+then
+    Player.StoreCarIsIn($player, MyCar)
+end
+while true
+    wait 0
+    if
+        not Char.IsStillAlive(Misty)
+    then
+        jump @GunFail
+    end
+    if
+        not Car.IsStillAlive(MyCar)
+    then
+        jump @CarMisty
+    end
+    if
+        Char.IsInCar(Misty, MyCar)
+    then
+        Blip.Remove(MistyBlip)
+        Sphere.Remove(GunSphere)
+        Blip.Remove(Destination)
+        Text.Print('MISSUG', 3000, 0) // Thanks for the lift, sugar!
+        wait 3000
+        Destination = Blip.AddForCoord(1147.61, -95.21, 7.02)
+        Blip.ChangeColor(Destination, BlipColor.Yellow)
+        GunSphere = Sphere.Create(1147.61, -95.21, 7.02, 3.0)
+        Player.SetControl($player, True)
+        Camera.RestoreJumpcut()
+        wait 3000
+        Text.Print('MISGTWK', 5000, 0) // "Take her to work."
+        jump @Arrived
+    end
+end
+
+Player.GetHealth($player, ZoeyHealth)
+wait 0
+if
+    ZoeyHealth < 50
+then
+    jump @Miasma_Sequence
+end
+// ----------------------------------
+
+:FindMisty
+while FindMisty == 1
+    wait 0
+    if
+        Player.LocateAnyMeansChar3D($player, Misty, 5.0, 5.0, 5.0, False)
+    then
+        Blip.Remove(MistyBlip)
+        FindMisty = 0
+        Char.SetObjEnterCarAsPassenger(Misty, MyCar)
+        jump @CarMisty
+    end
+end
+
+:Arrived
+while not Player.LocateAnyMeans3D($player, 1147.61, -95.21, 7.02, 1.0, 1.0, 0.75, False)
+    wait 0
+    if not Char.IsInCar(Misty, MyCar)
+    then
+        // 1. Setup Abandonment State
+        Blip.Remove(Destination)
+        MistyBlip = Blip.AddForChar(Misty)
+        Blip.ChangeColor(MistyBlip, BlipColor.Cyan)
+        Text.Print('MISWHRE', 3000, 0)
+        Text.PrintSoon('NOCHASE', 5000, 0)
+
+        $TIMER = 20000 // Give the player 20 seconds to return
+        Hud.DisplayTimer($TIMER)
+
+        // 2. Wait until she's back or time runs out
+        while not Char.IsInCar(Misty, MyCar)
+            wait 0
+
+            // Task her to get back in if she's standing idle
+            if
+                not Char.IsStillAlive(Misty)
+            then
+                jump @GunFail
+            end
+
+            // If player is close, task her to enter
+            if
+                Char.LocateAnyMeansCar3D(Misty, MyCar, 10.0, 10.0, 10.0, False)
+            then
+                Char.SetObjEnterCarAsPassenger(Misty, MyCar)
+            end
+
+            if
+                $TIMER == 0
+            then
+                Text.Print('MISTAXI', 3000, 1)
+                jump @GunFail
+            end
+        end
+
+        // 3. She's back! Cleanup and restore destination
+        Hud.ClearTimer($TIMER)
+        Blip.Remove(MistyBlip)
+    end
+    if
+        Player.LocateAnyMeans3D($player, 1147.61, -95.21, 7.02, 1.0, 1.0, 0.75, False)
+    then
+        Player.SetControl($player, False)
+        Blip.Remove(Destination)
+        Sphere.Remove(GunSphere)
+        Text.PrintNow('MISRIDE', 3000, 0)
+        wait 3000
+        Text.Print('MISLUI', 4000, 0)
+        wait 4000
+        Text.Print('MISLUI2', 5000, 0)
+        wait 5000
+        Text.Print('MISLUI3', 5000, 0)
+        wait 5000
+        Text.Print('MISMONY', 5000, 0)
+        Player.AddScore($player, 2000)
+        wait 5000
+        Text.Print('MISWORK', 8000, 0)
+        wait 5500
+        Char.SetObjLeaveCar(Misty, MyCar)
+        Char.SetObjGotoCoordOnFoot(Misty, 1171.91, -95.28)
+        Char.SetRunning(Misty, True)
+        while Char.IsOnScreen(Misty)
+            wait 0
+            if or
+                Char.LocateAnyMeans2D(Misty, 1171.91, -95.28, 2.0, 2.0, False)
+                not Char.IsOnScreen(Misty)
+            then
+                Char.RemoveElegantly(Misty)
+                Player.SetControl($player, True)
+                Text.PrintHelp('HIDEOUT')
+                Destination = Blip.AddForCoord(1419.15, -194.40, 49.74)
+                Blip.ChangeColor(Destination, BlipColor.Yellow)
+                GunSphere = Sphere.Create(1419.15, -194.40, 49.74, 3.0)
+                jump @Gun_Success
+            end
+        end
+    end
+end
+
+:Miasma_Sequence
+Player.SetControl($player, False)
+play_audio_stream_1channel "audio/EC/miasma.wav", True, 1.0
+
+Camera.Shake(1.0)
+
+wait 2500
+Camera.DoFade(1000, Fade.Out)
+wait 1000
+
+Clock.SetTimeOfDay(0, 0)
+wait 0
+if
+    Player.IsInAnyCar($player)
+then
+    Player.WarpFromCarToCoord($player, 1200.0, -500.0, 15.0)
+else
+    Player.SetCoordinates($player, 1200.0, -500.0, 15.0)
+end
+
+Player.SetHealth($player, 10)
+wait 1000
+Camera.DoFade(1000, Fade.In)
+wait 1000
+Player.SetControl($player, True)
+Text.Print('ZOEYBAD', 5000, 0)
+wait 5000
+
+:GunFail
+//Mission.Fail()
+Text.PrintBig('MISFAIL', 3000, TextStyle.Middle)
+if
+    not Char.IsStillAlive(Misty)
+then
+    Text.Print('MISDEAD', 5000, 0)
+else
+    Text.Print('TRYTRY', 5000, 0)
+end
+$OnCarMission = 0
+$onmission = 0
+PistolCollected = 0
+$SafeAndSound = 0
+CarGenerator.Switch($CheetahGen, 0)
+Blip.Remove(Destination)
+Blip.Remove(GunBlip)
+Sphere.Remove(GunSphere)
+Blip.Remove(MistyBlip)
+Hud.ClearTimer($TIMER)
+wait 3000
+Camera.DoFade(1500, Fade.Out)
+wait 1500
+if
+    Player.IsInAnyCar($player)
+then
+    Player.WarpFromCarToCoord($player, 1125.0, 30.0, 2.0)
+    Player.SetHeading($player, 180.0)
+else
+    Player.SetCoordinates($player, 1125.0, 30.0, 2.0)
+    Player.SetHeading($player, 180.0)
+end
+wait 500
+Camera.DoFade(1500, Fade.In)
+wait 1500
+Camera.Shake(0)
+Player.SetControl($player, True)
+$OnGunMission = 0
+terminate_this_custom_script
+
+:Gun_Success
+while not Player.LocateAnyMeans3D($player, 1419.15, -194.40, 49.74, 1.0, 1.0, 1.0, False)
+    wait 0
+    if
+        Player.LocateAnyMeans3D($player, 1419.15, -194.40, 49.74, 1.0, 1.0, 1.0, False)
+    then
+        Blip.Remove(Destination)
+        Sphere.Remove(GunSphere)
+        Player.SetControl($player, False)
+        Player.AddScore($player, 5000)
+        Text.PrintWithNumberBig('M_PASS', 5000, 3000, TextStyle.Middle) // MISSION PASSED! $~1~
+        Audio.PlayMissionPassedTune(1)
+        $onmission = 0
+        wait 3000
+        Camera.DoFade(1500, Fade.Out)
+        wait 1500
+        CarGenerator.Switch($CheetahGen, 101)
+        Blip.Remove($Ammunation)
+        Blip.Remove($Ammunation2)
+        Blip.Remove($Ammunation3)
+        Blip.Remove($SprayShopRES)
+        Blip.Remove($SprayShopIND)
+        $LuigiBlip = Blip.AddSpriteForContactPoint(1329.72, -465.71, 49.76, RadarSprite.Luigi)
+        Camera.DoFade(1500, Fade.In)
+        wait 1500
+        $SafeAndSound = 1
+        $OnGunMission = 0
+        Player.SetControl($player, True)
+        Text.PrintString("Follow the L blip to find Louie.", 5000)
+        Mission.Finish()
+        break
+    else
+        continue
+    end
+end
+
+:Gun_6666
+terminate_this_custom_script

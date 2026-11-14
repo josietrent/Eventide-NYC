@@ -1,0 +1,328 @@
+{$CLEO .cm}
+
+{$USE CLEO}
+
+{$INCLUDE ../utils/globals.txt}
+
+//-------------Mission 1 (triggered by :Vehicle)---------------
+:Car
+script_name 'Car'
+
+int StallionHealth = 0
+int Blip_Created = 0
+int CarBlipRemoved = 0
+int PlayerNotInStallion = 0
+Blip CarBlip = 0
+Blip Destination = 0
+Sphere CarSphere = 0
+
+$onmission = 1
+$SprayShop_Active = 0
+$OnCarMission = 1
+$CarMissionDone = 0
+
+:CarLoad
+wait 500 // Safety yield for engine transition
+Blip.Remove(Destination)
+Sphere.Remove(CarSphere)
+Camera.DoFade(1500, Fade.In)
+wait 1500
+Player.SetControl($player, True)
+
+:Car_Spawn
+wait 500
+if
+    Car.IsStillAlive($Stallion)
+then
+    Car.MarkAsNoLongerNeeded($Stallion)
+    Blip.Remove(CarBlip)
+end
+
+Streaming.RequestModel(#STALLION)
+Streaming.LoadAllModelsNow()
+$Stallion = Car.Create(#STALLION, 1021.48, -478.95, 15.02)
+Car.SetHeading($Stallion, 270.0)
+wait 100
+CarBlip = Blip.AddForCar($Stallion)
+Blip.ChangeColor(CarBlip, BlipColor.Yellow)
+Text.Print('INSTAL', 5000, 0) // Get in the car.
+PlayerNotInStallion = 0
+Blip_Created = 0
+CarBlipRemoved = 0
+jump @Car_Enter
+
+:Car_Dead
+Text.PrintHelp('CARDIE') // The vehicle has been destroyed!
+Blip.Remove(CarBlip)
+Blip.Remove(Destination)
+Sphere.Remove(CarSphere)
+Hud.ClearTimer($TIMER)
+if
+    $SprayShop_Active == 1
+then
+    Game.SetFreeResprays(False)
+    Blip.Remove($SprayShopIND)
+    $SprayShop_Active = 0
+end
+wait 500
+jump @Car_Spawn
+
+:Car_Enter
+while not Player.IsInCar($player, $Stallion)
+    wait 0
+    if
+        not Player.IsPlaying($player)
+    then
+        jump @carFail
+    end
+
+    if or
+        not Car.IsStillAlive($Stallion)
+        Car.IsInWater($Stallion)
+    then
+        jump @Car_Dead
+    end
+
+    if
+        Player.IsInCar($player, $Stallion)
+    then
+        break
+    end
+end
+
+CarBlipRemoved = 1
+Blip.Remove(CarBlip)
+Destination = Blip.AddForCoord(1419.15, -194.40, 49.74)
+CarSphere = Sphere.Create(1419.15, -194.40, 49.74, 3.0)
+Text.PrintHelp('FINHIDE') // Find a place to stay for the night.
+
+:Car_101
+while not Player.LocateAnyMeans3D($player, 1419.15, -194.40, 49.74, 3.0, 3.0, 3.0, False)
+    wait 0
+
+    if
+        not Player.IsPlaying($player)
+    then
+        jump @carFail
+    end
+
+    if or
+        not Car.IsStillAlive($Stallion)
+        Car.IsInWater($Stallion)
+    then
+        jump @Car_Dead
+    end
+
+    if
+        Player.IsInCar($player, $Stallion)
+    then
+        if
+            Blip_Created == 1
+        then
+            PlayerNotInStallion = 0
+            CarBlipRemoved = 1
+            Blip.Remove(CarBlip)
+            Blip_Created = 0
+            Hud.ClearTimer($TIMER)
+        end
+
+        Car.GetHealth($Stallion, StallionHealth)
+        if
+            StallionHealth < 750
+        then
+            if
+                $SprayShop_Active == 0
+            then
+                Text.PrintSoon('JM1_4', 5000, 1) // You're trashing the vehicle! Get it repaired!
+                Game.SetFreeResprays(True)
+                Blip.Remove(Destination)
+                Sphere.Remove(CarSphere)
+                $SprayShopIND = Blip.AddSpriteForCoord(924.0, -361.0, 10.0, RadarSprite.Spray)
+                $SprayShop_Active = 1
+            end
+        end
+
+        if StallionHealth == 1000
+        then
+            if
+                $SprayShop_Active == 1
+            then
+                Game.SetFreeResprays(False)
+                Blip.Remove($SprayShopIND)
+                Destination = Blip.AddForCoord(1419.15, -194.40, 49.74)
+                CarSphere = Sphere.Create(1419.15, -194.40, 49.74, 3.0)
+                Text.PrintHelp('FINHIDE') // Find a place to stay for the night.
+                $SprayShop_Active = 0
+            end
+        end
+    else
+        // Handle Exit Timer
+        if
+            PlayerNotInStallion == 0
+        then
+            $TIMER = 15000
+            CarBlip = Blip.AddForCar($Stallion)
+            Blip_Created = 1
+            CarBlipRemoved = 0
+            Hud.DisplayTimer($TIMER)
+            Text.PrintBig('INCAR', 3000, TextStyle.MiddleSmallerHigher) // Get back in the car!
+            PlayerNotInStallion = 1
+        end
+
+        if
+            $TIMER == 0
+        then
+            jump @carFail
+        end
+    end
+
+    if
+        Player.LocateAnyMeans3D($player, 1419.15, -194.40, 49.74, 3.0, 3.0, 3.0, False)
+    then
+        Player.SetControl($player, False)
+        Blip.Remove(Destination)
+        Sphere.Remove(CarSphere)
+        Sound.AddOneOffSound(1419.15, -194.40, 49.74, ScriptSound.SoundPartMissionComplete)
+        wait 1500
+        Camera.DoFade(1500, Fade.Out)
+        wait 1500
+        Blip.Remove($SafeBlip)
+        Blip.Remove(CarBlip)
+        wait 500
+        break
+    else
+        continue
+    end
+end
+
+:Car_103
+while Player.IsPlaying($player)
+    wait 0
+
+    if
+        Player.IsInAnyCar($player)
+    then
+        Player.WarpFromCarToCoord($player, 1453.67, -173.08, 85.00)
+    else
+        Player.SetCoordinates($player, 1453.67, -173.08, 85.00)
+    end
+
+    Player.SetControl($player, False)
+    Player.SetHeading($player, 180.0)
+    Hud.SwitchWidescreen(True)
+    Blip.Remove(Destination)
+    if or
+        Pad.IsKeyPressed(KeyCode.LeftShift)
+        Pad.IsKeyPressed(KeyCode.Space)
+        Pad.IsKeyPressed(KeyCode.F)
+    then
+        jump @carPass
+    else
+        Camera.SetFixedPosition(1423.41, -199.77, 75.43, 0.0, 0.0, 0.0)
+        Camera.PointAtPoint(1454.08, -173.18, 55.77, SwitchType.JumpCut)
+        Camera.DoFade(1500, Fade.In)
+        wait 1500
+        Text.PrintHelp('SAVE_1') // This abandoned house will serve as a nice hideout.
+    end
+    wait 0
+    if or
+        Pad.IsKeyPressed(KeyCode.LeftShift)
+        Pad.IsKeyPressed(KeyCode.Space)
+        Pad.IsKeyPressed(KeyCode.F)
+    then
+        jump @carPass
+    else
+        wait 5000
+        Text.PrintHelp('SAVE_2') // For now, at least...
+    end
+    wait 3000
+    if or
+        Pad.IsKeyPressed(KeyCode.LeftShift)
+        Pad.IsKeyPressed(KeyCode.Space)
+        Pad.IsKeyPressed(KeyCode.F)
+    then
+        jump @carPass
+    else
+        Camera.SetFixedPosition(1461.19, -177.64, 55.77, 0.0, 0.0, 0.0)
+        Camera.PointAtPoint(1453.64, -173.11, 55.77, SwitchType.JumpCut)
+        CarSphere = Sphere.Create(1453.64, -173.11, 55.77, 3.0)
+        Text.PrintHelp('SAVE_3') // Walking into this sphere behind the bar will save the game.
+    end
+    wait 6000
+    if or
+        Pad.IsKeyPressed(KeyCode.LeftShift)
+        Pad.IsKeyPressed(KeyCode.Space)
+        Pad.IsKeyPressed(KeyCode.F)
+    then
+        jump @carPass
+    else
+        Text.PrintHelp('SAVE_4') // When saving the game, you will lose any wanted level you may have, and time will advance by six hours.
+        wait 6000
+        jump @carPass
+    end
+end
+
+:carFail
+//Mission.Fail()
+$onmission = 0
+$CarMissionDone = 0
+Text.ClearPrints()
+Text.PrintBig('MISFAIL', 5000, 1) // You fucked up!
+Blip.Remove(Destination)
+Blip.Remove(CarBlip)
+Sphere.Remove(CarSphere)
+Blip.Remove($CarDealerBlip)
+if
+    $SprayShop_Active == 1
+then
+    Game.SetFreeResprays(False)
+    Blip.Remove($SprayShopIND)
+    $SprayShop_Active = 0
+end
+Hud.ClearTimer($TIMER)
+$MissionTriggerBlip = Blip.AddSpriteForContactPoint(1025.755, -471.541, 14.927, RadarSprite.Salvatore)
+$MissionTriggerSphere = Sphere.Create(1025.755, -471.541, 14.927, 3.0)
+
+if
+    Car.IsStillAlive($Stallion)
+then
+    Car.MarkAsNoLongerNeeded($Stallion)
+end
+Streaming.MarkModelAsNoLongerNeeded(#STALLION)
+
+wait 500
+Player.SetControl($player, True)
+$OnCarMission = 0
+terminate_this_custom_script
+
+:carPass
+Camera.DoFade(1500, Fade.Out)
+wait 1500
+Sphere.Remove(CarSphere)
+$SafeBlip = Blip.AddSpriteForCoord(1454.08, -173.18, 55.77, RadarSprite.Savehouse)
+Hud.SwitchWidescreen(False)
+wait 500
+Camera.RestoreJumpcut()
+Streaming.MarkModelAsNoLongerNeeded(#STALLION)
+Car.MarkAsNoLongerNeeded($Stallion)
+Player.SetControl($player, True)
+wait 500
+Text.Print('GTOROOF', 8000, 0)
+Camera.DoFade(1500, Fade.In)
+wait 1500
+Player.SetControl($player, False)
+Audio.PlayMissionPassedTune(1)
+Player.AddScore($player, 1000)
+Player.AlterWantedLevel($player, 0)
+Text.PrintWithNumberBig('M_PASS', 1000, 5000, TextStyle.Middle)
+wait 3000
+
+// REWARD
+Player.SetControl($player, True)
+Player.SetNeverGetsTired($player, True)
+wait 2000
+$CarMissionDone = 1
+$OnCarMission = 0
+$onmission = 0
+Mission.Finish()
+terminate_this_custom_script
