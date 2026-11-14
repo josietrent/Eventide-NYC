@@ -2,6 +2,7 @@ BADCAR	That's the wrong car, dumbass!
 BARPORT If you continue across the bridge toward Staunton Island, you will be punished.
 BARTELP	Do not set foot on our lands again!
 BARDONE	The Barrier has been shut off. Proceed at your own peril.
+BEACH	Go to the end of the pier near Callahan Point.
 BOAT    Press the ~k~~VEHICLE_ACCELERATE~ key to drive the boat forward.
 BOAT2   Press the ~k~~VEHICLE_BRAKE~ key to slow down or reverse.
 BOAT3	Press the A or D Keys to steer.
@@ -10,6 +11,7 @@ CALHAN	The Callahan Bridge is closed due to construction.
 CALHAN2	For an alternate route to Staunton Island, please use the Porter Tunnel in Harwood.
 CARDIE	The vehicle has been destroyed!
 CARHORN	Honk the horn to get her attention.
+CORHELP	You can press the ~y~Backslash~w~ key to show your current coordinates!
 DRIVE   Press the ~k~~VEHICLE_ENTER_EXIT~ ~w~key to enter or exit a vehicle.
 DRIVE2  Press the ~k~~VEHICLE_ACCELERATE~ ~w~key to drive forwards.
 DRIVE3  Press the ~k~~VEHICLE_BRAKE~ ~w~key to apply the brakes. The vehicle will reverse when stopped.
