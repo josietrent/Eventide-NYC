@@ -202,9 +202,9 @@ while Player.IsPlaying($player)
     if
         Player.IsInAnyCar($player)
     then
-        Player.WarpFromCarToCoord($player, 1453.67, -173.08, 85.00)
+        Player.WarpFromCarToCoord($player, 1452.80, -174.88, 71.17)
     else
-        Player.SetCoordinates($player, 1453.67, -173.08, 85.00)
+        Player.SetCoordinates($player, 1452.80, -174.88, 71.17)
     end
 
     Player.SetControl($player, False)
@@ -305,12 +305,9 @@ wait 500
 Camera.RestoreJumpcut()
 Streaming.MarkModelAsNoLongerNeeded(#STALLION)
 Car.MarkAsNoLongerNeeded($Stallion)
-Player.SetControl($player, True)
-wait 500
 Text.Print('GTOROOF', 8000, 0)
 Camera.DoFade(1500, Fade.In)
 wait 1500
-Player.SetControl($player, False)
 Audio.PlayMissionPassedTune(1)
 Player.AddScore($player, 1000)
 Player.AlterWantedLevel($player, 0)
