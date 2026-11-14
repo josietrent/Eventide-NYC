@@ -325,6 +325,35 @@ if (shouldRun(4, "coords")) {
   say.done(`  Packaged modloader/${modName}/CLEO/${basename(coordsOutput)}`);
 }
 
+// Step 5: Pistol Mission
+if (shouldRun(5, "pistol")) {
+  say.heading("Step 5 (pistol): Compiling pistol mission...");
+  const pistolInput = join(cwd, "threads", "pistol.txt");
+  const pistolOutput = join(cwd, "threads", "pistol.cm");
+  await compileIfChanged(pistolInput, pistolOutput);
+
+  const cleoStagingDir = join(modStagingDir, "CLEO");
+  await ensureDir(cleoStagingDir);
+  await Deno.copyFile(
+    pistolOutput,
+    join(cleoStagingDir, basename(pistolOutput)),
+  );
+  say.done(`  Packaged modloader/${modName}/CLEO/${basename(pistolOutput)}`);
+}
+
+// Step 6: Car Mission
+if (shouldRun(6, "car")) {
+  say.heading("Step 6 (car): Compiling car mission...");
+  const carInput = join(cwd, "threads", "car.txt");
+  const carOutput = join(cwd, "threads", "car.cm");
+  await compileIfChanged(carInput, carOutput);
+
+  const cleoStagingDir = join(modStagingDir, "CLEO");
+  await ensureDir(cleoStagingDir);
+  await Deno.copyFile(carOutput, join(cleoStagingDir, basename(carOutput)));
+  say.done(`  Packaged modloader/${modName}/CLEO/${basename(carOutput)}`);
+}
+
 // Packaging archive into dist/Drag-N-Drop.zip
 say.heading("Packaging dist/Drag-N-Drop.zip...");
 await ensureDir(distDir);
