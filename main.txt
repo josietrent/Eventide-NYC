@@ -11,6 +11,8 @@ nop
 
 const PACKAGE_COUNT = 61
 
+{$INCLUDE utils/globals.txt}
+
 var
     $BarrierIND: int
     $CarHealthBar: int
@@ -22,12 +24,10 @@ var
     $MissionTriggerSphere: Sphere
     $APOC_LEVEL: int
     $CarMissionDone: int
-    $Intro_Passed: int
     $Packages: int
     $PackBlip: int
     $PackHunt: int
     $PackIndex: int
-    $CarMissionDone: int
     $AnyCar: Car
 end
 
@@ -95,8 +95,9 @@ start_new_script @Packing // fudge 😏😈
 // FIXME: Text doesn't appear.
 Text.PrintHelp('BEACH')
 Player.SetControl($player, True)
-
+play_audio_stream_1channel "audio/EC/miasma.wav", True, 1.0
 // Terminate the main initialization thread cleanly now that setup is complete
+
 terminate_this_script
 
 //==============================================
@@ -116,8 +117,8 @@ $Canyonero = Car.Create(#LANDSTAL, 935.2039, -218.0919, 4.956)
 Car.SetHeading($Canyonero, 110)
 
 // FIXME: Blip and Sphere are not on mini-map.
-$MissionTriggerBlip = Blip.AddForCoord(900.0, -370.0, 9.80)
-$MissionTriggerSphere = Sphere.Create(900.0, -370.0, 9.80, 3.0)
+$MissionTriggerBlip = Blip.AddForCoord(774.45, -880.88, 14.74)
+$MissionTriggerSphere = Sphere.Create(774.45, -880.88, 14.74, 3.0)
 return
 
 //=========================================
@@ -128,7 +129,6 @@ return
 // Include external thread files here
 {$INCLUDE_ONCE threads/packages.txt}
 {$INCLUDE_ONCE threads/carHealth.txt}
-{$INCLUDE_ONCE threads/INIT.txt}
 
 // Trigger mission 0: Driving Tutorial
 :Driving
@@ -140,21 +140,39 @@ while true
         $onmission == false
         $Intro_Passed == false
     then
-        if Player.LocateOnFoot3D($player, 900.0, -370.0, 9.80, 3.0, 3.0, 3.0, False)
+        if Player.LocateOnFoot3D($player, 774.45, -880.88, 14.74, 3.0, 3.0, 3.0, False)
         then
             Blip.Remove($MissionTriggerBlip)
             Sphere.Remove($MissionTriggerSphere)
-            start_new_script @INIT
-            terminate_this_script
+            stream_custom_script "INIT.cm"
+            break
         end
     else
         if and
             $onmission == 1
-            Player.LocateOnFoot3D($player, 900.0, -370.0, 9.80, 3.0, 3.0, 3.0, False)
+            Player.LocateOnFoot3D($player, 774.45, -880.88, 14.74, 3.0, 3.0, 3.0, False)
         then
             Text.PrintHelp('FUCKOFF')
             wait 5000
         end
+    end
+end
+
+while true
+    wait 0
+    if and
+        $onmission == true
+        $Intro_Passed == false
+    then
+        continue
+    end
+
+    if and
+        $onmission == false
+        $Intro_Passed == true
+    then
+        start_new_script @Vehicle
+        terminate_this_script
     end
 end
 
