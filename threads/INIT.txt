@@ -297,7 +297,7 @@ Player.SetControl($player, False)
 Blip.Remove(PunkNoodles)
 stop_audio_stream_1channel
 wait 0
-Sphere.Remove($MissionTriggerSphere)
+Sphere.Remove(NoodleSphere)
 wait 0
 Text.PrintBig('MISPASS', 5000, TextStyle.MiddleSmaller)
 Audio.PlayMissionPassedTune(1)
