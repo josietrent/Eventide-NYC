@@ -228,7 +228,7 @@ while not Player.LocateAnyMeans3D($player, 933.66, -252.64, 4.50, 1.0, 1.0, 1.0,
     then
         Char.SetObjWaitOnFoot(Misty)
         Char.TurnToFacePlayer(Misty, $player)
-        Char.PlayAnimation(Misty, 12, 12, 4.0)
+        Char.SetWaitState(Misty, WaitState.PlayAnimTaxi, 3000)
         Player.StoreCarIsIn($player, MyCar)
         Text.Print('FOUNDMS', 3000, 0)
         Blip.Remove(MistyBlip)
@@ -260,6 +260,7 @@ while true
         then
             Player.SetControl($player, False)
             Blip.Remove(MistyBlip)
+            Char.SetWaitState(Misty, WaitState.False, 0)
             Char.SetObjGotoPlayerOnFoot(Misty, $player)
             wait 50
             break
