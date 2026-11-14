@@ -1,8 +1,8 @@
 /**
  * includes.ts
  *
- * Static analysis of Sanny `{$INCLUDE path}` directives: the dependency tree of a script, so the build
- * recompiles a script only when it or a file it includes changes, as make does with its prerequisites.
+ * Static analysis of Sanny `{$INCLUDE path}` and `{$INCLUDE_ONCE path}` directives: the dependency tree of a
+ * script, so the build recompiles a script only when it or a file it includes changes, as make does with its prerequisites.
  */
 
 import { dirname, join } from "@std/path";
@@ -40,11 +40,9 @@ export async function includeTree(path: string): Promise<IncludeTree> {
       return;
     }
     files.push(file);
-    for (
-      const match of withoutComments(text).matchAll(
-        /\{\$INCLUDE\s+([^}]+?)\s*\}/gi,
-      )
-    ) {
+    for (const match of withoutComments(text).matchAll(
+      /\{\$INCLUDE(?:_ONCE)?\s+([^}]+?)\s*\}/gi,
+    )) {
       await visit(join(dirname(file), match[1]));
     }
   }
