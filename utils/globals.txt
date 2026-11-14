@@ -1,0 +1,28 @@
+// Pinned global variable slots shared between main.scm and standalone CLEO scripts/missions.
+// Keep indices >= 5000 (above GTA III's CustomVariables.ini range and well below $3FFF).
+
+Alloc($player, 5000)
+Alloc($scplayer, 5001)
+Alloc($onmission, 5002)
+
+Alloc($MissionTriggerBlip, 5003)
+Alloc($MissionTriggerSphere, 5004)
+Alloc($Intro_Passed, 5005)
+Alloc($CarMissionDone, 5006)
+Alloc($APOC_LEVEL, 5007)
+Alloc($CarTutorialPlayed, 5008)
+Alloc($OnCarMission, 5009)
+Alloc($OnGunMission, 5010)
+Alloc($TIMER, 5011)
+
+Alloc($BarrierIND, 5012)
+Alloc($CarHealthBar, 5013)
+Alloc($CarHealth, 5014)
+Alloc($AnyCar, 5015)
+Alloc($CurrentPackages, 5016)
+Alloc($LastPackCount, 5017)
+Alloc($Packages, 5018)
+Alloc($PackBlip, 5019)
+Alloc($PackHunt, 5020)
+Alloc($PackIndex, 5021)
+Alloc($Canyonero, 5022)
