@@ -1,0 +1,29 @@
+// Barn hideout save pickup thread
+:SaveP
+script_name 'SaveP'
+while true
+    wait 0
+
+    if and
+        not Camera.GetFadingStatus()
+        Player.IsPlaying($player)
+        $onmission == false
+        Player.LocateAnyMeans3D($player, 1453.64, -173.11, 55.77, 1.0, 2.0, 0.75, True)
+        Game.HasSaveGameFinished()
+    then
+        Game.ActivateSaveMenu()
+        Player.SetControl($player, False)
+        Player.SetCoordinates($player, 1454.55, -187.22, 54.44)
+        Player.SetHeading($player, 180)
+
+        :WAIT_FOR_SAVE
+        wait 0
+        if
+            Game.HasSaveGameFinished()
+        then
+            Player.SetControl($player, True)
+        else
+            jump @WAIT_FOR_SAVE
+        end
+    end
+end
