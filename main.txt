@@ -199,6 +199,7 @@ while true
         then
             Blip.Remove($MissionTriggerBlip)
             Sphere.Remove($MissionTriggerSphere)
+            Player.SetControl($player, False)
             Text.PrintBigString("Driving Mr. Mute...", 5000, TextStyle.BottomRight)
             Camera.DoFade(1500, Fade.Out)
             wait 1500
