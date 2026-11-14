@@ -25,9 +25,6 @@ $CarMissionDone = 0
 wait 500 // Safety yield for engine transition
 Blip.Remove(Destination)
 Sphere.Remove(CarSphere)
-Camera.DoFade(1500, Fade.In)
-wait 1500
-Player.SetControl($player, True)
 
 :Car_Spawn
 wait 500
@@ -45,6 +42,9 @@ Car.SetHeading($Stallion, 270.0)
 wait 100
 CarBlip = Blip.AddForCar($Stallion)
 Blip.ChangeColor(CarBlip, BlipColor.Yellow)
+Camera.DoFade(1500, Fade.In)
+wait 1500
+Player.SetControl($player, True)
 Text.Print('INSTAL', 5000, 0) // Get in the car.
 PlayerNotInStallion = 0
 Blip_Created = 0
