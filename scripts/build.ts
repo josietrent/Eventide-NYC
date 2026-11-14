@@ -21,13 +21,25 @@ import { say } from "./log.ts";
 const args = Deno.args;
 const isBisect = args.includes("--bisect") || args.includes("-b");
 const forceArg = args.includes("--force");
-const onlyArg = args.find((a) => a.startsWith("--only="))?.slice(7)?.split(",");
-const skipArg = args.find((a) => a.startsWith("--skip="))?.slice(7)?.split(",");
-const stepArg = args.find((a) => a.startsWith("--step="))?.slice(7)?.split(",")
+const onlyArg = args
+  .find((a) => a.startsWith("--only="))
+  ?.slice(7)
+  ?.split(",");
+const skipArg = args
+  .find((a) => a.startsWith("--skip="))
+  ?.slice(7)
+  ?.split(",");
+const stepArg = args
+  .find((a) => a.startsWith("--step="))
+  ?.slice(7)
+  ?.split(",")
   .map(Number);
 
-const skipAssetArg = args.find((a) => a.startsWith("--skip-asset="))?.slice(13)
-  ?.split(",").map((s) => s.trim().toLowerCase());
+const skipAssetArg = args
+  .find((a) => a.startsWith("--skip-asset="))
+  ?.slice(13)
+  ?.split(",")
+  .map((s) => s.trim().toLowerCase());
 
 type ModelAsset = "dff" | "txd" | "col";
 const assetAnswers = new Map<string, boolean>();
@@ -36,7 +48,8 @@ const assetAnswers = new Map<string, boolean>();
 function shouldPackageAsset(modelName: string, asset: ModelAsset): boolean {
   const name = modelName.toLowerCase();
   if (
-    skipAssetArg?.includes(asset) || skipAssetArg?.includes(name) ||
+    skipAssetArg?.includes(asset) ||
+    skipAssetArg?.includes(name) ||
     skipAssetArg?.includes(`${name}:${asset}`)
   ) {
     return false;
@@ -94,7 +107,7 @@ async function compile(inputPath: string, outputPath: string) {
     say.error(`Failed to compile: ${inputPath}`);
     Deno.exit(1);
   }
-  if (await logStamp() !== before) {
+  if ((await logStamp()) !== before) {
     const log = (await Deno.readTextFile(logPath)).trim();
     // An error inside an include names the include, not the input, and the compiler drops the failing line
     if (log) {
@@ -160,7 +173,9 @@ async function saveHash(key: string, hash: string) {
 async function compileIfChanged(inputPath: string, outputPath: string) {
   const hash = await hashScript(inputPath);
   if (
-    !forceArg && await allExist([outputPath]) && hashCache[inputPath] === hash
+    !forceArg &&
+    (await allExist([outputPath])) &&
+    hashCache[inputPath] === hash
   ) {
     say.skip(`  Up to date: ${basename(inputPath)}`);
     return;
@@ -192,21 +207,22 @@ const modName = "Eventide";
 const stagingDir = join(distDir, "staging");
 const modStagingDir = join(stagingDir, "modloader", modName);
 const dragDropZip = join(distDir, "Drag-N-Drop.zip");
-const tarExe = Deno.build.os === "windows"
-  ? (() => {
-    const sysTar = join(
-      Deno.env.get("SystemRoot") || "C:\\Windows",
-      "System32",
-      "tar.exe",
-    );
-    try {
-      if (Deno.statSync(sysTar).isFile) return sysTar;
-    } catch {
-      // Fallback
-    }
-    return "tar.exe";
-  })()
-  : "tar";
+const tarExe =
+  Deno.build.os === "windows"
+    ? (() => {
+        const sysTar = join(
+          Deno.env.get("SystemRoot") || "C:\\Windows",
+          "System32",
+          "tar.exe",
+        );
+        try {
+          if (Deno.statSync(sysTar).isFile) return sysTar;
+        } catch {
+          // Fallback
+        }
+        return "tar.exe";
+      })()
+    : "tar";
 
 // Ensure clean staging directory
 try {
@@ -267,9 +283,9 @@ if (shouldRun(1, "main")) {
   say.done(`  Packaged modloader/${modName}/data/${basename(mainOutput)}`);
 }
 
-// Step 1: Help Thread
-if (shouldRun(1, "help")) {
-  say.heading("Step 1 (help): Compiling help thread...");
+// Step 2: Help Thread
+if (shouldRun(2, "help")) {
+  say.heading("Step 2 (help): Compiling help thread...");
   const helpInput = join(cwd, "threads", "help.txt");
   const helpOutput = join(cwd, "threads", "help.cs");
   await compileIfChanged(helpInput, helpOutput);
@@ -278,6 +294,35 @@ if (shouldRun(1, "help")) {
   await ensureDir(cleoStagingDir);
   await Deno.copyFile(helpOutput, join(cleoStagingDir, basename(helpOutput)));
   say.done(`  Packaged modloader/${modName}/CLEO/${basename(helpOutput)}`);
+}
+
+// Step 3: INIT Thread
+if (shouldRun(3, "init")) {
+  say.heading("Step 3 (init): Compiling INIT thread...");
+  const helpInput = join(cwd, "threads", "init.txt");
+  const helpOutput = join(cwd, "threads", "init.cm");
+  await compileIfChanged(helpInput, helpOutput);
+
+  const cleoStagingDir = join(modStagingDir, "CLEO");
+  await ensureDir(cleoStagingDir);
+  await Deno.copyFile(helpOutput, join(cleoStagingDir, basename(helpOutput)));
+  say.done(`  Packaged modloader/${modName}/CLEO/${basename(helpOutput)}`);
+}
+
+// Step 4: Coords Thread
+if (shouldRun(4, "coords")) {
+  say.heading("Step 4 (coords): Compiling coords thread...");
+  const coordsInput = join(cwd, "threads", "coords.txt");
+  const coordsOutput = join(cwd, "threads", "coords.cs");
+  await compileIfChanged(coordsInput, coordsOutput);
+
+  const cleoStagingDir = join(modStagingDir, "CLEO");
+  await ensureDir(cleoStagingDir);
+  await Deno.copyFile(
+    coordsOutput,
+    join(cleoStagingDir, basename(coordsOutput)),
+  );
+  say.done(`  Packaged modloader/${modName}/CLEO/${basename(coordsOutput)}`);
 }
 
 // Packaging archive into dist/Drag-N-Drop.zip
