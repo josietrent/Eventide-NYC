@@ -271,7 +271,6 @@ Text.PrintBig('MISFAIL', 5000, 1) // You fucked up!
 Blip.Remove(Destination)
 Blip.Remove(CarBlip)
 Sphere.Remove(CarSphere)
-Blip.Remove($CarDealerBlip)
 if
     $SprayShop_Active == 1
 then

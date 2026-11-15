@@ -24,10 +24,10 @@ int Arrived = 0
 int CarBlipRemoved = 0
 int PlayerNotInIdaho = 0
 Blip CarBlip = 0
-Blip CarDealerBlip = 0
 Blip PunkNoodles = 0
 Car Idaho = 0
 Sphere NoodleSphere = 0
+$CarDealerBlip = 0
 $OnCarMission = 0
 $OnGunMission = 0
 $onmission = 1
@@ -136,7 +136,7 @@ NoodleSphere = Sphere.Create(1041.73, -653.05, 14.82, 3.0)
 Text.PrintHelp('NOODLE')
 wait 7500
 Text.PrintHelp('TOMMY')
-CarDealerBlip = Blip.AddSpriteForCoord(1233.78, -129.02, 15.05, RadarSprite.Tony)
+$CarDealerBlip = Blip.AddSpriteForCoord(1233.78, -129.02, 15.05, RadarSprite.Tony)
 
 :INIT_Near
 while not Player.LocateAnyMeans3D($player, 1041.73, -653.05, 14.82, 15.0, 15.0, 5.0, False)
@@ -272,7 +272,8 @@ $Intro_Passed = 0
 stop_audio_stream_1channel
 Blip.Remove(PunkNoodles)
 Blip.Remove(CarBlip)
-Blip.Remove(CarDealerBlip)
+Blip.Remove($CarDealerBlip)
+$CarDealerBlip = 0
 Sphere.Remove(NoodleSphere)
 Hud.ClearTimer($TIMER)
 wait 0
