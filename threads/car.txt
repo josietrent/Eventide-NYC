@@ -42,6 +42,7 @@ Car.SetHeading($Stallion, 270.0)
 wait 100
 CarBlip = Blip.AddForCar($Stallion)
 Blip.ChangeColor(CarBlip, BlipColor.Yellow)
+wait 500
 Camera.DoFade(1500, Fade.In)
 wait 1500
 Player.SetControl($player, True)
