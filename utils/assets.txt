@@ -15,7 +15,6 @@ Gang.SetWeapons(GangType.Triad, WeaponType.BaseballBat, WeaponType.Pistol)
 
 // Bribes
 // FIXME: Kill all redundant/unused globals! 🔥
-$BRIBE = Pickup.Create(#BRIBE, PickupType.OnStreet, 985.10, -469.83, 14.93)
 $BRIBE = Pickup.Create(#BRIBE, PickupType.OnStreet, 163.88, -801.43, 26.17)
 $BRIBE = Pickup.Create(#BRIBE, PickupType.OnStreet, 157.46, -93.54, 20.17)
 $BRIBE = Pickup.Create(#BRIBE, PickupType.OnStreet, 185.97, -620.82, 26.01)
