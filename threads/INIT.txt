@@ -136,7 +136,7 @@ NoodleSphere = Sphere.Create(1041.73, -653.05, 14.82, 3.0)
 Text.PrintHelp('NOODLE')
 wait 7500
 Text.PrintHelp('TOMMY')
-$CarDealerBlip = Blip.AddSpriteForCoord(1233.78, -129.02, 15.05, RadarSprite.Tony)
+$CarDealerBlip = Blip.AddSpriteForContactPoint(1233.78, -129.02, 15.05, RadarSprite.Tony)
 
 :INIT_Near
 while not Player.LocateAnyMeans3D($player, 1041.73, -653.05, 14.82, 15.0, 15.0, 5.0, False)
