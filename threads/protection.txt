@@ -90,6 +90,7 @@ wait 6000
 Camera.DoFade(1500, Fade.Out)
 wait 1500
 Deadbeat = Char.Create(PedType.CivMale, #B_MAN1, 1202.93, -426.60, 25.07)
+Char.SetObjWaitOnFoot(Deadbeat)
 DeadbeatCar = Car.Create(#PEREN, 1186.04, -464.43, 25.07)
 Car.SetHeading(DeadbeatCar, 180.0)
 Camera.RestoreJumpcut()
@@ -130,50 +131,82 @@ end
 // Confrontation Cutscene / Interaction
 Player.SetControl($player, False)
 Hud.SwitchWidescreen(True)
+Char.TurnToFacePlayer(Deadbeat, $player)
 Camera.SetFixedPosition(1205.50, -422.10, 26.50, 0.0, 0.0, 0.0)
 Camera.PointAtChar(Deadbeat, CameraMode.FollowPed, SwitchType.JumpCut)
 wait 1000
 Text.PrintString("Look, tell Louie I don't have his cash this week!", 4000)
 wait 4000
 
-// Spooked target flees to his car
+// Spooked target runs to his car first, then enters once nearby
 Hud.SwitchWidescreen(False)
-Player.SetControl($player, True)
 Camera.RestoreJumpcut()
-wait 1000
-Char.SetObjGotoCoordOnFoot(Deadbeat, 1186.04, -464.43)
-Char.SetObjEnterCarAsDriver(Deadbeat, DeadbeatCar)
+Player.SetControl($player, True)
+Char.SetObjNoObj(Deadbeat)
+Char.SetObjGotoCoordOnFoot(Deadbeat, 1188.50, -464.43)
 Char.SetRunning(Deadbeat, True)
 Text.PrintString("He's running for it!", 5000)
 
-while not Char.LocateAnyMeans2D(Deadbeat, 1186.04, -464.43, 4.0, 4.0, False)
+while not Char.LocateAnyMeans2D(Deadbeat, 1188.50, -464.43, 4.0, 4.0, False)
     wait 0
     if
         not Player.IsPlaying($player)
     then
         jump @Protection_Fail
     end
-    if
-        Char.LocateAnyMeans2D(Deadbeat, 1186.04, -464.43, 4.0, 4.0, False)
-    then
-        Char.SetObjNoObj(Deadbeat)
-        wait 0
-        Char.SetObjEnterCarAsDriver(Deadbeat, DeadbeatCar)
-    end
-
     if not Char.IsStillAlive(Deadbeat)
     then
         Text.PrintString("You killed him before getting Louie's money!", 5000)
         jump @Protection_Fail
     end
-
+    if not Car.IsStillAlive(DeadbeatCar)
+    then
+        Text.PrintString("You wrecked his car before getting Louie's money!", 5000)
+        jump @Protection_Fail
+    end
     if
-        not Char.LocateAnyMeansChar3D(Deadbeat, $scplayer, 30.0, 30.0, 30.0, False)
+        not Char.LocateAnyMeansChar3D(Deadbeat, $scplayer, 65.0, 65.0, 65.0, False)
     then
         Text.PrintString("He got away!", 5000)
         jump @Protection_Fail
     end
+    if
+        Char.IsDead(Luigi)
+    then
+        Text.PrintString("Louie's dead!", 5000)
+        Char.RemoveElegantly(Luigi)
+        jump @Protection_Fail
+    end
+end
 
+// Now that he is next to the car, tell him to get in and wait until he is seated
+Char.SetObjNoObj(Deadbeat)
+Char.SetObjEnterCarAsDriver(Deadbeat, DeadbeatCar)
+Char.SetRunning(Deadbeat, True)
+
+while not Char.IsInCar(Deadbeat, DeadbeatCar)
+    wait 0
+    if
+        not Player.IsPlaying($player)
+    then
+        jump @Protection_Fail
+    end
+    if not Char.IsStillAlive(Deadbeat)
+    then
+        Text.PrintString("You killed him before getting Louie's money!", 5000)
+        jump @Protection_Fail
+    end
+    if not Car.IsStillAlive(DeadbeatCar)
+    then
+        Text.PrintString("You wrecked his car before getting Louie's money!", 5000)
+        jump @Protection_Fail
+    end
+    if
+        not Char.LocateAnyMeansChar3D(Deadbeat, $scplayer, 65.0, 65.0, 65.0, False)
+    then
+        Text.PrintString("He got away!", 5000)
+        jump @Protection_Fail
+    end
     if
         Char.IsDead(Luigi)
     then
@@ -193,6 +226,7 @@ Car.SetChangeLane(DeadbeatCar, True)
 Car.SetDrivingStyle(DeadbeatCar, DrivingMode.PloughThrough)
 Car.SetCruiseSpeed(DeadbeatCar, 30)
 RouteState = 1
+wait 500 // Let the Perennial start moving before checking Car.IsStopped
 
 // The Pursuit Logic Loop
 :Protection_Pursuit
@@ -376,7 +410,20 @@ while true
 end
 
 :Protection_FleeOnFoot
-Char.SetObjLeaveCar(Deadbeat, DeadbeatCar)
+if
+    Char.IsInCar(Deadbeat, DeadbeatCar)
+then
+    Char.SetObjLeaveCar(Deadbeat, DeadbeatCar)
+    while Char.IsInCar(Deadbeat, DeadbeatCar)
+        wait 0
+        if or
+            not Player.IsPlaying($player)
+            not Char.IsStillAlive(Deadbeat)
+        then
+            jump @Protection_Fail
+        end
+    end
+end
 Char.SetObjGotoCoordOnFoot(Deadbeat, 1286.58, -327.17)
 Char.SetRunning(Deadbeat, True)
 
@@ -472,6 +519,10 @@ while not Player.LocateOnFootChar3D($player, Luigi, 5.0, 5.0, 0.75, False)
 end
 
 :Protection_Success
+Camera.RestoreJumpcut()
+Hud.SwitchWidescreen(False)
+Camera.DoFade(1500, Fade.In)
+wait 1500
 Text.PrintWithNumberBig('MISPASS', 10000, 5000, TextStyle.Middle)
 Audio.PlayMissionPassedTune(1)
 Player.AddScore($player, 10000)
@@ -485,10 +536,6 @@ then
     Char.MarkAsNoLongerNeeded(Luigi)
 end
 Streaming.UnloadSpecialCharacter(1)
-Camera.RestoreJumpcut()
-Hud.SwitchWidescreen(False)
-Camera.DoFade(1500, Fade.In)
-wait 1500
 Player.SetControl($player, True)
 $OnProtectionMission = 0
 terminate_this_custom_script
