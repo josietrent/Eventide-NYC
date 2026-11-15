@@ -138,9 +138,9 @@ while true
     if Pad.IsKeyPressed(KeyCode.OemPeriod) // Press '.' to skip to next package
     then
         $PackIndex += 1
-        if $PackIndex > 60
+        if $PackIndex > 61
         then
-            $PackIndex = 60
+            $PackIndex = 61
         end
         $BlipActive = 1
         Text.PrintHelp('PACKINC')
@@ -290,9 +290,9 @@ while true
                     $Packages >= 24
                     $BarrierIND == 1
                 then
-                    if $BlipActive == 0
+                    if 2@ == 0
                     then
-                        $BlipActive = 1
+                        2@ = 1
                         if $PackBlip > 0
                         then
                             Blip.Remove($PackBlip)
@@ -721,5 +721,11 @@ then
     $PackCoordX = 1295.85
     $PackCoordY = -957.13
     $PackCoordZ = 18.00
+end
+if $PackIndex == 61
+then
+    $PackCoordX = 281.59
+    $PackCoordY = -1556.22
+    $PackCoordZ = 27.04
 end
 return
