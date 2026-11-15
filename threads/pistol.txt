@@ -854,16 +854,6 @@ Streaming.UnloadSpecialCharacter(1)
 wait 3000
 Camera.DoFade(1500, Fade.Out)
 wait 1500
-if
-    Player.IsInAnyCar($player)
-then
-    Player.WarpFromCarToCoord($player, 1125.0, 30.0, 2.0)
-    Player.SetHeading($player, 180.0)
-else
-    Player.SetCoordinates($player, 1125.0, 30.0, 2.0)
-    Player.SetHeading($player, 180.0)
-end
-wait 500
 Camera.DoFade(1500, Fade.In)
 wait 1500
 Camera.Shake(0)
