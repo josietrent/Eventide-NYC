@@ -12,6 +12,7 @@ CALHAN2	For an alternate route to Staunton Island, please use the Porter Tunnel 
 CARDIE	The vehicle has been destroyed!
 CARHORN	Honk the horn to get her attention.
 CORHELP	You can press the ~y~Backslash~w~ key to show your current coordinates!
+DEBHEAL	Deadbeat Health:
 DRIVE   Press the ~k~~VEHICLE_ENTER_EXIT~ ~w~key to enter or exit a vehicle.
 DRIVE2  Press the ~k~~VEHICLE_ACCELERATE~ ~w~key to drive forwards.
 DRIVE3  Press the ~k~~VEHICLE_BRAKE~ ~w~key to apply the brakes. The vehicle will reverse when stopped.

@@ -34,6 +34,7 @@ var
     $AnyCar: Car
     $OnProtectionMission: int
     $ProtectionDone: int
+    $DeadbeatHealthBar: int
 end
 
 //=============
