@@ -22,6 +22,7 @@ Pickup BRIBE_IND1 = Pickup.Create(#BRIBE, PickupType.OnStreet, 1125.60, -251.54,
 Pickup BRIBE_IND2 = Pickup.Create(#BRIBE, PickupType.OnStreet, 953.71, -423.23, 15.25)
 Pickup BRIBE_IND3 = Pickup.Create(#BRIBE, PickupType.OnStreet, 820.21, -1076.76, 6.82)
 Pickup BRIBE_IND4 = Pickup.Create(#BRIBE, PickupType.OnStreet, 1148.39, -923.51, 14.71)
+Pickup BRIBE_IND5 = Pickup.Create(#BRIBE, PickupType.OnStreet, 985.10, -469.83, 14.93)
 
 Pickup health1 = Pickup.Create(#HEALTH, PickupType.OnStreet, 1399.89, -390.78, 50.56)
 
@@ -87,6 +88,7 @@ while Player.IsPlaying($player)
             Pickup.HasBeenCollected(BRIBE_IND2)
             Pickup.HasBeenCollected(BRIBE_IND3)
             Pickup.HasBeenCollected(BRIBE_IND4)
+            Pickup.HasBeenCollected(BRIBE_IND5)
         then
             PrintHowToBribe()
             continue
