@@ -10,6 +10,8 @@ var
     5@: float
     6@: float
     7@: float
+    8@: Object
+    9@: Object
 end
 
 /// Whether the player is prevented from entering Staunton
@@ -26,6 +28,14 @@ $BarrierTimer = 0
 6@ = 0.0   // Player Z
 7@ = 0.0   // Bridge deck min Z threshold
 
+// Place Staunton-end roadblocks at the foot of Callahan Bridge using generic HELIX_BARRIER (collision always loaded)
+Streaming.RequestModel(#HELIX_BARRIER)
+Streaming.LoadAllModelsNow()
+8@ = Object.CreateNoOffset(#HELIX_BARRIER, 200.0, -921.5, 26.125)
+Object.SetHeading(8@, 90.0)
+9@ = Object.CreateNoOffset(#HELIX_BARRIER, 200.0, -941.5, 26.125)
+Object.SetHeading(9@, 90.0)
+
 :BarrierSniffer
 while $BarrierIND == true
     wait 0
@@ -39,13 +49,25 @@ while $BarrierIND == true
     gosub @CheckBridgeZone
     if and
         3@ == true
-        not Player.IsOnFoot($player)
         0@ == false
     then
         $BarrierTimer = 15000
         Text.PrintHelp('BARPORT')
         0@ = true
         Hud.DisplayTimer($BarrierTimer)
+    else
+        // If the player is off the bridge deck in Newport or elsewhere on Staunton, teleport immediately
+        if and
+            3@ == false
+            0@ == false
+        then
+            if or
+                Player.IsInZone($player, 'COM_EAS')
+                Player.IsInZone($player, 'COM_ZON')
+            then
+                goto @BarrierTeleport
+            end
+        end
     end
 
     // State 2: Countdown & Warning phase
@@ -68,6 +90,12 @@ while $BarrierIND == true
             0@ = false
             Text.ClearHelp()
             Hud.ClearTimer($BarrierTimer)
+            if or
+                Player.IsInZone($player, 'COM_EAS')
+                Player.IsInZone($player, 'COM_ZON')
+            then
+                goto @BarrierTeleport
+            end
             break // Exit countdown loop back to monitoring
         end
 
@@ -93,45 +121,55 @@ while $BarrierIND == true
             if
                 1@ < 5
             then
-                2@ = 0
-                Streaming.LoadCollision(LevelName.Industrial)
-                while not Streaming.IsCollisionInMemory(LevelName.Industrial)
-                    wait 0
-                    2@ += 1
-                    if 2@ > 200 // Roughly 5 seconds max wait
-                    then
-                        break
-                    end
-                end
-
-                Player.SetControl($player, False)
-                Camera.DoFade(500, Fade.Out)
-                wait 500
-
-                if
-                    Player.IsInAnyCar($player)
-                then
-                    Player.WarpFromCarToCoord($player, 760.70, 92.53, 4.79)
-                else
-                    Player.SetCoordinates($player, 760.70, 92.53, 4.79)
-                end
-
-                wait 500
-                Camera.DoFade(500, Fade.In)
-                wait 500
-                Text.PrintHelp('BARTELP') // Do not set foot on our lands again!
-                Player.SetControl($player, True)
-                Player.SetHealth($player, 0)
-                0@ = false
+                goto @BarrierTeleport
             end
         end
     end
 end
 
+Object.Delete(8@)
+Object.Delete(9@)
+Streaming.MarkModelAsNoLongerNeeded(#HELIX_BARRIER)
 terminate_this_script
 
-// Sets 3@ = true if player leaves IND_ZON in a boat, is in ROADBR2 (Z >= 30.74), or is on the Callahan Bridge deck in ROADBR1.
-// Excludes ground/underpass roads beneath the bridge (Z <= 14.08) and water below the main span (Z = 0.0).
+:BarrierTeleport
+0@ = false
+Text.ClearHelp()
+Hud.ClearTimer($BarrierTimer)
+
+2@ = 0
+Streaming.LoadCollision(LevelName.Industrial)
+while not Streaming.IsCollisionInMemory(LevelName.Industrial)
+    wait 0
+    2@ += 1
+    if 2@ > 200 // Roughly 5 seconds max wait
+    then
+        break
+    end
+end
+
+Player.SetControl($player, False)
+Camera.DoFade(500, Fade.Out)
+wait 500
+
+if
+    Player.IsInAnyCar($player)
+then
+    Player.WarpFromCarToCoord($player, 760.70, 92.53, 4.79)
+else
+    Player.SetCoordinates($player, 760.70, 92.53, 4.79)
+end
+
+wait 500
+Camera.DoFade(500, Fade.In)
+wait 500
+Text.PrintHelp('BARTELP') // Do not set foot on our lands again!
+Player.SetControl($player, True)
+Player.SetHealth($player, 0)
+goto @BarrierSniffer
+
+// Sets 3@ = true if player leaves IND_ZON in a boat, is in ROADBR2 (Z >= 30.74), on the Staunton ramp (X = 197..445), in the ROADBR2..ROADBR1 seam (X = 614..618, Z >= 33), or on the Callahan Bridge deck in ROADBR1 (X <= 1005.0).
+// Excludes ground/underpass roads beneath the bridge (Z <= 14.08 on Portland, com_roadkb12 on Staunton), water below the main span (Z = 0.0), CBridgePickup (X = 1026.04), and Portland street approaches (X > 1005.0).
 :CheckBridgeZone
 3@ = false
 if and
@@ -144,6 +182,23 @@ end
 
 if
     Player.IsInZone($player, 'ROADBR2')
+then
+    3@ = true
+    return
+end
+
+// Cover the Staunton ramp descending west from ROADBR2 (X = 197..445) while staying above the underpass road (com_roadkb12)
+if or
+    Player.IsInArea3D($player, 197.0, -952.0, 24.5, 250.0, -910.0, 207.0, False)
+    Player.IsInArea3D($player, 250.0, -952.0, 26.5, 445.0, -910.0, 207.0, False)
+then
+    3@ = true
+    return
+end
+
+// Cover the ~2.56u zone gap between ROADBR2 (maxX = 614.878) and ROADBR1 (minX = 617.442) on the deck
+if
+    Player.IsInArea3D($player, 614.0, -959.0, 33.0, 618.0, -908.0, 207.0, False)
 then
     3@ = true
     return
@@ -167,8 +222,9 @@ then
             4@ <= 965.0
         then
             // Portland ramp (slope -0.10: deck Z ~= 115.25 - 0.1*X; underpass Z <= 14.08)
+            // Divide by -10.0 instead of multiplying by -0.1 because GTA III quantizes floats to 1/16 (-0.1 -> -0.0625)
             7@ = 4@
-            7@ *= -0.1
+            7@ /= -10.0
             7@ += 112.0
             if
                 6@ >= 7@
@@ -176,8 +232,13 @@ then
                 3@ = true
             end
         else
-            // East approach ramp (X = 965..1065) already down near street level (13.8..18.8)
-            3@ = true
+            if
+                4@ <= 1005.0
+            then
+                // East end of bridge structure (bridge_endbit01 ends at X = 1005.12);
+                // excludes CBridgePickup (X = 1026.04) and Portland road approaches (X = 1025..1065.44)
+                3@ = true
+            end
         end
     end
 end
