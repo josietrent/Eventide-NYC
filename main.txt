@@ -9,12 +9,14 @@ DEFINE MISSIONS 0
 {$USE CLEO, AUDIO, ini}
 nop
 
-const PACKAGE_COUNT = 61
+const PACKAGE_COUNT = 62
 
 {$INCLUDE utils/globals.txt}
 
 var
     $BarrierIND: int
+    $BarrierCOM: int
+    $BarrierTimer: int
     $CarHealthBar: int
     $CarHealth: int
     $CurrentPackages: int
@@ -86,11 +88,14 @@ wait 2000
 // Setup global state
 /// Whether some vaguely defined "car" mission is done
 $CarMissionDone = false
+$BarrierIND = true
+$BarrierCOM = true
 
 // Spawn BG threads
 start_new_script @Driving
 start_new_script @CarHealth
 start_new_script @Packing // fudge 😏😈
+start_new_script @Barrier
 
 // FIXME: Text doesn't appear.
 Text.PrintHelp('BEACH')
@@ -130,6 +135,7 @@ return
 {$INCLUDE_ONCE threads/packages.txt}
 {$INCLUDE_ONCE threads/carHealth.txt}
 {$INCLUDE_ONCE threads/savep.txt}
+{$INCLUDE_ONCE threads/barriers.txt}
 
 // Trigger mission 0: Driving Tutorial
 :Driving
@@ -299,8 +305,54 @@ end
 if
     $SafeAndSound == 1
 then
+    start_new_script @Stairs
     terminate_this_script
 else
     $OnGunMission = 0
     goto @Pistol
+end
+
+/// Trigger mission 3: "Meddling in Her Affairs..."
+:Stairs
+script_name 'Stairs'
+
+:Stairs_Loop
+while $OnAlleyMission == 0
+    wait 0
+    if and
+        Player.CanStartMission($player)
+        $onmission == 0
+        Player.LocateAnyMeans3D($player, 1329.72, -465.71, 49.76, 1.5, 1.5, 2.0, False)
+    then
+        Blip.Remove($LuigiBlip)
+        Player.SetControl($player, False)
+        Text.PrintBigString("Meddling in Her Affairs...", 5000, TextStyle.BottomRight)
+        Camera.DoFade(1500, Fade.Out)
+        wait 1500
+        $OnAlleyMission = 1
+        stream_custom_script "alley.cm"
+        break
+    else
+        if and
+            $onmission == 1
+            Player.LocateOnFoot3D($player, 1329.72, -465.71, 49.76, 3.0, 3.0, 3.0, False)
+        then
+            Text.PrintHelp('FUCKOFF')
+            wait 5000
+        end
+    end
+end
+
+while $OnAlleyMission == 1
+    wait 250
+end
+
+if
+    $AlleyMissionDone == 1
+then
+    terminate_this_script
+else
+    $OnAlleyMission = 0
+    $LuigiBlip = Blip.AddSpriteForContactPoint(1329.72, -465.71, 49.76, RadarSprite.Luigi)
+    goto @Stairs_Loop
 end
