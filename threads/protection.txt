@@ -14,7 +14,6 @@ Car DeadbeatCar = 0
 Blip TargetBlip = 0
 Blip LuigiBlip = 0
 int RouteState = 0
-int DeadbeatHealth = 0
 
 $onmission = 1
 $OnProtectionMission = 1
@@ -23,7 +22,6 @@ wait 100
 
 Streaming.RequestModel(#PEREN)
 Streaming.RequestModel(#B_MAN1)
-Streaming.RequestModel(#BAT)
 Streaming.LoadSpecialCharacter(1, 'LUIGI')
 wait 500
 Streaming.LoadAllModelsNow()
@@ -34,7 +32,6 @@ while true
     if and
         Streaming.HasModelLoaded(#PEREN)
         Streaming.HasModelLoaded(#B_MAN1)
-        Streaming.HasModelLoaded(#BAT)
         Streaming.HasSpecialCharacterLoaded(1)
     then
         break
@@ -76,11 +73,12 @@ end
 // Reposition the camera to the lower angle, turn Louie to the player, and start speaking
 Camera.SetFixedPosition(1213.84, -325.56, 26.07, 0.0, 0.0, 0.0)
 Char.SetObjNoObj(Luigi)
-wait 250
+Char.SetObjWaitOnFoot(Luigi)
+Char.SetHeading(Luigi, 89.0)
+Player.SetHeading($player, 269.0)
 Char.TurnToFacePlayer(Luigi, $player)
 Player.TurnToFaceChar($player, Luigi)
 wait 500
-Char.SetObjWaitOnFoot(Luigi)
 Text.PrintString("One of our guys has been holding out on his protection money.", 5000)
 wait 5000
 Text.PrintString("Go find him and make sure he understands the cost of doing business.", 6000)
@@ -433,7 +431,8 @@ Blip.Remove(TargetBlip)
 TargetBlip = Blip.AddForChar(Deadbeat)
 Blip.ChangeColor(TargetBlip, BlipColor.Green)
 Text.PrintString("Rough him up until he pays, but don't kill him!", 5000)
-Player.GiveWeapon($player, WeaponType.BaseballBat, 1)
+Char.GetHealth(Deadbeat, $DeadbeatHealthBar)
+Hud.DisplayCounterWithString($DeadbeatHealthBar, CounterDisplay.Bar, 'DEBHEAL')
 
 while not Char.IsDead(Deadbeat)
     wait 0
@@ -442,13 +441,14 @@ while not Char.IsDead(Deadbeat)
     then
         jump @Protection_Fail
     end
-    Char.GetHealth(Deadbeat, DeadbeatHealth)
+    Char.GetHealth(Deadbeat, $DeadbeatHealthBar)
     if
         Char.IsStillAlive(Deadbeat)
     then
         if
-            DeadbeatHealth < 50 // Handed over the cash
+            $DeadbeatHealthBar < 50 // Handed over the cash
         then
+            Hud.ClearCounter($DeadbeatHealthBar)
             Blip.Remove(TargetBlip)
             Player.SetControl($player, False)
             wait 250
@@ -570,6 +570,7 @@ $OnProtectionMission = 0
 terminate_this_custom_script
 
 :Protection_Cleanup
+Hud.ClearCounter($DeadbeatHealthBar)
 Blip.Remove(TargetBlip)
 Blip.Remove(LuigiBlip)
 if
@@ -584,5 +585,4 @@ then
 end
 Streaming.MarkModelAsNoLongerNeeded(#PEREN)
 Streaming.MarkModelAsNoLongerNeeded(#B_MAN1)
-Streaming.MarkModelAsNoLongerNeeded(#BAT)
 return
