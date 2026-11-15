@@ -1,0 +1,541 @@
+{$CLEO .cm}
+
+{$USE CLEO}
+
+{$INCLUDE ../utils/globals.txt}
+
+//-------------Mission 4 (triggered by :Affairs)---------------
+:Protection
+script_name 'Protect'
+
+Char Luigi = 0
+Char Deadbeat = 0
+Car DeadbeatCar = 0
+Blip TargetBlip = 0
+Blip LuigiBlip = 0
+int RouteState = 0
+int DeadbeatHealth = 0
+
+$onmission = 1
+$OnProtectionMission = 1
+$ProtectionDone = 0
+wait 100
+
+Streaming.RequestModel(#PEREN)
+Streaming.RequestModel(#B_MAN1)
+Streaming.RequestModel(#BAT)
+Streaming.LoadSpecialCharacter(1, 'LUIGI')
+wait 500
+Streaming.LoadAllModelsNow()
+wait 500
+
+while true
+    wait 0
+    if and
+        Streaming.HasModelLoaded(#PEREN)
+        Streaming.HasModelLoaded(#B_MAN1)
+        Streaming.HasModelLoaded(#BAT)
+        Streaming.HasSpecialCharacterLoaded(1)
+    then
+        break
+    end
+end
+
+Hud.SwitchWidescreen(True)
+wait 1000
+Player.SetControl($player, False)
+
+// Create Louie at the top of the stairs
+Luigi = Char.Create(PedType.Special, #SPECIAL01, 1219.74, -313.32, 29.95)
+
+// Position the player out of sight before fading in
+Player.SetCoordinates($player, 1207.98, -325.48, 26.07)
+
+// Set up the initial camera overview at the stairs
+Camera.SetFixedPosition(1219.81, -321.13, 35.46, 0.0, 0.0, 0.0)
+Camera.PointAtChar(Luigi, CameraMode.FollowPed, SwitchType.JumpCut)
+wait 500
+Camera.DoFade(1500, Fade.In)
+wait 1500
+
+// Order Louie to walk down to the base of the stairs
+Char.SetObjGotoCoordOnFoot(Luigi, 1219.74, -325.69)
+
+// Monitor Louie's movement until he arrives at the base of the stairs
+:Louie_Stairs_Loop
+while not Char.LocateAnyMeans2D(Luigi, 1219.74, -325.69, 0.5, 0.5, False)
+    wait 0
+    if or
+        not Player.IsPlaying($player)
+        not Char.IsStillAlive(Luigi)
+    then
+        jump @Protection_Fail
+    end
+end
+
+// Reposition the camera to the lower angle, turn Louie to the player, and start speaking
+Camera.SetFixedPosition(1213.84, -325.56, 26.07, 0.0, 0.0, 0.0)
+Char.SetObjNoObj(Luigi)
+wait 250
+Char.TurnToFacePlayer(Luigi, $player)
+Player.TurnToFaceChar($player, Luigi)
+wait 500
+Char.SetObjWaitOnFoot(Luigi)
+Text.PrintString("One of our guys has been holding out on his protection money.", 5000)
+wait 5000
+Text.PrintString("Go find him and make sure he understands the cost of doing business.", 6000)
+wait 6000
+
+// Transition out of the briefing scene
+Camera.DoFade(1500, Fade.Out)
+wait 1500
+Deadbeat = Char.Create(PedType.CivMale, #B_MAN1, 1202.93, -426.60, 25.07)
+DeadbeatCar = Car.Create(#PEREN, 1186.04, -464.43, 25.07)
+Car.SetHeading(DeadbeatCar, 180.0)
+Camera.RestoreJumpcut()
+Hud.SwitchWidescreen(False)
+Camera.DoFade(1500, Fade.In)
+wait 1500
+
+Player.SetControl($player, True)
+Text.PrintString("Find the Deadbeat. He should be nearby.", 5000)
+
+// Give the player a blip to find the target
+TargetBlip = Blip.AddForChar(Deadbeat)
+Blip.ChangeColor(TargetBlip, BlipColor.Green)
+
+:Protection_Approach
+while not Player.LocateAnyMeansChar3D($player, Deadbeat, 10.0, 10.0, 10.0, False)
+    wait 0
+    if
+        not Player.IsPlaying($player)
+    then
+        jump @Protection_Fail
+    end
+    if
+        Char.IsDead(Deadbeat)
+    then
+        Text.PrintString("He's dead! Louie wanted his money, not a corpse!", 5000)
+        jump @Protection_Fail
+    end
+    if
+        Char.IsDead(Luigi)
+    then
+        Text.PrintString("Louie's dead!", 5000)
+        Char.RemoveElegantly(Luigi)
+        jump @Protection_Fail
+    end
+end
+
+// Confrontation Cutscene / Interaction
+Player.SetControl($player, False)
+Hud.SwitchWidescreen(True)
+Camera.SetFixedPosition(1205.50, -422.10, 26.50, 0.0, 0.0, 0.0)
+Camera.PointAtChar(Deadbeat, CameraMode.FollowPed, SwitchType.JumpCut)
+wait 1000
+Text.PrintString("Look, tell Louie I don't have his cash this week!", 4000)
+wait 4000
+
+// Spooked target flees to his car
+Hud.SwitchWidescreen(False)
+Player.SetControl($player, True)
+Camera.RestoreJumpcut()
+wait 1000
+Char.SetObjGotoCoordOnFoot(Deadbeat, 1186.04, -464.43)
+Char.SetObjEnterCarAsDriver(Deadbeat, DeadbeatCar)
+Char.SetRunning(Deadbeat, True)
+Text.PrintString("He's running for it!", 5000)
+
+while not Char.LocateAnyMeans2D(Deadbeat, 1186.04, -464.43, 4.0, 4.0, False)
+    wait 0
+    if
+        not Player.IsPlaying($player)
+    then
+        jump @Protection_Fail
+    end
+    if
+        Char.LocateAnyMeans2D(Deadbeat, 1186.04, -464.43, 4.0, 4.0, False)
+    then
+        Char.SetObjNoObj(Deadbeat)
+        wait 0
+        Char.SetObjEnterCarAsDriver(Deadbeat, DeadbeatCar)
+    end
+
+    if not Char.IsStillAlive(Deadbeat)
+    then
+        Text.PrintString("You killed him before getting Louie's money!", 5000)
+        jump @Protection_Fail
+    end
+
+    if
+        not Char.LocateAnyMeansChar3D(Deadbeat, $scplayer, 30.0, 30.0, 30.0, False)
+    then
+        Text.PrintString("He got away!", 5000)
+        jump @Protection_Fail
+    end
+
+    if
+        Char.IsDead(Luigi)
+    then
+        Text.PrintString("Louie's dead!", 5000)
+        Char.RemoveElegantly(Luigi)
+        jump @Protection_Fail
+    end
+end
+
+Blip.Remove(TargetBlip)
+TargetBlip = Blip.AddForCar(DeadbeatCar)
+Blip.ChangeColor(TargetBlip, BlipColor.Green)
+
+// Set initial driving settings and kick off Route State 1
+Car.GotoCoordinates(DeadbeatCar, 1193.61, -491.55, 24.41)
+Car.SetChangeLane(DeadbeatCar, True)
+Car.SetDrivingStyle(DeadbeatCar, DrivingMode.PloughThrough)
+Car.SetCruiseSpeed(DeadbeatCar, 30)
+RouteState = 1
+
+// The Pursuit Logic Loop
+:Protection_Pursuit
+while true
+    wait 0
+    if
+        not Player.IsPlaying($player)
+    then
+        jump @Protection_Fail
+    end
+
+    // Check if player is falling behind
+    if
+        not Char.LocateAnyMeansChar2D(Deadbeat, $scplayer, 50.0, 50.0, False)
+    then
+        Text.PrintString("You're too far away! Stay close to him!", 5000)
+        wait 5000
+
+        if or
+            not Player.IsPlaying($player)
+            Car.IsDead(DeadbeatCar)
+            Char.IsDead(Deadbeat)
+        then
+            Text.PrintString("Oh shit, he's dead! Now how is Louie supposed to get his money?", 5000)
+            jump @Protection_Fail
+        end
+
+        // Final warning check
+        if not Char.LocateAnyMeansChar2D(Deadbeat, $scplayer, 50.0, 50.0, False)
+        then
+            Text.PrintString("You lost him!", 5000)
+            jump @Protection_Fail
+        end
+    end
+
+    // Check if the vehicle is totaled or he's dead
+    if or
+        Car.IsDead(DeadbeatCar)
+        Char.IsDead(Deadbeat)
+    then
+        Text.PrintString("Oh shit, he's dead?!", 5000)
+        jump @Protection_Fail
+    end
+
+    if
+        Char.IsDead(Luigi)
+    then
+        Text.PrintString("Louie's dead!", 5000)
+        Char.RemoveElegantly(Luigi)
+        jump @Protection_Fail
+    end
+
+    // Check if the player successfully traps the car or flips it over
+    if or
+        Car.IsStopped(DeadbeatCar)
+        Car.IsUpsidedown(DeadbeatCar)
+    then
+        jump @Protection_FleeOnFoot
+    end
+
+    // Coordinate Progression Logic System
+    if and
+        RouteState == 1
+        Car.Locate3D(DeadbeatCar, 1193.61, -491.55, 24.41, 6.0, 6.0, 6.0, False)
+    then
+        Car.GotoCoordinates(DeadbeatCar, 1359.60, -475.11, 49.33)
+        RouteState = 2
+    end
+
+    if and
+        RouteState == 2
+        Car.Locate3D(DeadbeatCar, 1359.60, -475.11, 49.33, 6.0, 6.0, 6.0, False)
+    then
+        Car.GotoCoordinates(DeadbeatCar, 1364.49, -347.13, 49.48)
+        RouteState = 3
+    end
+
+    if and
+        RouteState == 3
+        Car.Locate3D(DeadbeatCar, 1364.49, -347.13, 49.48, 6.0, 6.0, 6.0, False)
+    then
+        Car.GotoCoordinates(DeadbeatCar, 1302.36, -346.17, 38.60)
+        RouteState = 4
+    end
+
+    if and
+        RouteState == 4
+        Car.Locate3D(DeadbeatCar, 1302.36, -346.17, 38.60, 6.0, 6.0, 6.0, False)
+    then
+        Car.GotoCoordinates(DeadbeatCar, 1298.57, -290.66, 38.29)
+        RouteState = 5
+    end
+
+    if and
+        RouteState == 5
+        Car.Locate3D(DeadbeatCar, 1298.57, -290.66, 38.29, 6.0, 6.0, 6.0, False)
+    then
+        Car.GotoCoordinates(DeadbeatCar, 1201.42, -280.57, 24.41)
+        RouteState = 6
+    end
+
+    if and
+        RouteState == 6
+        Car.Locate3D(DeadbeatCar, 1201.42, -280.57, 24.41, 6.0, 6.0, 6.0, False)
+    then
+        Car.GotoCoordinates(DeadbeatCar, 1197.68, -222.24, 24.26)
+        RouteState = 7
+    end
+
+    if and
+        RouteState == 7
+        Car.Locate3D(DeadbeatCar, 1197.68, -222.24, 24.26, 6.0, 6.0, 6.0, False)
+    then
+        Car.GotoCoordinates(DeadbeatCar, 1166.43, -207.28, 20.46)
+        RouteState = 8
+    end
+
+    if and
+        RouteState == 8
+        Car.Locate3D(DeadbeatCar, 1166.43, -207.28, 20.46, 6.0, 6.0, 6.0, False)
+    then
+        Car.GotoCoordinates(DeadbeatCar, 1161.18, -274.63, 21.84)
+        RouteState = 9
+    end
+
+    if and
+        RouteState == 9
+        Car.Locate3D(DeadbeatCar, 1161.18, -274.63, 21.84, 6.0, 6.0, 6.0, False)
+    then
+        Car.GotoCoordinates(DeadbeatCar, 1127.74, -282.61, 19.41)
+        RouteState = 10
+    end
+
+    if and
+        RouteState == 10
+        Car.Locate3D(DeadbeatCar, 1127.74, -282.61, 19.41, 6.0, 6.0, 6.0, False)
+    then
+        Car.GotoCoordinates(DeadbeatCar, 1123.63, -487.26, 19.41)
+        RouteState = 11
+    end
+
+    if and
+        RouteState == 11
+        Car.Locate3D(DeadbeatCar, 1123.63, -487.26, 19.41, 6.0, 6.0, 6.0, False)
+    then
+        Car.GotoCoordinates(DeadbeatCar, 1360.39, -472.47, 49.45)
+        RouteState = 12
+    end
+
+    if and
+        RouteState == 12
+        Car.Locate3D(DeadbeatCar, 1360.39, -472.47, 49.45, 6.0, 6.0, 6.0, False)
+    then
+        Car.GotoCoordinates(DeadbeatCar, 1365.09, -281.98, 49.41)
+        RouteState = 13
+    end
+
+    if and
+        RouteState == 13
+        Car.Locate3D(DeadbeatCar, 1365.09, -281.98, 49.41, 6.0, 6.0, 6.0, False)
+    then
+        Car.GotoCoordinates(DeadbeatCar, 1304.37, -282.25, 39.30)
+        RouteState = 14
+    end
+
+    if and
+        RouteState == 14
+        Car.Locate3D(DeadbeatCar, 1304.37, -282.25, 39.30, 6.0, 6.0, 6.0, False)
+    then
+        Car.GotoCoordinates(DeadbeatCar, 1299.65, -309.80, 40.63)
+        RouteState = 15
+    end
+
+    if and
+        RouteState == 15
+        Car.Locate3D(DeadbeatCar, 1299.65, -309.80, 40.63, 6.0, 6.0, 6.0, False)
+    then
+        // Final driving node reached successfully. Drop to foot evasion logic.
+        jump @Protection_FleeOnFoot
+    end
+end
+
+:Protection_FleeOnFoot
+Char.SetObjLeaveCar(Deadbeat, DeadbeatCar)
+Char.SetObjGotoCoordOnFoot(Deadbeat, 1286.58, -327.17)
+Char.SetRunning(Deadbeat, True)
+
+:Protection_Confrontation
+wait 0
+Blip.Remove(TargetBlip)
+TargetBlip = Blip.AddForChar(Deadbeat)
+Blip.ChangeColor(TargetBlip, BlipColor.Green)
+Text.PrintString("Rough him up until he pays, but don't kill him!", 5000)
+Player.GiveWeapon($player, WeaponType.BaseballBat, 1)
+
+while not Char.IsDead(Deadbeat)
+    wait 0
+    if
+        not Player.IsPlaying($player)
+    then
+        jump @Protection_Fail
+    end
+    Char.GetHealth(Deadbeat, DeadbeatHealth)
+    if
+        Char.IsStillAlive(Deadbeat)
+    then
+        if
+            DeadbeatHealth < 50 // Handed over the cash
+        then
+            Blip.Remove(TargetBlip)
+            Player.SetControl($player, False)
+            wait 250
+            Char.SetObjWaitOnFoot(Deadbeat)
+            Char.TurnToFacePlayer(Deadbeat, $player)
+            Text.PrintString("Alright! Alright! Here, take it!", 4000)
+            Player.AddScore($player, 50000)
+            wait 4000
+            Player.SetControl($player, True)
+            Text.PrintString("Get the money back to Louie's!", 5000)
+            LuigiBlip = Blip.AddForChar(Luigi)
+            Blip.ChangeColor(LuigiBlip, BlipColor.Yellow)
+            jump @Protection_Finish
+        end
+    else
+        Text.PrintString("You killed him before getting the money!", 5000)
+        jump @Protection_Fail
+    end
+    if
+        Char.IsDead(Luigi)
+    then
+        Text.PrintString("Louie's dead!", 5000)
+        Char.RemoveElegantly(Luigi)
+        jump @Protection_Fail
+    end
+end
+
+Text.PrintString("You killed him before getting the money!", 5000)
+jump @Protection_Fail
+
+:Protection_Finish
+while not Player.LocateOnFootChar3D($player, Luigi, 5.0, 5.0, 0.75, False)
+    wait 0
+    if
+        not Player.IsPlaying($player)
+    then
+        jump @Protection_Fail
+    end
+    if
+        Player.LocateOnFootChar3D($player, Luigi, 5.0, 5.0, 0.75, False)
+    then
+        Blip.Remove(LuigiBlip)
+        Player.SetControl($player, False)
+        Camera.DoFade(1500, Fade.Out)
+        wait 1500
+        Hud.SwitchWidescreen(True)
+        Camera.SetFixedPosition(1213.84, -325.56, 26.07, 0.0, 0.0, 0.0)
+        Camera.PointAtChar(Luigi, CameraMode.Fixed, SwitchType.JumpCut)
+        wait 0
+        Camera.DoFade(1500, Fade.In)
+        wait 1500
+        Text.PrintString("Nicely done, kid. I'll take that dough off your hands. ", 5000)
+        Player.AddScore($player, -50000)
+        wait 5000
+        Text.PrintString("Now, make yourself scarce. The cops will be looking for you, so watch yourself. Capiche?", 4000)
+        wait 4000
+        Camera.DoFade(1500, Fade.Out)
+        wait 1500
+        jump @Protection_Success
+    end
+    if
+        Char.IsDead(Luigi)
+    then
+        Text.PrintString("Louie's dead!", 5000)
+        Char.RemoveElegantly(Luigi)
+        jump @Protection_Fail
+    end
+end
+
+:Protection_Success
+Text.PrintWithNumberBig('MISPASS', 10000, 5000, TextStyle.Middle)
+Audio.PlayMissionPassedTune(1)
+Player.AddScore($player, 10000)
+Mission.Finish()
+$ProtectionDone = 1
+$onmission = 0
+Protection_Cleanup()
+if
+    Char.IsStillAlive(Luigi)
+then
+    Char.MarkAsNoLongerNeeded(Luigi)
+end
+Streaming.UnloadSpecialCharacter(1)
+Camera.RestoreJumpcut()
+Hud.SwitchWidescreen(False)
+Camera.DoFade(1500, Fade.In)
+wait 1500
+Player.SetControl($player, True)
+$OnProtectionMission = 0
+terminate_this_custom_script
+
+:Protection_Fail
+$onmission = 0
+$ProtectionDone = 0
+Text.ClearPrints()
+Text.PrintBigString("Mission Failed!", 3000, TextStyle.Middle)
+wait 3000
+Protection_Cleanup()
+if
+    Char.IsStillAlive(Deadbeat)
+then
+    Char.Delete(Deadbeat)
+end
+if
+    Car.IsStillAlive(DeadbeatCar)
+then
+    Car.Delete(DeadbeatCar)
+end
+if
+    Char.IsStillAlive(Luigi)
+then
+    Char.Delete(Luigi)
+end
+Streaming.UnloadSpecialCharacter(1)
+Camera.RestoreJumpcut()
+Hud.SwitchWidescreen(False)
+Player.SetControl($player, True)
+$OnProtectionMission = 0
+terminate_this_custom_script
+
+:Protection_Cleanup
+Blip.Remove(TargetBlip)
+Blip.Remove(LuigiBlip)
+if
+    Char.IsStillAlive(Deadbeat)
+then
+    Char.MarkAsNoLongerNeeded(Deadbeat)
+end
+if
+    Car.IsStillAlive(DeadbeatCar)
+then
+    Car.MarkAsNoLongerNeeded(DeadbeatCar)
+end
+Streaming.MarkModelAsNoLongerNeeded(#PEREN)
+Streaming.MarkModelAsNoLongerNeeded(#B_MAN1)
+Streaming.MarkModelAsNoLongerNeeded(#BAT)
+return

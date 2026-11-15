@@ -367,6 +367,24 @@ if (shouldRun(7, "alley")) {
   say.done(`  Packaged modloader/${modName}/CLEO/${basename(alleyOutput)}`);
 }
 
+// Step 8: Protection Mission
+if (shouldRun(8, "protection")) {
+  say.heading("Step 8 (protection): Compiling protection mission...");
+  const protectionInput = join(cwd, "threads", "protection.txt");
+  const protectionOutput = join(cwd, "threads", "protection.cm");
+  await compileIfChanged(protectionInput, protectionOutput);
+
+  const cleoStagingDir = join(modStagingDir, "CLEO");
+  await ensureDir(cleoStagingDir);
+  await Deno.copyFile(
+    protectionOutput,
+    join(cleoStagingDir, basename(protectionOutput)),
+  );
+  say.done(
+    `  Packaged modloader/${modName}/CLEO/${basename(protectionOutput)}`,
+  );
+}
+
 // Packaging archive into dist/Drag-N-Drop.zip
 say.heading("Packaging dist/Drag-N-Drop.zip...");
 await ensureDir(distDir);

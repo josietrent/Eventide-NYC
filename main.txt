@@ -32,6 +32,8 @@ var
     $PackHunt: int
     $PackIndex: int
     $AnyCar: Car
+    $OnProtectionMission: int
+    $ProtectionDone: int
 end
 
 //=============
@@ -351,9 +353,64 @@ end
 if
     $AlleyMissionDone == 1
 then
+    start_new_script @Affairs
     terminate_this_script
 else
     $OnAlleyMission = 0
     $LuigiBlip = Blip.AddSpriteForContactPoint(1329.72, -465.71, 49.76, RadarSprite.Luigi)
     goto @Stairs_Loop
+end
+
+/// Trigger mission 4: "Pest Removal Ain't Easy..."
+:Affairs
+script_name 'Affairs'
+
+:Affairs_Loop
+while $OnProtectionMission == 0
+    wait 0
+    if and
+        Player.CanStartMission($player)
+        $onmission == 0
+        Player.LocateAnyMeans3D($player, 1214.89, -327.47, 26.07, 1.5, 1.5, 2.0, False)
+    then
+        0@, 1@ = Clock.GetTimeOfDay()
+        if and
+            0@ >= 3
+            0@ <= 7
+        then
+            Blip.Remove($LuigiBlip)
+            Player.SetControl($player, False)
+            Text.PrintBigString("Pest Removal Ain't Easy...", 5000, TextStyle.BottomRight)
+            Camera.DoFade(1500, Fade.Out)
+            wait 1500
+            $OnProtectionMission = 1
+            stream_custom_script "protection.cm"
+            break
+        else
+            Text.Print('FYBCLOK', 5000, 0)
+            wait 2000
+        end
+    else
+        if and
+            $onmission == 1
+            Player.LocateOnFoot3D($player, 1214.89, -327.47, 26.07, 3.0, 3.0, 3.0, False)
+        then
+            Text.PrintHelp('FUCKOFF')
+            wait 5000
+        end
+    end
+end
+
+while $OnProtectionMission == 1
+    wait 250
+end
+
+if
+    $ProtectionDone == 1
+then
+    terminate_this_script
+else
+    $OnProtectionMission = 0
+    $LuigiBlip = Blip.AddSpriteForContactPoint(1214.89, -327.47, 26.07, RadarSprite.Luigi)
+    goto @Affairs_Loop
 end
