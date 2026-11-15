@@ -870,8 +870,8 @@ while not Player.LocateAnyMeans3D($player, 1419.15, -194.40, 49.74, 1.0, 1.0, 1.
         Blip.Remove(Destination)
         Sphere.Remove(GunSphere)
         Player.SetControl($player, False)
-        Player.AddScore($player, 5000)
-        Text.PrintWithNumberBig('M_PASS', 5000, 3000, TextStyle.Middle) // MISSION PASSED! $~1~
+        Player.AddScore($player, 1000)
+        Text.PrintWithNumberBig('M_PASS', 1000, 3000, TextStyle.Middle) // MISSION PASSED! $~1~
         Audio.PlayMissionPassedTune(1)
         $onmission = 0
         wait 3000
@@ -879,8 +879,6 @@ while not Player.LocateAnyMeans3D($player, 1419.15, -194.40, 49.74, 1.0, 1.0, 1.
         wait 1500
         CarGenerator.Switch($CheetahGen, 101)
         Blip.Remove($Ammunation)
-        Blip.Remove($Ammunation2)
-        Blip.Remove($Ammunation3)
         Blip.Remove($SprayShopRES)
         Blip.Remove($SprayShopIND)
         Streaming.UnloadSpecialCharacter(1)
