@@ -1,6 +1,17 @@
 :Barrier
 script_name 'Barrier'
 
+var
+    0@: int
+    1@: int
+    2@: int
+    3@: int
+    4@: float
+    5@: float
+    6@: float
+    7@: float
+end
+
 /// Whether the player is prevented from entering Staunton
 $BarrierIND = true
 /// Whether the player is prevented from entering Shoreside
@@ -9,6 +20,11 @@ $BarrierCOM = true
 $BarrierTimer = 0
 1@ = 0     // PlayerHealth
 2@ = 0     // CollisionWaitTimer
+3@ = false // InRestrictedArea (set by :CheckBridgeZone)
+4@ = 0.0   // Player X
+5@ = 0.0   // Player Y
+6@ = 0.0   // Player Z
+7@ = 0.0   // Bridge deck min Z threshold
 
 :BarrierSniffer
 while $BarrierIND == true
@@ -20,25 +36,16 @@ while $BarrierIND == true
         continue
     end
 
-    // State 1: Monitoring approach (player drives onto the Callahan Bridge)
-    // ROADBR1 covers the main bridge span (X: 617-1065, Y: -958 to -908)
-    // ROADBR2 covers the western approach ramp (X: 444-614, Y: -958 to -908)
-    if or
-        Player.IsInZone($player, 'ROADBR1')
-        Player.IsInZone($player, 'ROADBR2')
-        Player.IsInAnyBoat($player)
+    gosub @CheckBridgeZone
+    if and
+        3@ == true
+        not Player.IsOnFoot($player)
+        0@ == false
     then
-        // FIXME: Exclude when the player is under the bridge (this gets complicated b/c the bridge deck height is variable...)
-        // QUESTION: What is the verital extents of the bridge deck
-        if and
-            not Player.IsOnFoot($player)
-            0@ == false
-        then
-            $BarrierTimer = 15000
-            Text.PrintHelp('BARPORT')
-            0@ = true
-            Hud.DisplayTimer($BarrierTimer)
-        end
+        $BarrierTimer = 15000
+        Text.PrintHelp('BARPORT')
+        0@ = true
+        Hud.DisplayTimer($BarrierTimer)
     end
 
     // State 2: Countdown & Warning phase
@@ -53,11 +60,10 @@ while $BarrierIND == true
             break
         end
 
-        // If the player left both bridge zones (and isn't in a boat), cancel the countdown
-        if and
-            not Player.IsInZone($player, 'ROADBR1')
-            not Player.IsInZone($player, 'ROADBR2')
-            not Player.IsInAnyBoat($player)
+        // If the player left the restricted bridge deck / water, cancel the countdown
+        gosub @CheckBridgeZone
+        if
+            3@ == false
         then
             0@ = false
             Text.ClearHelp()
@@ -123,3 +129,56 @@ while $BarrierIND == true
 end
 
 terminate_this_script
+
+// Sets 3@ = true if player leaves IND_ZON in a boat, is in ROADBR2 (Z >= 30.74), or is on the Callahan Bridge deck in ROADBR1.
+// Excludes ground/underpass roads beneath the bridge (Z <= 14.08) and water below the main span (Z = 0.0).
+:CheckBridgeZone
+3@ = false
+if and
+    Player.IsInAnyBoat($player)
+    not Player.IsInZone($player, 'IND_ZON')
+then
+    3@ = true
+    return
+end
+
+if
+    Player.IsInZone($player, 'ROADBR2')
+then
+    3@ = true
+    return
+end
+
+if
+    Player.IsInZone($player, 'ROADBR1')
+then
+    4@, 5@, 6@ = Player.GetCoordinates($player)
+    if
+        4@ < 789.0
+    then
+        // Suspended span (deck Z = 37.77..41.92, col bottom Z = 33.45)
+        if
+            6@ >= 33.0
+        then
+            3@ = true
+        end
+    else
+        if
+            4@ <= 965.0
+        then
+            // Portland ramp (slope -0.10: deck Z ~= 115.25 - 0.1*X; underpass Z <= 14.08)
+            7@ = 4@
+            7@ *= -0.1
+            7@ += 112.0
+            if
+                6@ >= 7@
+            then
+                3@ = true
+            end
+        else
+            // East approach ramp (X = 965..1065) already down near street level (13.8..18.8)
+            3@ = true
+        end
+    end
+end
+return
