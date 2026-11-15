@@ -354,6 +354,19 @@ if (shouldRun(6, "car")) {
   say.done(`  Packaged modloader/${modName}/CLEO/${basename(carOutput)}`);
 }
 
+// Step 7: Alley Mission
+if (shouldRun(7, "alley")) {
+  say.heading("Step 7 (alley): Compiling alley mission...");
+  const alleyInput = join(cwd, "threads", "alley.txt");
+  const alleyOutput = join(cwd, "threads", "alley.cm");
+  await compileIfChanged(alleyInput, alleyOutput);
+
+  const cleoStagingDir = join(modStagingDir, "CLEO");
+  await ensureDir(cleoStagingDir);
+  await Deno.copyFile(alleyOutput, join(cleoStagingDir, basename(alleyOutput)));
+  say.done(`  Packaged modloader/${modName}/CLEO/${basename(alleyOutput)}`);
+}
+
 // Packaging archive into dist/Drag-N-Drop.zip
 say.heading("Packaging dist/Drag-N-Drop.zip...");
 await ensureDir(distDir);
