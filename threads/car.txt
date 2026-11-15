@@ -298,7 +298,7 @@ terminate_this_custom_script
 Camera.DoFade(1500, Fade.Out)
 wait 1500
 Sphere.Remove(CarSphere)
-$SafeBlip = Blip.AddSpriteForCoord(1454.08, -173.18, 55.77, RadarSprite.Savehouse)
+$SafeBlip = Blip.AddSpriteForContactPoint(1454.08, -173.18, 55.77, RadarSprite.Savehouse)
 Hud.SwitchWidescreen(False)
 wait 500
 Camera.RestoreJumpcut()
