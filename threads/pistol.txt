@@ -142,7 +142,7 @@ GunSphere = Sphere.Create(933.6613, -252.648, 4.501, 3.0)
 Destination = Blip.AddForCoord(933.6613, -252.648, 4.501)
 Blip.ChangeColor(Destination, BlipColor.Yellow)
 Text.Print('MEETUP', 4000, 0)
-NeedsCar = -1
+NeedsCar = 0
 
 :NotAtApartment
 while not Player.LocateAnyMeans3D($player, 933.66, -252.64, 4.50, 1.0, 1.0, 1.0, True)
@@ -152,15 +152,9 @@ while not Player.LocateAnyMeans3D($player, 933.66, -252.64, 4.50, 1.0, 1.0, 1.0,
     then
         Player.StoreCarIsInNoSave($player, MyCar)
         if
-            NeedsCar == -1
-        then
-            NeedsCar = 0
-        end
-        if
             NeedsCar == 1
         then
             Hud.ClearTimer($TIMER)
-            Blip.Remove(CarBlip)
             NeedsCar = 0
         end
     else
@@ -207,13 +201,6 @@ while not Player.LocateAnyMeans3D($player, 933.66, -252.64, 4.50, 1.0, 1.0, 1.0,
     if
         $TIMER == 0
     then
-        jump @GunFail
-    end
-
-    if
-        Car.IsDead(Cheetah)
-    then
-        Text.PrintBig('CARDIE', 5000, TextStyle.MiddleSmallerHigher) // The vehicle has been destroyed!
         jump @GunFail
     end
 
@@ -289,11 +276,30 @@ while true
         Player.IsInAnyCar($player)
     then
         Player.StoreCarIsInNoSave($player, MyCar)
+        if
+            CarBlip > 0
+        then
+            Blip.Remove(CarBlip)
+            CarBlip = 0
+        end
+    else
+        if and
+            CarBlip == 0
+            Car.IsStillAlive(MyCar)
+        then
+            CarBlip = Blip.AddForCar(MyCar)
+        end
     end
 
     if
         not Car.IsStillAlive(MyCar)
     then
+        if
+            CarBlip > 0
+        then
+            Blip.Remove(CarBlip)
+            CarBlip = 0
+        end
         if or
             NeedsCar == 0
             TIMERA >= 3000
@@ -374,7 +380,41 @@ while true
     if
         not Car.IsStillAlive(MyCar)
     then
+        if
+            CarBlip > 0
+        then
+            Blip.Remove(CarBlip)
+            CarBlip = 0
+        end
         jump @CarMisty
+    end
+    if
+        Player.IsInAnyCar($player)
+    then
+        if
+            not Player.IsInCar($player, MyCar)
+        then
+            Player.StoreCarIsInNoSave($player, MyCar)
+            if
+                CarBlip > 0
+            then
+                Blip.Remove(CarBlip)
+                CarBlip = 0
+            end
+            jump @CarMisty
+        end
+        if
+            CarBlip > 0
+        then
+            Blip.Remove(CarBlip)
+            CarBlip = 0
+        end
+    else
+        if
+            CarBlip == 0
+        then
+            CarBlip = Blip.AddForCar(MyCar)
+        end
     end
     if
         Char.IsInCar(Misty, MyCar)
@@ -382,9 +422,13 @@ while true
         Blip.Remove(MistyBlip)
         Sphere.Remove(GunSphere)
         Blip.Remove(Destination)
-        Destination = Blip.AddForCoord(1147.61, -95.21, 7.02)
-        Blip.ChangeColor(Destination, BlipColor.Yellow)
-        GunSphere = Sphere.Create(1147.61, -95.21, 7.02, 3.0)
+        if
+            Player.IsInCar($player, MyCar)
+        then
+            Destination = Blip.AddForCoord(1147.61, -95.21, 7.02)
+            Blip.ChangeColor(Destination, BlipColor.Yellow)
+            GunSphere = Sphere.Create(1147.61, -95.21, 7.02, 3.0)
+        end
         Player.SetControl($player, True)
         Camera.RestoreJumpcut()
         if
@@ -417,6 +461,34 @@ while FindMisty == 1
         jump @GunFail
     end
     if
+        not Car.IsStillAlive(MyCar)
+    then
+        if
+            CarBlip > 0
+        then
+            Blip.Remove(CarBlip)
+            CarBlip = 0
+        end
+    end
+    if
+        Player.IsInAnyCar($player)
+    then
+        Player.StoreCarIsInNoSave($player, MyCar)
+        if
+            CarBlip > 0
+        then
+            Blip.Remove(CarBlip)
+            CarBlip = 0
+        end
+    else
+        if and
+            CarBlip == 0
+            Car.IsStillAlive(MyCar)
+        then
+            CarBlip = Blip.AddForCar(MyCar)
+        end
+    end
+    if
         Player.LocateAnyMeansChar3D($player, Misty, 5.0, 5.0, 5.0, False)
     then
         Blip.Remove(MistyBlip)
@@ -439,6 +511,12 @@ while true
     if
         not Car.IsStillAlive(MyCar)
     then
+        if
+            CarBlip > 0
+        then
+            Blip.Remove(CarBlip)
+            CarBlip = 0
+        end
         Blip.Remove(Destination)
         Sphere.Remove(GunSphere)
         if
@@ -463,6 +541,12 @@ while true
     if
         $CarHealth < 250
     then
+        if
+            CarBlip > 0
+        then
+            Blip.Remove(CarBlip)
+            CarBlip = 0
+        end
         Blip.Remove(Destination)
         Sphere.Remove(GunSphere)
         Text.Print('MISWREK', 3000, 0)
@@ -507,6 +591,12 @@ while true
     if
         $CarHealth < 600
     then
+        if
+            CarBlip > 0
+        then
+            Blip.Remove(CarBlip)
+            CarBlip = 0
+        end
         Blip.Remove(Destination)
         Sphere.Remove(GunSphere)
         Text.Print('MISWREK', 3000, 0)
@@ -536,6 +626,12 @@ while true
         Player.IsInAnyCar($player)
         not Player.IsInCar($player, MyCar)
     then
+        if
+            CarBlip > 0
+        then
+            Blip.Remove(CarBlip)
+            CarBlip = 0
+        end
         Blip.Remove(Destination)
         Sphere.Remove(GunSphere)
         if
@@ -563,6 +659,12 @@ while true
     // 4. Misty exited/pulled out while car is still healthy
     if not Char.IsInCar(Misty, MyCar)
     then
+        if
+            CarBlip > 0
+        then
+            Blip.Remove(CarBlip)
+            CarBlip = 0
+        end
         Blip.Remove(Destination)
         Sphere.Remove(GunSphere)
         MistyBlip = Blip.AddForChar(Misty)
@@ -620,12 +722,40 @@ while true
             end
         end
 
-        // She's back! Cleanup and restore destination
+        // She's back! Cleanup and restore destination if player is in MyCar
         Hud.ClearTimer($TIMER)
         Blip.Remove(MistyBlip)
-        Destination = Blip.AddForCoord(1147.61, -95.21, 7.02)
-        Blip.ChangeColor(Destination, BlipColor.Yellow)
-        GunSphere = Sphere.Create(1147.61, -95.21, 7.02, 3.0)
+        if
+            Player.IsInCar($player, MyCar)
+        then
+            Destination = Blip.AddForCoord(1147.61, -95.21, 7.02)
+            Blip.ChangeColor(Destination, BlipColor.Yellow)
+            GunSphere = Sphere.Create(1147.61, -95.21, 7.02, 3.0)
+        end
+    end
+
+    // 5. Player exited MyCar on foot: blip the car they were just in
+    if
+        not Player.IsInAnyCar($player)
+    then
+        if
+            CarBlip == 0
+        then
+            Blip.Remove(Destination)
+            Sphere.Remove(GunSphere)
+            CarBlip = Blip.AddForCar(MyCar)
+            Text.Print('INCAR', 3000, 0)
+        end
+    else
+        if
+            CarBlip > 0
+        then
+            Blip.Remove(CarBlip)
+            CarBlip = 0
+            Destination = Blip.AddForCoord(1147.61, -95.21, 7.02)
+            Blip.ChangeColor(Destination, BlipColor.Yellow)
+            GunSphere = Sphere.Create(1147.61, -95.21, 7.02, 3.0)
+        end
     end
 
     if and
@@ -717,6 +847,8 @@ Blip.Remove(Destination)
 Blip.Remove(GunBlip)
 Sphere.Remove(GunSphere)
 Blip.Remove(MistyBlip)
+Blip.Remove(CarBlip)
+CarBlip = 0
 Hud.ClearTimer($TIMER)
 Streaming.UnloadSpecialCharacter(1)
 wait 3000
