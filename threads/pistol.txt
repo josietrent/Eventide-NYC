@@ -12,6 +12,7 @@ int FindMisty = 0
 int PistolCollected = 0
 int NeedsCar = 0
 int ZoeyHealth = 0
+int MistyGreeted = 0
 Pickup PistolPickup = 0
 Blip GunBlip = 0
 Blip Destination = 0
@@ -381,15 +382,19 @@ while true
         Blip.Remove(MistyBlip)
         Sphere.Remove(GunSphere)
         Blip.Remove(Destination)
-        Text.Print('MISSUG', 3000, 0) // Thanks for the lift, sugar!
-        wait 3000
         Destination = Blip.AddForCoord(1147.61, -95.21, 7.02)
         Blip.ChangeColor(Destination, BlipColor.Yellow)
         GunSphere = Sphere.Create(1147.61, -95.21, 7.02, 3.0)
         Player.SetControl($player, True)
         Camera.RestoreJumpcut()
-        wait 3000
-        Text.Print('MISGTWK', 5000, 0) // "Take her to work."
+        if
+            MistyGreeted == 0
+        then
+            MistyGreeted = 1
+            Text.Print('MISSUG', 3000, 0) // Thanks for the lift, sugar!
+            wait 3000
+            Text.Print('MISGTWK', 5000, 0) // "Take her to work."
+        end
         jump @Arrived
     end
 end
@@ -713,6 +718,7 @@ Blip.Remove(GunBlip)
 Sphere.Remove(GunSphere)
 Blip.Remove(MistyBlip)
 Hud.ClearTimer($TIMER)
+Streaming.UnloadSpecialCharacter(1)
 wait 3000
 Camera.DoFade(1500, Fade.Out)
 wait 1500
@@ -755,6 +761,7 @@ while not Player.LocateAnyMeans3D($player, 1419.15, -194.40, 49.74, 1.0, 1.0, 1.
         Blip.Remove($Ammunation3)
         Blip.Remove($SprayShopRES)
         Blip.Remove($SprayShopIND)
+        Streaming.UnloadSpecialCharacter(1)
         $LuigiBlip = Blip.AddSpriteForContactPoint(1329.72, -465.71, 49.76, RadarSprite.Luigi)
         Camera.DoFade(1500, Fade.In)
         wait 1500
