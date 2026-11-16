@@ -70,10 +70,9 @@ while not Char.LocateAnyMeans2D(Luigi, 1330.30, -465.53, 0.25, 0.25, False)
         Camera.SetFixedPosition(1325.71, -473.58, 49.75, 0.0, 0.0, 0.0)
         Char.SetObjNoObj(Luigi)
         Char.SetObjWaitOnFoot(Luigi)
+        wait 0
         Char.SetHeading(Luigi, 145.0)
         Player.SetHeading($player, 325.0)
-        Char.TurnToFacePlayer(Luigi, $player)
-        Player.TurnToFaceChar($player, Luigi)
         wait 500
         Text.PrintString("I've never seen you around before. You're new to the city, ain't ya?", 5000)
         wait 5000
