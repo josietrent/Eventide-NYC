@@ -138,17 +138,29 @@ while true
 
     if Pad.IsKeyPressed(KeyCode.OemPeriod) // Press '.' to skip to next package
     then
-        $CurrentPackages = PACKAGE_COUNT
-        $CurrentPackages -= 1
-        if $PackIndex < $CurrentPackages
+        if and
+            $BarrierIND == 1
+            $PackIndex >= 26
         then
-            $PackIndex += 1
-            $BlipActive = 1
-            $CurrentPackages = $PackIndex
-            $CurrentPackages += 1
-            Text.PrintHelpFormatted("Currently tracked package changed to ~y~Package %d~w~ of %d.", $CurrentPackages, PACKAGE_COUNT)
+            Text.PrintHelp('PACK_ST')
         else
-            Text.PrintHelpFormatted("Already tracking ~y~Package %d~w~ of %d.", PACKAGE_COUNT, PACKAGE_COUNT)
+            $CurrentPackages = PACKAGE_COUNT
+            $CurrentPackages -= 1
+            if $PackIndex < $CurrentPackages
+            then
+                $PackIndex += 1
+                $BlipActive = 1
+                if or
+                    $BarrierIND == 0
+                    $PackIndex < 26
+                then
+                    $CurrentPackages = $PackIndex
+                    $CurrentPackages += 1
+                    Text.PrintHelpFormatted("Currently tracked package changed to ~y~Package %d~w~ of %d.", $CurrentPackages, PACKAGE_COUNT)
+                end
+            else
+                Text.PrintHelpFormatted("Already tracking ~y~Package %d~w~ of %d.", PACKAGE_COUNT, PACKAGE_COUNT)
+            end
         end
         wait 300 // Debounce
     end
@@ -278,7 +290,7 @@ while true
                 $CurrentPackages = $Packages
 
                 if and
-                    $Packages >= 26
+                    $PackIndex >= 26
                     $BarrierIND == 1
                 then
                     if 2@ == 0
