@@ -4,14 +4,14 @@ script_name 'Packing'
 // $CurrentPackages = Tracking Pointer / Package Index Counter
 // $BlipActive = BlipActive Flag (1 = Needs Update, 0 = Active)
 // 2@ = Barrier for Portland Flag
-// 3@ = Package Tutorial Shown Flag
+// $PackTutShown = Package Tutorial Shown Flag
 // $PackHunt = Package Hunt flag
 // 5@ = Active Package Blip Handle
 // $Packages = Current Packages Count
 wait 500
 
 $PackIndex = 0
-3@ = 0
+$PackTutShown = 0
 $PackHunt = 0
 5@ = 0
 $Reward1Given = 0
@@ -36,21 +36,19 @@ while true
     end
 
     $Packages = Game.GetCollectablesCollected()
-    if
+    if and
         $Packages >= 1
+        $Intro_Passed == 0
+        $PackTutShown == 0
     then
-        if
-            3@ == 0
-        then
-            Text.PrintHelp('PAKTUT1')
-            wait 5000
-            Text.PrintHelp('PAKTUT2')
-            wait 5000
-            Text.PrintHelp('PAKTUT3')
-            wait 5000
-            Text.PrintHelp('PAKTUT4')
-            3@ = 1
-        end
+        $PackTutShown = 1
+        Text.PrintHelp('PAKTUT1')
+        wait 5000
+        Text.PrintHelp('PAKTUT2')
+        wait 5000
+        Text.PrintHelp('PAKTUT3')
+        wait 5000
+        Text.PrintHelp('PAKTUT4')
     end
 
     if
