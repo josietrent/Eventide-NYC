@@ -2,42 +2,49 @@
 script_name 'CarHlth'
 
 :CarHealth101
-while not Player.IsInAnyCar($player)
+while true
     wait 0
-    if
+    if and
+        Player.IsPlaying($player)
         Player.CanStartMission($player)
+        Player.IsInAnyCar($player)
     then
+        Player.StoreCarIsInNoSave($player, $AnyCar)
         if
-            Player.IsInAnyCar($player)
+            not Car.IsDead($AnyCar)
         then
-            Player.StoreCarIsInNoSave($player, $AnyCar)
             goto @CarHealth102
         end
     end
 end
 
 :CarHealth102
-while Player.IsPlaying($player)
+while true
     wait 0
-    Car.GetHealth($AnyCar, $CarHealth)
-    $CarHealthBar = $CarHealth
-    $CarHealthBar *= 100
-    $CarHealthBar /= 1000
-    Hud.DisplayCounterWithString($CarHealthBar, CounterDisplay.Bar, 'VEHHEAL')
-
     if
         not Player.IsPlaying($player)
     then
-        Car.Delete($AnyCar)
+        if
+            not Car.IsDead($AnyCar)
+        then
+            Car.Delete($AnyCar)
+        end
         Hud.ClearCounter($CarHealthBar)
         start_new_script @CarHealth
         terminate_this_script
     end
 
-    if
+    if or
+        Car.IsDead($AnyCar)
         not Player.IsInCar($player, $AnyCar)
     then
         Hud.ClearCounter($CarHealthBar)
         goto @CarHealth101
     end
+
+    Car.GetHealth($AnyCar, $CarHealth)
+    $CarHealthBar = $CarHealth
+    $CarHealthBar *= 100
+    $CarHealthBar /= 1000
+    Hud.DisplayCounterWithString($CarHealthBar, CounterDisplay.Bar, 'VEHHEAL')
 end
