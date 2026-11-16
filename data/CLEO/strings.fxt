@@ -92,9 +92,7 @@ PACK48	A Rocket Launcher has been delivered to the Mansion!
 PACKALL	Nice! That's all the packages!
 PACK_ST	You cannot proceed in the ~y~Package Hunt~w~ until you unlock Staunton Island.
 PACK_SH	You cannot proceed in the ~y~Package Hunt~w~ until you unlock Shoreside Vale.
-PACKDEC	Package count decreased by 1.
 PACKDON Package Tracking has become obsolete. You can keep tapping, but nothing interesting will happen.
-PACKINC	Package count increased by 1.
 PACKON  Package Tracking System Enabled! Disable with the ~y~ O Key.
 PACKON1	The Package Tracking System is already on, ~r~dumbass!
 PACKOFF Package Tracking System Disabled! Press the ~y~ P Key to re-enable it.

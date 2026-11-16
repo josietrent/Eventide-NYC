@@ -123,25 +123,33 @@ while true
     // ==========================================
     if Pad.IsKeyPressed(KeyCode.OemComma)  // Press ',' to go to previous package
     then
-        $PackIndex -= 1
-        if $PackIndex < 0
+        if $PackIndex > 0
         then
-            $PackIndex = 0
+            $PackIndex -= 1
+            $BlipActive = 1
+            $CurrentPackages = $PackIndex
+            $CurrentPackages += 1
+            Text.PrintHelpFormatted("Currently tracked package changed to ~y~Package %d~w~ of %d.", $CurrentPackages, PACKAGE_COUNT)
+        else
+            Text.PrintHelpFormatted("Already tracking ~y~Package 1~w~ of %d.", PACKAGE_COUNT)
         end
-        $BlipActive = 1
-        Text.PrintHelp('PACKDEC')
         wait 300 // Debounce so it doesn't fly down 10 indices per second
     end
 
     if Pad.IsKeyPressed(KeyCode.OemPeriod) // Press '.' to skip to next package
     then
-        $PackIndex += 1
-        if $PackIndex > 62
+        $CurrentPackages = PACKAGE_COUNT
+        $CurrentPackages -= 1
+        if $PackIndex < $CurrentPackages
         then
-            $PackIndex = 62
+            $PackIndex += 1
+            $BlipActive = 1
+            $CurrentPackages = $PackIndex
+            $CurrentPackages += 1
+            Text.PrintHelpFormatted("Currently tracked package changed to ~y~Package %d~w~ of %d.", $CurrentPackages, PACKAGE_COUNT)
+        else
+            Text.PrintHelpFormatted("Already tracking ~y~Package %d~w~ of %d.", PACKAGE_COUNT, PACKAGE_COUNT)
         end
-        $BlipActive = 1
-        Text.PrintHelp('PACKINC')
         wait 300 // Debounce
     end
 
