@@ -219,12 +219,13 @@ TargetBlip = Blip.AddForCar(DeadbeatCar)
 Blip.ChangeColor(TargetBlip, BlipColor.Green)
 
 // Set initial driving settings and kick off Route State 1
-Car.GotoCoordinates(DeadbeatCar, 1193.61, -491.55, 24.41)
 Car.SetChangeLane(DeadbeatCar, True)
 Car.SetDrivingStyle(DeadbeatCar, DrivingMode.PloughThrough)
 Car.SetCruiseSpeed(DeadbeatCar, 30)
+Car.GotoCoordinates(DeadbeatCar, 1193.61, -491.55, 24.41)
 RouteState = 1
-wait 500 // Let the Perennial start moving before checking Car.IsStopped
+TIMERA = 0
+TIMERB = 0
 
 // The Pursuit Logic Loop
 :Protection_Pursuit
@@ -258,6 +259,7 @@ while true
             Text.PrintString("You lost him!", 5000)
             jump @Protection_Fail
         end
+        TIMERA = 0
     end
 
     // Check if the vehicle is totaled or he's dead
@@ -277,12 +279,30 @@ while true
         jump @Protection_Fail
     end
 
-    // Check if the player successfully traps the car or flips it over
+    // Check if the player pulled him out, flipped the car, or trapped it long enough
     if or
-        Car.IsStopped(DeadbeatCar)
+        not Char.IsInCar(Deadbeat, DeadbeatCar)
         Car.IsUpsidedown(DeadbeatCar)
     then
         jump @Protection_FleeOnFoot
+    end
+
+    if
+        TIMERB >= 3500
+    then
+        if
+            Car.IsStopped(DeadbeatCar)
+        then
+            if
+                TIMERA >= 2500
+            then
+                jump @Protection_FleeOnFoot
+            end
+        else
+            TIMERA = 0
+        end
+    else
+        TIMERA = 0
     end
 
     // Coordinate Progression Logic System
