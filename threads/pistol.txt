@@ -8,20 +8,20 @@
 :Gun
 script_name 'Gun'
 
-int FindMisty = 0
+int FindMarie = 0
 int PistolCollected = 0
 int NeedsCar = 0
 int ZoeyHealth = 0
-int MistyGreeted = 0
+int MarieGreeted = 0
 Pickup PistolPickup = 0
 Blip GunBlip = 0
 Blip Destination = 0
-Blip MistyBlip = 0
+Blip MarieBlip = 0
 Blip CarBlip = 0
 Sphere GunSphere = 0
 Car Cheetah = 0
 Car MyCar = 0
-Char Misty = 0
+Char Marie = 0
 
 $onmission = 1
 $OnGunMission = 1
@@ -32,7 +32,7 @@ wait 100
 :Gun_Loading
 Streaming.RequestModel(#COLT45)
 Streaming.RequestModel(#CHEETAH)
-Streaming.LoadSpecialCharacter(1, 'MISTY')
+Streaming.LoadSpecialCharacter(1, 'MISTY') // Temporary GTA III ped model placeholder for Marie until custom character models/bones are added
 wait 500
 Streaming.LoadAllModelsNow()
 
@@ -72,8 +72,8 @@ PistolCollected = 1
 Blip.Remove(GunBlip)
 wait 500
 
-Misty = Char.Create(PedType.CivFemale, #SPECIAL01, 1119.10, -437.00, 19.97)
-Char.SetObjWaitOnFoot(Misty)
+Marie = Char.Create(PedType.CivFemale, #SPECIAL01, 1119.10, -437.00, 19.97)
+Char.SetObjWaitOnFoot(Marie)
 wait 250
 
 Text.Print('GOGAS', 5000, 0)
@@ -106,8 +106,8 @@ while not Player.LocateOnFoot3D($player, 1147.61, -95.21, 7.02, 1.0, 1.0, 0.75, 
         Hud.SwitchWidescreen(True)
         Camera.SetFixedPosition(1162.58, -75.06, 20.53, 0.0, 0.0, 0.0)
         Camera.PointAtPoint(1161.11, -105.09, 7.64, SwitchType.JumpCut)
-        Char.SetUsePednodeSeek(Misty, True)
-        Char.SetObjGotoCoordOnFoot(Misty, 933.66, -252.64)
+        Char.SetUsePednodeSeek(Marie, True)
+        Char.SetObjGotoCoordOnFoot(Marie, 933.66, -252.64)
         wait 500
         Camera.DoFade(500, Fade.In)
         wait 500
@@ -117,7 +117,7 @@ while not Player.LocateOnFoot3D($player, 1147.61, -95.21, 7.02, 1.0, 1.0, 0.75, 
         wait 5000
         Camera.DoFade(1500, Fade.Out)
         wait 1500
-        Camera.PointAtChar(Misty, CameraMode.FollowPed, SwitchType.JumpCut)
+        Camera.PointAtChar(Marie, CameraMode.FollowPed, SwitchType.JumpCut)
         wait 1000
         Camera.DoFade(500, Fade.In)
         wait 500
@@ -134,10 +134,10 @@ while not Player.LocateOnFoot3D($player, 1147.61, -95.21, 7.02, 1.0, 1.0, 0.75, 
     end
 end
 
-:Misty
-MistyBlip = Blip.AddForChar(Misty)
-Blip.ChangeDisplay(MistyBlip, BlipDisplay.Both)
-Blip.ChangeColor(MistyBlip, BlipColor.Cyan)
+:Marie
+MarieBlip = Blip.AddForChar(Marie)
+Blip.ChangeDisplay(MarieBlip, BlipDisplay.Both)
+Blip.ChangeColor(MarieBlip, BlipColor.Cyan)
 GunSphere = Sphere.Create(933.6613, -252.648, 4.501, 3.0)
 Destination = Blip.AddForCoord(933.6613, -252.648, 4.501)
 Blip.ChangeColor(Destination, BlipColor.Yellow)
@@ -180,16 +180,16 @@ while not Player.LocateAnyMeans3D($player, 933.66, -252.64, 4.50, 1.0, 1.0, 1.0,
         Player.LocateAnyMeans3D($player, 933.66, -252.64, 4.50, 6.0, 6.0, 1.0, False)
     then
         Player.StoreCarIsInNoSave($player, MyCar)
-        Char.SetObjWaitOnFoot(Misty)
+        Char.SetObjWaitOnFoot(Marie)
         Sphere.Remove(GunSphere)
         Blip.Remove(Destination)
         Player.SetControl($player, False)
         Camera.DoFade(1000, Fade.Out)
         wait 1000
         if
-            not Char.LocateAnyMeans3D(Misty, 933.66, -255.65, 4.50, 10.0, 10.0, 10.0, False)
+            not Char.LocateAnyMeans3D(Marie, 933.66, -255.65, 4.50, 10.0, 10.0, 10.0, False)
         then
-            Char.SetCoordinates(Misty, 933.66, -255.65, 4.50)
+            Char.SetCoordinates(Marie, 933.66, -255.65, 4.50)
         end
         wait 500
         Camera.DoFade(1000, Fade.In)
@@ -205,21 +205,21 @@ while not Player.LocateAnyMeans3D($player, 933.66, -252.64, 4.50, 1.0, 1.0, 1.0,
     end
 
     if
-        Char.IsDead(Misty)
+        Char.IsDead(Marie)
     then
         jump @GunFail
     end
 
     if and
         Player.IsInAnyCar($player)
-        Char.LocateAnyMeansChar3D($scplayer, Misty, 8.0, 8.0, 3.0, False)
+        Char.LocateAnyMeansChar3D($scplayer, Marie, 8.0, 8.0, 3.0, False)
     then
-        Char.SetObjWaitOnFoot(Misty)
-        Char.TurnToFacePlayer(Misty, $player)
-        Char.SetWaitState(Misty, WaitState.PlayAnimTaxi, 3000)
+        Char.SetObjWaitOnFoot(Marie)
+        Char.TurnToFacePlayer(Marie, $player)
+        Char.SetWaitState(Marie, WaitState.PlayAnimTaxi, 3000)
         Player.StoreCarIsInNoSave($player, MyCar)
         Text.Print('FOUNDMS', 3000, 0)
-        Blip.Remove(MistyBlip)
+        Blip.Remove(MarieBlip)
         Sphere.Remove(GunSphere)
         Blip.Remove(Destination)
         break
@@ -233,7 +233,7 @@ TIMERA = 0
 while true
     wait 0
     if
-        not Char.IsStillAlive(Misty)
+        not Char.IsStillAlive(Marie)
     then
         jump @GunFail
     end
@@ -245,9 +245,9 @@ while true
         if
             Pad.IsKeyPressed(KeyCode.LeftShift)
         then
-            Blip.Remove(MistyBlip)
-            Char.SetWaitState(Misty, WaitState.False, 0)
-            Char.SetObjGotoPlayerOnFoot(Misty, $player)
+            Blip.Remove(MarieBlip)
+            Char.SetWaitState(Marie, WaitState.False, 0)
+            Char.SetObjGotoPlayerOnFoot(Marie, $player)
             wait 50
             break
         end
@@ -261,13 +261,13 @@ while true
     end
 end
 
-:CarMisty
+:CarMarie
 NeedsCar = 0
 while true
     wait 0
 
     if
-        not Char.IsStillAlive(Misty)
+        not Char.IsStillAlive(Marie)
     then
         jump @GunFail
     end
@@ -313,7 +313,7 @@ while true
     NeedsCar = 0
 
     if
-        Char.IsInCar(Misty, MyCar)
+        Char.IsInCar(Marie, MyCar)
     then
         break
     end
@@ -327,9 +327,9 @@ while true
         if
             $CarHealth < 250
         then
-            Char.SetObjFleeCar(Misty, MyCar)
+            Char.SetObjFleeCar(Marie, MyCar)
         else
-            Char.SetObjWaitOnFoot(Misty)
+            Char.SetObjWaitOnFoot(Marie)
         end
         if
             $SprayShop_Active == 0
@@ -347,24 +347,24 @@ while true
 
         // 2. Proximity check - Task her to enter ONLY if car is healthy
         if
-            Char.LocateAnyMeansCar3D(Misty, MyCar, 20.0, 20.0, 20.0, False)
+            Char.LocateAnyMeansCar3D(Marie, MyCar, 20.0, 20.0, 20.0, False)
         then
-            Char.SetObjEnterCarAsPassenger(Misty, MyCar)
-            Char.SetRunning(Misty, True)
+            Char.SetObjEnterCarAsPassenger(Marie, MyCar)
+            Char.SetRunning(Marie, True)
             break
         else
             Text.Print('MISFIND', 3000, 0)
-            Char.SetObjWaitOnFoot(Misty)
-            FindMisty = 1
-            MistyBlip = Blip.AddForChar(Misty)
-            Blip.ChangeDisplay(MistyBlip, BlipDisplay.BlipOnly)
-            Blip.ChangeColor(MistyBlip, BlipColor.Cyan)
-            jump @FindMisty
+            Char.SetObjWaitOnFoot(Marie)
+            FindMarie = 1
+            MarieBlip = Blip.AddForChar(Marie)
+            Blip.ChangeDisplay(MarieBlip, BlipDisplay.BlipOnly)
+            Blip.ChangeColor(MarieBlip, BlipColor.Cyan)
+            jump @FindMarie
         end
     end
 end
 
-:MistyInCar
+:MarieInCar
 if
     Player.IsInAnyCar($player)
 then
@@ -373,7 +373,7 @@ end
 while true
     wait 0
     if
-        not Char.IsStillAlive(Misty)
+        not Char.IsStillAlive(Marie)
     then
         jump @GunFail
     end
@@ -386,7 +386,7 @@ while true
             Blip.Remove(CarBlip)
             CarBlip = 0
         end
-        jump @CarMisty
+        jump @CarMarie
     end
     if
         Player.IsInAnyCar($player)
@@ -401,7 +401,7 @@ while true
                 Blip.Remove(CarBlip)
                 CarBlip = 0
             end
-            jump @CarMisty
+            jump @CarMarie
         end
         if
             CarBlip > 0
@@ -417,9 +417,9 @@ while true
         end
     end
     if
-        Char.IsInCar(Misty, MyCar)
+        Char.IsInCar(Marie, MyCar)
     then
-        Blip.Remove(MistyBlip)
+        Blip.Remove(MarieBlip)
         Sphere.Remove(GunSphere)
         Blip.Remove(Destination)
         if
@@ -432,9 +432,9 @@ while true
         Player.SetControl($player, True)
         Camera.RestoreJumpcut()
         if
-            MistyGreeted == 0
+            MarieGreeted == 0
         then
-            MistyGreeted = 1
+            MarieGreeted = 1
             Text.Print('MISSUG', 3000, 0) // Thanks for the lift, sugar!
             wait 3000
             Text.Print('MISGTWK', 5000, 0) // "Take her to work."
@@ -452,11 +452,11 @@ then
 end
 // ----------------------------------
 
-:FindMisty
-while FindMisty == 1
+:FindMarie
+while FindMarie == 1
     wait 0
     if
-        not Char.IsStillAlive(Misty)
+        not Char.IsStillAlive(Marie)
     then
         jump @GunFail
     end
@@ -489,12 +489,12 @@ while FindMisty == 1
         end
     end
     if
-        Player.LocateAnyMeansChar3D($player, Misty, 5.0, 5.0, 5.0, False)
+        Player.LocateAnyMeansChar3D($player, Marie, 5.0, 5.0, 5.0, False)
     then
-        Blip.Remove(MistyBlip)
-        FindMisty = 0
-        Char.SetObjEnterCarAsPassenger(Misty, MyCar)
-        jump @CarMisty
+        Blip.Remove(MarieBlip)
+        FindMarie = 0
+        Char.SetObjEnterCarAsPassenger(Marie, MyCar)
+        jump @CarMarie
     end
 end
 
@@ -502,7 +502,7 @@ end
 while true
     wait 0
     if
-        not Char.IsStillAlive(Misty)
+        not Char.IsStillAlive(Marie)
     then
         jump @GunFail
     end
@@ -520,21 +520,21 @@ while true
         Blip.Remove(Destination)
         Sphere.Remove(GunSphere)
         if
-            Char.IsInCar(Misty, MyCar)
+            Char.IsInCar(Marie, MyCar)
         then
-            Char.SetObjLeaveCar(Misty, MyCar)
+            Char.SetObjLeaveCar(Marie, MyCar)
         end
-        Char.SetObjFleeOnFootTillSafe(Misty)
+        Char.SetObjFleeOnFootTillSafe(Marie)
         TIMERA = 0
         while TIMERA < 1500
             wait 0
             if
-                not Char.IsStillAlive(Misty)
+                not Char.IsStillAlive(Marie)
             then
                 jump @GunFail
             end
         end
-        jump @CarMisty
+        jump @CarMarie
     end
 
     Car.GetHealth(MyCar, $CarHealth)
@@ -551,13 +551,13 @@ while true
         Sphere.Remove(GunSphere)
         Text.Print('MISWREK', 3000, 0)
         if
-            Char.IsInCar(Misty, MyCar)
+            Char.IsInCar(Marie, MyCar)
         then
-            Char.SetObjLeaveCar(Misty, MyCar)
-            while Char.IsInCar(Misty, MyCar)
+            Char.SetObjLeaveCar(Marie, MyCar)
+            while Char.IsInCar(Marie, MyCar)
                 wait 0
                 if
-                    not Char.IsStillAlive(Misty)
+                    not Char.IsStillAlive(Marie)
                 then
                     jump @GunFail
                 end
@@ -571,20 +571,20 @@ while true
         if
             Car.IsStillAlive(MyCar)
         then
-            Char.SetObjFleeCar(Misty, MyCar)
+            Char.SetObjFleeCar(Marie, MyCar)
         else
-            Char.SetObjFleeOnFootTillSafe(Misty)
+            Char.SetObjFleeOnFootTillSafe(Marie)
         end
         TIMERA = 0
         while TIMERA < 2000
             wait 0
             if
-                not Char.IsStillAlive(Misty)
+                not Char.IsStillAlive(Marie)
             then
                 jump @GunFail
             end
         end
-        jump @CarMisty
+        jump @CarMarie
     end
 
     // 2. Car wrecked (< 600 HP): she refuses to ride in it and gets out
@@ -601,13 +601,13 @@ while true
         Sphere.Remove(GunSphere)
         Text.Print('MISWREK', 3000, 0)
         if
-            Char.IsInCar(Misty, MyCar)
+            Char.IsInCar(Marie, MyCar)
         then
-            Char.SetObjLeaveCar(Misty, MyCar)
-            while Char.IsInCar(Misty, MyCar)
+            Char.SetObjLeaveCar(Marie, MyCar)
+            while Char.IsInCar(Marie, MyCar)
                 wait 0
                 if
-                    not Char.IsStillAlive(Misty)
+                    not Char.IsStillAlive(Marie)
                 then
                     jump @GunFail
                 end
@@ -618,10 +618,10 @@ while true
                 end
             end
         end
-        jump @CarMisty
+        jump @CarMarie
     end
 
-    // 3. Player switched into a different car: Misty exits old car and follows to new one
+    // 3. Player switched into a different car: Marie exits old car and follows to new one
     if and
         Player.IsInAnyCar($player)
         not Player.IsInCar($player, MyCar)
@@ -635,13 +635,13 @@ while true
         Blip.Remove(Destination)
         Sphere.Remove(GunSphere)
         if
-            Char.IsInCar(Misty, MyCar)
+            Char.IsInCar(Marie, MyCar)
         then
-            Char.SetObjLeaveCar(Misty, MyCar)
-            while Char.IsInCar(Misty, MyCar)
+            Char.SetObjLeaveCar(Marie, MyCar)
+            while Char.IsInCar(Marie, MyCar)
                 wait 0
                 if
-                    not Char.IsStillAlive(Misty)
+                    not Char.IsStillAlive(Marie)
                 then
                     jump @GunFail
                 end
@@ -653,11 +653,11 @@ while true
             end
         end
         Player.StoreCarIsInNoSave($player, MyCar)
-        jump @CarMisty
+        jump @CarMarie
     end
 
-    // 4. Misty exited/pulled out while car is still healthy
-    if not Char.IsInCar(Misty, MyCar)
+    // 4. Marie exited/pulled out while car is still healthy
+    if not Char.IsInCar(Marie, MyCar)
     then
         if
             CarBlip > 0
@@ -667,19 +667,19 @@ while true
         end
         Blip.Remove(Destination)
         Sphere.Remove(GunSphere)
-        MistyBlip = Blip.AddForChar(Misty)
-        Blip.ChangeColor(MistyBlip, BlipColor.Cyan)
+        MarieBlip = Blip.AddForChar(Marie)
+        Blip.ChangeColor(MarieBlip, BlipColor.Cyan)
         Text.Print('MISWHRE', 3000, 0)
         Text.PrintSoon('NOCHASE', 5000, 0)
 
         $TIMER = 20000 // Give the player 20 seconds to return
         Hud.DisplayTimer($TIMER)
 
-        while not Char.IsInCar(Misty, MyCar)
+        while not Char.IsInCar(Marie, MyCar)
             wait 0
 
             if
-                not Char.IsStillAlive(Misty)
+                not Char.IsStillAlive(Marie)
             then
                 jump @GunFail
             end
@@ -694,8 +694,8 @@ while true
                 not Car.IsStillAlive(MyCar)
             then
                 Hud.ClearTimer($TIMER)
-                Blip.Remove(MistyBlip)
-                jump @CarMisty
+                Blip.Remove(MarieBlip)
+                jump @CarMarie
             end
 
             Car.GetHealth(MyCar, $CarHealth)
@@ -703,15 +703,15 @@ while true
                 $CarHealth < 600
             then
                 Hud.ClearTimer($TIMER)
-                Blip.Remove(MistyBlip)
-                jump @CarMisty
+                Blip.Remove(MarieBlip)
+                jump @CarMarie
             end
 
             // If car is close & healthy, task her to enter
             if
-                Char.LocateAnyMeansCar3D(Misty, MyCar, 10.0, 10.0, 10.0, False)
+                Char.LocateAnyMeansCar3D(Marie, MyCar, 10.0, 10.0, 10.0, False)
             then
-                Char.SetObjEnterCarAsPassenger(Misty, MyCar)
+                Char.SetObjEnterCarAsPassenger(Marie, MyCar)
             end
 
             if
@@ -724,7 +724,7 @@ while true
 
         // She's back! Cleanup and restore destination if player is in MyCar
         Hud.ClearTimer($TIMER)
-        Blip.Remove(MistyBlip)
+        Blip.Remove(MarieBlip)
         if
             Player.IsInCar($player, MyCar)
         then
@@ -760,7 +760,7 @@ while true
 
     if and
         Player.IsInCar($player, MyCar)
-        Char.IsInCar(Misty, MyCar)
+        Char.IsInCar(Marie, MyCar)
         Player.LocateAnyMeans3D($player, 1147.61, -95.21, 7.02, 1.0, 1.0, 0.75, False)
     then
         Player.SetControl($player, False)
@@ -779,16 +779,16 @@ while true
         wait 5000
         Text.Print('MISWORK', 8000, 0)
         wait 5500
-        Char.SetObjLeaveCar(Misty, MyCar)
-        Char.SetObjGotoCoordOnFoot(Misty, 1171.91, -95.28)
-        Char.SetRunning(Misty, True)
-        while Char.IsOnScreen(Misty)
+        Char.SetObjLeaveCar(Marie, MyCar)
+        Char.SetObjGotoCoordOnFoot(Marie, 1171.91, -95.28)
+        Char.SetRunning(Marie, True)
+        while Char.IsOnScreen(Marie)
             wait 0
             if or
-                Char.LocateAnyMeans2D(Misty, 1171.91, -95.28, 2.0, 2.0, False)
-                not Char.IsOnScreen(Misty)
+                Char.LocateAnyMeans2D(Marie, 1171.91, -95.28, 2.0, 2.0, False)
+                not Char.IsOnScreen(Marie)
             then
-                Char.RemoveElegantly(Misty)
+                Char.RemoveElegantly(Marie)
                 Player.SetControl($player, True)
                 Text.PrintHelp('HIDEOUT')
                 Destination = Blip.AddForCoord(1419.15, -194.40, 49.74)
@@ -832,7 +832,7 @@ wait 5000
 //Mission.Fail()
 Text.PrintBig('MISFAIL', 3000, TextStyle.Middle)
 if
-    not Char.IsStillAlive(Misty)
+    not Char.IsStillAlive(Marie)
 then
     Text.Print('MISDEAD', 5000, 0)
 else
@@ -846,7 +846,7 @@ CarGenerator.Switch($CheetahGen, 0)
 Blip.Remove(Destination)
 Blip.Remove(GunBlip)
 Sphere.Remove(GunSphere)
-Blip.Remove(MistyBlip)
+Blip.Remove(MarieBlip)
 Blip.Remove(CarBlip)
 CarBlip = 0
 Hud.ClearTimer($TIMER)
