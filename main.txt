@@ -25,6 +25,7 @@ var
     $LastPackCount: int
     $MissionTriggerBlip: Blip
     $MissionTriggerSphere: Sphere
+    $LuigiSphere: Sphere
     $APOC_LEVEL: int
     $CarMissionDone: int
     $Packages: int
@@ -336,6 +337,7 @@ while $OnAlleyMission == 0
         Player.LocateAnyMeans3D($player, 1329.72, -465.71, 49.76, 1.5, 1.5, 2.0, False)
     then
         Blip.Remove($LuigiBlip)
+        Sphere.Remove($LuigiSphere)
         Player.SetControl($player, False)
         Text.PrintBigString("Meddling in Her Affairs...", 5000, TextStyle.BottomRight)
         Camera.DoFade(1500, Fade.Out)
@@ -366,6 +368,7 @@ then
 else
     $OnAlleyMission = 0
     $LuigiBlip = Blip.AddSpriteForContactPoint(1329.72, -465.71, 49.76, RadarSprite.Luigi)
+    $LuigiSphere = Sphere.Create(1329.72, -465.71, 49.76, 1.5)
     goto @Stairs_Loop
 end
 
