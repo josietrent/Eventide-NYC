@@ -323,7 +323,6 @@ while true
     if
         $CarHealth < 600
     then
-        Text.Print('MISWREK', 1000, 0)
         if
             $CarHealth < 250
         then
@@ -334,6 +333,7 @@ while true
         if
             $SprayShop_Active == 0
         then
+            Text.Print('MISWREK', 3000, 0)
             $SprayShopIND = Blip.AddSpriteForCoord(924.0, -361.0, 10.0, RadarSprite.Spray)
             $SprayShop_Active = 1
         end
@@ -887,6 +887,12 @@ Sphere.Remove(GunSphere)
 Blip.Remove(MarieBlip)
 Blip.Remove(CarBlip)
 CarBlip = 0
+if
+    $SprayShop_Active == 1
+then
+    Blip.Remove($SprayShopIND)
+    $SprayShop_Active = 0
+end
 Hud.ClearTimer($TIMER)
 Streaming.UnloadSpecialCharacter(1)
 wait 3000
