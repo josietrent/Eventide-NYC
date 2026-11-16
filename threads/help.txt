@@ -1,14 +1,9 @@
 {$CLEO .cs}
 {$USE CLEO, ini}
+{$INCLUDE ../utils/globals.txt}
 nop
 
 Blip PorterTunnel = 0
-// TODO: Save these flags to the game save
-int CarTutorialPlayed = false
-int BribeHelpPlayed = false
-int BoatHelpPlayed = false
-int SprintHelpPlayed = false
-int DeathHelp = false
 
 // Startup Gate: Wait until the game and player are fully active before spawning anything
 while not Player.IsPlaying($player)
@@ -17,44 +12,40 @@ end
 
 wait 1000 // Brief buffer to ensure world streaming is settled
 
-// Spawn bribes
-Pickup BRIBE_IND1 = Pickup.Create(#BRIBE, PickupType.OnStreet, 1125.60, -251.54, 17.66)
-Pickup BRIBE_IND2 = Pickup.Create(#BRIBE, PickupType.OnStreet, 953.71, -423.23, 15.25)
-Pickup BRIBE_IND3 = Pickup.Create(#BRIBE, PickupType.OnStreet, 820.21, -1076.76, 6.82)
-Pickup BRIBE_IND4 = Pickup.Create(#BRIBE, PickupType.OnStreet, 1148.39, -923.51, 14.71)
-Pickup BRIBE_IND5 = Pickup.Create(#BRIBE, PickupType.OnStreet, 985.10, -469.83, 14.93)
+if
+    $HelpPickupsSpawned == 0
+then
+    // Spawn bribes
+    $HelpBribe1 = Pickup.Create(#BRIBE, PickupType.OnStreet, 1125.60, -251.54, 17.66)
+    $HelpBribe2 = Pickup.Create(#BRIBE, PickupType.OnStreet, 953.71, -423.23, 15.25)
+    $HelpBribe3 = Pickup.Create(#BRIBE, PickupType.OnStreet, 820.21, -1076.76, 6.82)
+    $HelpBribe4 = Pickup.Create(#BRIBE, PickupType.OnStreet, 1148.39, -923.51, 14.71)
+    $HelpBribe5 = Pickup.Create(#BRIBE, PickupType.OnStreet, 985.10, -469.83, 14.93)
 
-Pickup health1 = Pickup.Create(#HEALTH, PickupType.OnStreet, 1399.89, -390.78, 50.56)
+    $HelpHealth1 = Pickup.Create(#HEALTH, PickupType.OnStreet, 1399.89, -390.78, 50.56)
 
-// Info pickups
-Pickup CBridgePickup = Pickup.Create(#INFO, PickupType.Once, 1026.04, -932.74, 14.97) // Callahan Bridge coordinate
-Pickup WastedInfo    = Pickup.Create(#INFO, PickupType.Once, 1148.41, -585.33, 15.00) // Hospital coordinate
+    // Info pickups
+    $HelpBridgeInfo = Pickup.Create(#INFO, PickupType.Once, 1026.04, -932.74, 14.97) // Callahan Bridge coordinate
+    $HelpWastedInfo = Pickup.Create(#INFO, PickupType.Once, 1148.41, -585.33, 15.00) // Hospital coordinate
+    $HelpPickupsSpawned = 1
+end
 
 :Help
 script_name 'Help'
 
-CarTutorialPlayed = 0
-BribeHelpPlayed = 0
-BoatHelpPlayed = 0
-SprintHelpPlayed = 0
-DeathHelp = 0
-
 :HelpWait
-while Player.IsPlaying($player)
+while true
     wait 250
 
     if not Player.IsPlaying($player)
     then
-        while not Player.IsPlaying($player)
-            wait 250
-        end
         continue
     end
 
     if
         not Player.CanStartMission($player)
     then
-        break
+        continue
     end
 
     //====================================================
@@ -64,7 +55,7 @@ while Player.IsPlaying($player)
     // 1. Car Tutorial Check
     if and
         Player.IsInAnyCar($player)
-        CarTutorialPlayed == false
+        $CarTutorialPlayed == 0
     then
         PrintHowToDrive()
         continue
@@ -73,22 +64,22 @@ while Player.IsPlaying($player)
     // 2. Wasted / Death Tutorial Check (Hospital Location Check)
     if and
         Player.LocateAnyMeans3D($player, 1148.41, -585.33, 15.00, 2.0, 2.0, 2.0, False)
-        DeathHelp == false
+        $DeathHelpPlayed == 0
     then
         HowToDie()
         continue
     end
 
     // 3. Bribe Pickup Help Check
-    if BribeHelpPlayed == false
+    if $BribeHelpPlayed == 0
     then
         // When the player picks up any of Portland's bribes
         if or
-            Pickup.HasBeenCollected(BRIBE_IND1)
-            Pickup.HasBeenCollected(BRIBE_IND2)
-            Pickup.HasBeenCollected(BRIBE_IND3)
-            Pickup.HasBeenCollected(BRIBE_IND4)
-            Pickup.HasBeenCollected(BRIBE_IND5)
+            Pickup.HasBeenCollected($HelpBribe1)
+            Pickup.HasBeenCollected($HelpBribe2)
+            Pickup.HasBeenCollected($HelpBribe3)
+            Pickup.HasBeenCollected($HelpBribe4)
+            Pickup.HasBeenCollected($HelpBribe5)
         then
             PrintHowToBribe()
             continue
@@ -98,7 +89,7 @@ while Player.IsPlaying($player)
     // 4. Boat Tutorial Check
     if and
         Player.IsInAnyBoat($player)
-        BoatHelpPlayed == false
+        $BoatHelpPlayed == 0
     then
         // ⛵ I'm on a boat, motherfucker!
         PrintHowToBoat()
@@ -108,15 +99,16 @@ while Player.IsPlaying($player)
     // 5. Sprint Help Check
     if and
         $CarMissionDone == true
-        SprintHelpPlayed == false
+        $SprintHelpPlayed == 0
     then
         PrintHowToSprint()
         continue
     end
 
     // 6. Callahan Bridge Info Check
-    if
+    if and
         Player.LocateAnyMeans3D($player, 1026.04, -932.74, 14.97, 2.0, 2.0, 2.0, False)
+        $BridgeHelpPlayed == 0
     then
         PrintBridgeHelp()
         continue
@@ -124,24 +116,23 @@ while Player.IsPlaying($player)
 
     // 7. Completion Check
     if and
-        BoatHelpPlayed == true
-        BribeHelpPlayed == true
-        CarTutorialPlayed == true
-        DeathHelp == true
-        SprintHelpPlayed == true
+        $BoatHelpPlayed == 1
+        $BribeHelpPlayed == 1
+        $CarTutorialPlayed == 1
+        $DeathHelpPlayed == 1
+        $SprintHelpPlayed == 1
+        $BridgeHelpPlayed == 1
     then
-        terminate_this_script
+        terminate_this_custom_script
     end
 end
-
-// FIXME: Why the fuck not loop?
-jump @HelpWait
 
 //=============
 // Subroutines
 //=============
 
 :PrintBridgeHelp
+    $BridgeHelpPlayed = 1
     Text.PrintHelp('CALHAN')
     wait 6000
     Text.PrintHelp('CALHAN2')
@@ -157,7 +148,7 @@ jump @HelpWait
 return
 
 :PrintHowToDrive
-    CarTutorialPlayed = true
+    $CarTutorialPlayed = 1
     wait 100
     Text.PrintHelp('DRIVE2')
     wait 5000
@@ -169,7 +160,7 @@ return
 return
 
 :PrintHowToBoat
-    BoatHelpPlayed = true
+    $BoatHelpPlayed = 1
     wait 100
     Text.PrintHelp('BOAT')
     wait 5000
@@ -181,7 +172,7 @@ return
 return
 
 :PrintHowToBribe
-    BribeHelpPlayed = true
+    $BribeHelpPlayed = 1
     wait 100
     Text.PrintHelp('BRIBE')
     wait 5000
@@ -189,7 +180,7 @@ return
 return
 
 :PrintHowToSprint
-    SprintHelpPlayed = true
+    $SprintHelpPlayed = 1
     wait 100
     Text.PrintHelp('SPRINT')
     wait 5000
@@ -198,7 +189,7 @@ return
 return
 
 :HowToDie
-    DeathHelp = true
+    $DeathHelpPlayed = 1
     Player.SetControl($player, False)
     Camera.SetFixedPosition(1116.83, -590.72, 25.27, 0.0, 0.0, 0.0)
     Camera.PointAtPoint(1130.80, -590.75, 23.01, SwitchType.JumpCut)
