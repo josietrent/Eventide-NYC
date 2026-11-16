@@ -312,6 +312,8 @@ bool SyncMusicPauseState(const char *source) {
           g_pausedTotalMs = totalMs;
           g_pausedVol = vol;
           g_hasPausedPos = (gotPos && curMs >= 0);
+        } else if (vol >= 0) {
+          AilSetStreamVolume(hStream, vol);
         }
 
         char buf[320];
