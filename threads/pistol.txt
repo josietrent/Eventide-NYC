@@ -780,23 +780,61 @@ while true
         Text.Print('MISWORK', 8000, 0)
         wait 5500
         Char.SetObjLeaveCar(Marie, MyCar)
-        Char.SetObjGotoCoordOnFoot(Marie, 1171.91, -95.28)
-        Char.SetRunning(Marie, True)
-        while Char.IsOnScreen(Marie)
+        while Char.IsInCar(Marie, MyCar)
             wait 0
-            if or
-                Char.LocateAnyMeans2D(Marie, 1171.91, -95.28, 2.0, 2.0, False)
-                not Char.IsOnScreen(Marie)
+            if
+                not Char.IsStillAlive(Marie)
             then
-                Char.RemoveElegantly(Marie)
-                Player.SetControl($player, True)
-                Text.PrintHelp('HIDEOUT')
-                Destination = Blip.AddForCoord(1419.15, -194.40, 49.74)
-                Blip.ChangeColor(Destination, BlipColor.Yellow)
-                GunSphere = Sphere.Create(1419.15, -194.40, 49.74, 3.0)
-                jump @Gun_Success
+                jump @GunFail
+            end
+            if
+                not Car.IsStillAlive(MyCar)
+            then
+                break
             end
         end
+
+        Char.SetObjGotoCoordOnFoot(Marie, 1170.77, -92.49)
+        Char.SetRunning(Marie, True)
+        TIMERA = 0
+        while not Char.LocateAnyMeans2D(Marie, 1170.77, -92.49, 2.0, 2.0, False)
+            wait 0
+            if
+                not Char.IsStillAlive(Marie)
+            then
+                jump @GunFail
+            end
+            if
+                TIMERA >= 12000
+            then
+                break
+            end
+        end
+
+        Char.SetObjGotoCoordOnFoot(Marie, 1171.00, -108.68)
+        Char.SetRunning(Marie, True)
+        TIMERA = 0
+        while not Char.LocateAnyMeans2D(Marie, 1171.00, -108.68, 2.0, 2.0, False)
+            wait 0
+            if
+                not Char.IsStillAlive(Marie)
+            then
+                jump @GunFail
+            end
+            if
+                TIMERA >= 12000
+            then
+                break
+            end
+        end
+
+        Char.RemoveElegantly(Marie)
+        Player.SetControl($player, True)
+        Text.PrintHelp('HIDEOUT')
+        Destination = Blip.AddForCoord(1419.15, -194.40, 49.74)
+        Blip.ChangeColor(Destination, BlipColor.Yellow)
+        GunSphere = Sphere.Create(1419.15, -194.40, 49.74, 3.0)
+        jump @Gun_Success
     end
 end
 
