@@ -155,14 +155,6 @@ while true
 
     if $PackHunt == 1
     then
-        // --- AUTOMATED RADAR GUIDE LOGIC ---
-        if not $LastPackCount == $Packages
-        then
-            // If the Package count goes up automatically, advance the index as well
-            $PackIndex = $Packages
-            $LastPackCount = $Packages
-            $BlipActive = 1
-        end
 
         // --- REWARDS LOGIC ---
         if $Packages >= 6
@@ -277,13 +269,6 @@ while true
             end
         end
 
-        // --- AUTOMATED RADAR GUIDE LOGIC ---
-        if
-            not $LastPackCount == $Packages
-        then
-            $LastPackCount = $Packages
-            $BlipActive = 1
-        end
 
         if $PackHunt == 1
         then
@@ -335,11 +320,6 @@ while true
                         end
                     end
 
-                    if Player.LocateAnyMeans3D($player, $PackCoordX, $PackCoordY, $PackCoordZ, 3.0, 3.0, 3.0, False)
-                    then
-                        $PackIndex += 1
-                        $BlipActive = 1
-                    end
                 end
             else
                 if $PackBlip > 0
