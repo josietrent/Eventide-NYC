@@ -182,8 +182,12 @@ goto @BarrierSniffer
 // Excludes ground/underpass roads beneath the bridge (Z <= 14.08 on Portland, com_roadkb12 on Staunton), water below the main span (Z = 0.0), CBridgePickup (X = 1026.04), and Portland street approaches (X > 1005.0).
 :CheckBridgeZone
 3@ = false
-if
-    Player.IsInAnyBoat($player)
+// Avoid III.CLEO.asi buggy 04A8 IsInAnyBoat (reads dword at veh+0x5C)
+if or
+    Player.IsInModel($player, #PREDATOR)
+    Player.IsInModel($player, #SPEEDER)
+    Player.IsInModel($player, #REEFER)
+    Player.IsInModel($player, #GHOST)
 then
     if
         not Player.IsInZone($player, 'IND_ZON')

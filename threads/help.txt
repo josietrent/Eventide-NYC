@@ -86,14 +86,20 @@ while true
         end
     end
 
-    // 4. Boat Tutorial Check
-    if and
-        Player.IsInAnyBoat($player)
+    // 4. Boat Tutorial Check (avoid III.CLEO.asi's buggy 04A8 IsInAnyBoat dword read at veh+0x5C)
+    if
         $BoatHelpPlayed == 0
     then
-        // ⛵ I'm on a boat, motherfucker!
-        PrintHowToBoat()
-        continue
+        if or
+            Player.IsInModel($player, #PREDATOR)
+            Player.IsInModel($player, #SPEEDER)
+            Player.IsInModel($player, #REEFER)
+            Player.IsInModel($player, #GHOST)
+        then
+            // ⛵ I'm on a boat, motherfucker!
+            PrintHowToBoat()
+            continue
+        end
     end
 
     // 5. Sprint Help Check
