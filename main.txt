@@ -159,7 +159,7 @@ while true
             Blip.Remove($MissionTriggerBlip)
             Sphere.Remove($MissionTriggerSphere)
             Player.SetControl($player, False)
-            Text.PrintBigString("Waking Up in the Fog...", 5000, TextStyle.BottomRight)
+            Text.PrintBigString("Nowhere Like Home...", 5000, TextStyle.BottomRight)
             Camera.DoFade(1500, Fade.Out)
             wait 1500
             stream_custom_script "INIT.cm"
