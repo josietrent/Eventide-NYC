@@ -118,6 +118,174 @@ async function compile(inputPath: string, outputPath: string) {
   say.pass(`Compiled ${basename(inputPath)}`);
 }
 
+/** Locates an x86 MSVC toolchain and Windows 10/11 SDK for building .asi plugins. */
+async function findMsvcX86Toolchain(): Promise<{
+  clExe: string;
+  includes: string[];
+  libs: string[];
+} | null> {
+  const vswhere =
+    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Installer\\vswhere.exe";
+  let vsPath = "";
+  try {
+    const out = await new Deno.Command(vswhere, {
+      args: [
+        "-latest",
+        "-products",
+        "*",
+        "-requires",
+        "Microsoft.VisualStudio.Component.VC.Tools.x86.x64",
+        "-property",
+        "installationPath",
+      ],
+    }).output();
+    if (out.success) {
+      vsPath =
+        new TextDecoder().decode(out.stdout).trim().split(/\r?\n/)[0] || "";
+    }
+  } catch {
+    // vswhere unavailable
+  }
+  if (!vsPath) return null;
+
+  const msvcBase = join(vsPath, "VC", "Tools", "MSVC");
+  const msvcVersions: string[] = [];
+  try {
+    for await (const entry of Deno.readDir(msvcBase)) {
+      if (entry.isDirectory) msvcVersions.push(entry.name);
+    }
+  } catch {
+    return null;
+  }
+  msvcVersions.sort().reverse();
+
+  let msvcDir = "";
+  let clExe = "";
+  for (const ver of msvcVersions) {
+    const root = join(msvcBase, ver);
+    for (const host of ["Hostx64", "Hostx86"]) {
+      const candidate = join(root, "bin", host, "x86", "cl.exe");
+      try {
+        if ((await Deno.stat(candidate)).isFile) {
+          msvcDir = root;
+          clExe = candidate;
+          break;
+        }
+      } catch {
+        // Try next
+      }
+    }
+    if (clExe) break;
+  }
+  if (!clExe) return null;
+
+  const sdkRoots = [
+    "D:\\Windows Kits\\10",
+    "C:\\Program Files (x86)\\Windows Kits\\10",
+    "C:\\Program Files\\Windows Kits\\10",
+  ];
+  for (const sdkRoot of sdkRoots) {
+    const incBase = join(sdkRoot, "Include");
+    const sdkVersions: string[] = [];
+    try {
+      for await (const entry of Deno.readDir(incBase)) {
+        if (entry.isDirectory) sdkVersions.push(entry.name);
+      }
+    } catch {
+      continue;
+    }
+    sdkVersions.sort().reverse();
+    for (const ver of sdkVersions) {
+      try {
+        if ((await Deno.stat(join(incBase, ver, "um", "windows.h"))).isFile) {
+          return {
+            clExe,
+            includes: [
+              join(msvcDir, "include"),
+              join(incBase, ver, "ucrt"),
+              join(incBase, ver, "um"),
+              join(incBase, ver, "shared"),
+            ],
+            libs: [
+              join(msvcDir, "lib", "x86"),
+              join(sdkRoot, "Lib", ver, "ucrt", "x86"),
+              join(sdkRoot, "Lib", ver, "um", "x86"),
+            ],
+          };
+        }
+      } catch {
+        // Try next SDK version
+      }
+    }
+  }
+  return null;
+}
+
+/** Compiles an .asi plugin DLL from C++ source when changed or missing. */
+async function compileAsiIfChanged(
+  sourcePath: string,
+  outputPath: string,
+  objDir: string,
+  extraLibs: string[] = ["user32.lib"],
+) {
+  const sourceBytes = await Deno.readFile(sourcePath);
+  const hash = await sha256(sourceBytes);
+  if (
+    !forceArg &&
+    (await allExist([outputPath])) &&
+    hashCache[sourcePath] === hash
+  ) {
+    say.skip(`  Up to date: ${basename(outputPath)}`);
+    return;
+  }
+
+  const toolchain = await findMsvcX86Toolchain();
+  if (!toolchain) {
+    if (await allExist([outputPath])) {
+      say.info(
+        `  MSVC x86 not found; reusing prebuilt ${basename(outputPath)}`,
+      );
+      return;
+    }
+    say.error(`MSVC x86 toolchain not found and ${outputPath} is missing.`);
+    Deno.exit(1);
+  }
+
+  await ensureDir(dirname(outputPath));
+  await ensureDir(objDir);
+  const objPath = join(
+    objDir,
+    `${basename(sourcePath, extname(sourcePath))}.obj`,
+  );
+  const args = [
+    "/nologo",
+    "/LD",
+    "/O2",
+    "/MT",
+    "/W4",
+    "/WX",
+    ...toolchain.includes.map((dir) => `/I${dir}`),
+    sourcePath,
+    `/Fe:${outputPath}`,
+    `/Fo:${objPath}`,
+    "/link",
+    ...toolchain.libs.map((dir) => `/LIBPATH:${dir}`),
+    ...extraLibs,
+  ];
+  const out = await new Deno.Command(toolchain.clExe, { args }).output();
+  if (!out.success) {
+    say.error(
+      `Failed to compile ${basename(sourcePath)}:\n` +
+        new TextDecoder().decode(out.stdout) +
+        new TextDecoder().decode(out.stderr),
+    );
+    Deno.exit(1);
+  }
+
+  say.pass(`Compiled ${basename(outputPath)}`);
+  await saveHash(sourcePath, hash);
+}
+
 /** Hex SHA-256 of a string or bytes. */
 async function sha256(data: string | Uint8Array<ArrayBuffer>): Promise<string> {
   const digest = await crypto.subtle.digest(
@@ -409,6 +577,24 @@ if (shouldRun(10, "triblips")) {
   await ensureDir(cleoStagingDir);
   await Deno.copyFile(triOutput, join(cleoStagingDir, basename(triOutput)));
   say.done(`  Packaged modloader/${modName}/CLEO/${basename(triOutput)}`);
+}
+
+// Step 11: PauseRadio ASI Plugin
+if (shouldRun(11, "pauseradio")) {
+  say.heading("Step 11 (pauseradio): Compiling PauseRadio.asi...");
+  const asiInput = join(cwd, "plugins", "PauseRadio", "PauseRadio.cpp");
+  const asiOutput = join(cwd, "plugins", "PauseRadio", "PauseRadio.asi");
+  await compileAsiIfChanged(asiInput, asiOutput, join(stagingDir, "obj"));
+
+  await Deno.copyFile(asiOutput, join(modStagingDir, basename(asiOutput)));
+  say.done(`  Packaged modloader/${modName}/${basename(asiOutput)}`);
+}
+
+// Clean compiler scratch directory before zipping
+try {
+  await Deno.remove(join(stagingDir, "obj"), { recursive: true });
+} catch {
+  // Ignored
 }
 
 // Packaging archive into dist/Drag-N-Drop.zip
