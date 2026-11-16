@@ -40,9 +40,19 @@ Object.SetHeading(9@, 90.0)
 while $BarrierIND == true
     wait 0
 
-    if
+    if or
         not Player.IsPlaying($player)
+        Camera.GetFadingStatus()
     then
+        wait 500
+        continue
+    end
+
+    // Sleep while save menu is active so a restored save settles for ~2s before zone checks run
+    if
+        not Game.HasSaveGameFinished()
+    then
+        wait 2000
         continue
     end
 
@@ -172,12 +182,15 @@ goto @BarrierSniffer
 // Excludes ground/underpass roads beneath the bridge (Z <= 14.08 on Portland, com_roadkb12 on Staunton), water below the main span (Z = 0.0), CBridgePickup (X = 1026.04), and Portland street approaches (X > 1005.0).
 :CheckBridgeZone
 3@ = false
-if and
+if
     Player.IsInAnyBoat($player)
-    not Player.IsInZone($player, 'IND_ZON')
 then
-    3@ = true
-    return
+    if
+        not Player.IsInZone($player, 'IND_ZON')
+    then
+        3@ = true
+        return
+    end
 end
 
 if
