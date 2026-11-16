@@ -263,6 +263,7 @@ while true
         Text.PrintBigString("Mission Passed!", 5000, TextStyle.Middle)
         Audio.PlayMissionPassedTune(1)
         Blip.Remove($LuigiBlip)
+        Stat.RegisterMissionPassed('MIS3NAM')
         Mission.Finish()
         $AlleyMissionDone = 1
         $onmission = 0

@@ -526,6 +526,7 @@ wait 1500
 Text.PrintWithNumberBig('MISPASS', 10000, 5000, TextStyle.Middle)
 Audio.PlayMissionPassedTune(1)
 Player.AddScore($player, 10000)
+Stat.RegisterMissionPassed('MIS4NAM')
 Mission.Finish()
 $ProtectionDone = 1
 $onmission = 0

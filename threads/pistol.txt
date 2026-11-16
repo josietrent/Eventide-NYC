@@ -889,6 +889,7 @@ while not Player.LocateAnyMeans3D($player, 1419.15, -194.40, 49.74, 1.0, 1.0, 1.
         $OnGunMission = 0
         Player.SetControl($player, True)
         Text.PrintString("Follow the L blip to find Louie.", 5000)
+        Stat.RegisterMissionPassed('MIS2NAM')
         Mission.Finish()
         break
     else

@@ -320,5 +320,6 @@ wait 2000
 $CarMissionDone = 1
 $OnCarMission = 0
 $onmission = 0
+Stat.RegisterMissionPassed('MIS1NAM')
 Mission.Finish()
 terminate_this_custom_script

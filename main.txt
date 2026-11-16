@@ -152,10 +152,16 @@ while true
         $onmission == false
         $Intro_Passed == false
     then
-        if Player.LocateOnFoot3D($player, 774.45, -880.88, 14.74, 3.0, 3.0, 3.0, False)
+        if and
+            Player.CanStartMission($player)
+            Player.LocateOnFoot3D($player, 774.45, -880.88, 14.74, 3.0, 3.0, 3.0, False)
         then
             Blip.Remove($MissionTriggerBlip)
             Sphere.Remove($MissionTriggerSphere)
+            Player.SetControl($player, False)
+            Text.PrintBigString("Waking Up in the Fog...", 5000, TextStyle.BottomRight)
+            Camera.DoFade(1500, Fade.Out)
+            wait 1500
             stream_custom_script "INIT.cm"
             break
         end
