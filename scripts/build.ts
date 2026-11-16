@@ -385,6 +385,32 @@ if (shouldRun(8, "protection")) {
   );
 }
 
+// Step 9: World Thread
+if (shouldRun(9, "world")) {
+  say.heading("Step 9 (world): Compiling world thread...");
+  const worldInput = join(cwd, "threads", "world.txt");
+  const worldOutput = join(cwd, "threads", "world.cs");
+  await compileIfChanged(worldInput, worldOutput);
+
+  const cleoStagingDir = join(modStagingDir, "CLEO");
+  await ensureDir(cleoStagingDir);
+  await Deno.copyFile(worldOutput, join(cleoStagingDir, basename(worldOutput)));
+  say.done(`  Packaged modloader/${modName}/CLEO/${basename(worldOutput)}`);
+}
+
+// Step 10: Triangular Blips Thread
+if (shouldRun(10, "triblips")) {
+  say.heading("Step 10 (triblips): Compiling triblips thread...");
+  const triInput = join(cwd, "threads", "triblips.txt");
+  const triOutput = join(cwd, "threads", "triblips.cs");
+  await compileIfChanged(triInput, triOutput);
+
+  const cleoStagingDir = join(modStagingDir, "CLEO");
+  await ensureDir(cleoStagingDir);
+  await Deno.copyFile(triOutput, join(cleoStagingDir, basename(triOutput)));
+  say.done(`  Packaged modloader/${modName}/CLEO/${basename(triOutput)}`);
+}
+
 // Packaging archive into dist/Drag-N-Drop.zip
 say.heading("Packaging dist/Drag-N-Drop.zip...");
 await ensureDir(distDir);
