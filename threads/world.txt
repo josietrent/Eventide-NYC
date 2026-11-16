@@ -1,0 +1,22 @@
+{$CLEO .cs}
+{$USE CLEO}
+{$INCLUDE ../utils/globals.txt}
+nop
+
+script_name 'WORLD'
+
+while not Player.IsPlaying($player)
+    wait 0
+end
+
+World.SetCarDensityMultiplier(0.25)
+World.SetPedDensityMultiplier(0.1)
+
+// Re-apply after load fade-in settles so engine reset on save reload never leaves density at 1.0
+while Camera.GetFadingStatus()
+    wait 0
+end
+
+World.SetCarDensityMultiplier(0.25)
+World.SetPedDensityMultiplier(0.1)
+terminate_this_custom_script
