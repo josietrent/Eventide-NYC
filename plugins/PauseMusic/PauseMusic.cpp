@@ -17,6 +17,8 @@ constexpr uintptr_t ADDR_FN_AUDIO_SERVICE = 0x57AA60;
 constexpr uintptr_t ADDR_GAME_STATE = 0x8F5838; // int32_t (7 = menu, 9 = game)
 constexpr uintptr_t ADDR_MENU_ACTIVE =
     0x8F5AE9; // uint8_t FrontEndMenuManager.m_bMenuActive
+constexpr uintptr_t ADDR_ACTIVATE_SAVE_MENU =
+    0x8F5E2B; // uint8_t FrontEndMenuManager.m_bActivateSaveMenu
 constexpr uintptr_t ADDR_MENU_SCREEN =
     0x8F5F20; // int32_t FrontEndMenuManager.m_nCurrScreen
 constexpr uintptr_t ADDR_USER_PAUSE = 0x95CD7C; // uint8_t CTimer::m_UserPause
@@ -54,6 +56,11 @@ constexpr uintptr_t ADDR_PS_GLOBAL = 0x8F437C; // RsGlobal.ps -> *(HWND*)ps
 constexpr int32_t GS_FRONTEND = 7;
 constexpr int32_t GS_PLAYING_GAME = 9;
 constexpr int32_t MENUPAGE_SOUND_SETTINGS = 5;
+constexpr int32_t MENUPAGE_SAVE_BASIC = 24;
+constexpr int32_t MENUPAGE_NO_CARD_SAVE = 25;
+constexpr int32_t MENUPAGE_CHOOSE_SAVE_SLOT = 26;
+constexpr int32_t MENUPAGE_SAVE_OVERWRITE = 27;
+constexpr int32_t MENUPAGE_SAVE_UNSUCCESSFUL = 48;
 constexpr int32_t SMP_DONE = 2;
 constexpr UINT WM_APP_SYNC_PAUSE_MUSIC = WM_APP + 0x38;
 
@@ -528,6 +535,13 @@ void ReloadConfig(bool force) {
   }
 }
 
+bool IsSaveMenuScreen(int32_t screen) {
+  return screen == MENUPAGE_SAVE_BASIC || screen == MENUPAGE_NO_CARD_SAVE ||
+         screen == MENUPAGE_CHOOSE_SAVE_SLOT ||
+         screen == MENUPAGE_SAVE_OVERWRITE ||
+         screen == MENUPAGE_SAVE_UNSUCCESSFUL;
+}
+
 bool ShouldPlayPauseMusic(bool *outImmediateCut = nullptr) {
   if (outImmediateCut) {
     *outImmediateCut = false;
@@ -555,11 +569,15 @@ bool ShouldPlayPauseMusic(bool *outImmediateCut = nullptr) {
   const int32_t gameState = *reinterpret_cast<const int32_t *>(ADDR_GAME_STATE);
   const uint8_t menuActive =
       *reinterpret_cast<const uint8_t *>(ADDR_MENU_ACTIVE);
+  const uint8_t activateSaveMenu =
+      *reinterpret_cast<const uint8_t *>(ADDR_ACTIVATE_SAVE_MENU);
   const uint8_t userPause = *reinterpret_cast<const uint8_t *>(ADDR_USER_PAUSE);
   const int32_t menuScreen =
       *reinterpret_cast<const int32_t *>(ADDR_MENU_SCREEN);
 
-  if (menuScreen == MENUPAGE_SOUND_SETTINGS && menuActive != 0) {
+  if (activateSaveMenu != 0 ||
+      (menuActive != 0 && (menuScreen == MENUPAGE_SOUND_SETTINGS ||
+                           IsSaveMenuScreen(menuScreen)))) {
     if (outImmediateCut) {
       *outImmediateCut = true;
     }
