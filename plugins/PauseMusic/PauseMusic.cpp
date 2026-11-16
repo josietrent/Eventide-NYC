@@ -13,6 +13,10 @@ namespace {
 constexpr uintptr_t ADDR_CALL_AUDIO_SERVICE =
     0x57A2F0; // inside cDMAudio::Service() -> cAudioManager::Service()
 constexpr uintptr_t ADDR_FN_AUDIO_SERVICE = 0x57AA60;
+constexpr uintptr_t ADDR_CALL_SAMPLE_TERMINATE =
+    0x57A28C; // inside cAudioManager::Terminate() ->
+              // cSampleManager::Terminate()
+constexpr uintptr_t ADDR_FN_SAMPLE_TERMINATE = 0x566DC0;
 
 constexpr uintptr_t ADDR_GAME_STATE = 0x8F5838; // int32_t (7 = menu, 9 = game)
 constexpr uintptr_t ADDR_MENU_ACTIVE =
@@ -65,6 +69,7 @@ constexpr int32_t SMP_DONE = 2;
 constexpr UINT WM_APP_SYNC_PAUSE_MUSIC = WM_APP + 0x38;
 
 using AudioServiceFn = void(__thiscall *)(void *self);
+using SampleTerminateFn = void(__thiscall *)(void *self);
 using AilOpenStreamFn = uint32_t(__stdcall *)(uint32_t digDriver,
                                               const char *filename,
                                               int32_t streamMem);
@@ -96,13 +101,18 @@ struct PauseMusicConfig {
 CRITICAL_SECTION g_lock;
 bool g_lockInit = false;
 bool g_patched = false;
+bool g_patchedSampleTerminate = false;
+volatile bool g_shuttingDown = false;
 bool g_windowInactive = false;
 bool g_focusLost = false;
 bool g_windowHookAttempt = false;
 
 int32_t g_origRel32 = 0;
+int32_t g_origSampleTerminateRel32 = 0;
 AudioServiceFn g_origAudioService =
     reinterpret_cast<AudioServiceFn>(ADDR_FN_AUDIO_SERVICE);
+SampleTerminateFn g_origSampleTerminate =
+    reinterpret_cast<SampleTerminateFn>(ADDR_FN_SAMPLE_TERMINATE);
 HWND g_hwnd = nullptr;
 WNDPROC g_origWndProc = nullptr;
 HANDLE g_stopEvent = nullptr;
@@ -392,8 +402,27 @@ const char *GetAilLastError() {
   return (err && err[0]) ? err : "(empty)";
 }
 
+bool IsMilesReady() {
+  return (*reinterpret_cast<const uint8_t *>(ADDR_SAMPLE_INIT) != 0) &&
+         (*reinterpret_cast<const uint32_t *>(ADDR_DIG_DRIVER) != 0);
+}
+
+void ResetStreamState(bool clearSavedPosition) {
+  if (clearSavedPosition) {
+    g_savedTrack.clear();
+    g_savedPosMs = 0;
+  }
+  g_stream = 0;
+  g_fadeAlpha = 0.0f;
+  g_lastAppliedVol = -1;
+}
+
 void CloseActiveStream(bool savePosition) {
   if (g_stream == 0) {
+    return;
+  }
+  if (!IsMilesReady()) {
+    ResetStreamState(!savePosition);
     return;
   }
   if (savePosition && g_cfg.resumePosition && g_trackIndex < g_tracks.size()) {
@@ -410,9 +439,7 @@ void CloseActiveStream(bool savePosition) {
   AilSetStreamVolume(g_stream, 0);
   AilPauseStream(g_stream, 1);
   AilCloseStream(g_stream);
-  g_stream = 0;
-  g_fadeAlpha = 0.0f;
-  g_lastAppliedVol = -1;
+  ResetStreamState(false);
 }
 
 std::string SelectActiveIniFile() {
@@ -547,11 +574,10 @@ bool ShouldPlayPauseMusic(bool *outImmediateCut = nullptr) {
     *outImmediateCut = false;
   }
 
-  if (g_tracks.empty()) {
+  if (g_shuttingDown || g_tracks.empty()) {
     return false;
   }
-  if (*reinterpret_cast<const uint8_t *>(ADDR_SAMPLE_INIT) == 0 ||
-      *reinterpret_cast<const uint32_t *>(ADDR_DIG_DRIVER) == 0) {
+  if (!IsMilesReady()) {
     if (outImmediateCut) {
       *outImmediateCut = true;
     }
@@ -653,10 +679,23 @@ bool OpenTrackStream(uint32_t digDriver, int32_t initialVolume) {
 }
 
 void UpdatePauseMusic() {
-  if (!g_lockInit) {
+  if (!g_lockInit || g_shuttingDown) {
     return;
   }
   EnterCriticalSection(&g_lock);
+
+  if (g_shuttingDown) {
+    LeaveCriticalSection(&g_lock);
+    return;
+  }
+
+  if (!IsMilesReady()) {
+    if (g_stream != 0) {
+      ResetStreamState(true);
+    }
+    LeaveCriticalSection(&g_lock);
+    return;
+  }
 
   ReloadConfig(false);
 
@@ -747,8 +786,9 @@ void UpdatePauseMusic() {
 
 DWORD WINAPI FocusWatchThread(LPVOID) {
   bool prevFgLost = false;
-  while (WaitForSingleObject(g_stopEvent, 50) == WAIT_TIMEOUT) {
-    if (g_hwnd && IsWindow(g_hwnd)) {
+  while (!g_shuttingDown &&
+         WaitForSingleObject(g_stopEvent, 50) == WAIT_TIMEOUT) {
+    if (!g_shuttingDown && g_hwnd && IsWindow(g_hwnd)) {
       const bool fgLost = (GetForegroundWindow() != g_hwnd);
       if (fgLost != prevFgLost) {
         prevFgLost = fgLost;
@@ -761,28 +801,54 @@ DWORD WINAPI FocusWatchThread(LPVOID) {
 
 LRESULT CALLBACK Hook_WndProc(HWND hwnd, UINT msg, WPARAM wParam,
                               LPARAM lParam) {
+  WNDPROC origProc = g_origWndProc;
+
+  if (msg == WM_DESTROY || msg == WM_NCDESTROY) {
+    g_shuttingDown = true;
+    if (g_stopEvent) {
+      SetEvent(g_stopEvent);
+    }
+    if (g_lockInit) {
+      EnterCriticalSection(&g_lock);
+      CloseActiveStream(false);
+      LeaveCriticalSection(&g_lock);
+    }
+    if (origProc && GetWindowLongA(hwnd, GWL_WNDPROC) ==
+                        reinterpret_cast<LONG>(&Hook_WndProc)) {
+      SetWindowLongA(hwnd, GWL_WNDPROC, reinterpret_cast<LONG>(origProc));
+    }
+    g_hwnd = nullptr;
+    g_origWndProc = nullptr;
+    return CallWindowProcA(origProc, hwnd, msg, wParam, lParam);
+  }
+
   if (msg == WM_APP_SYNC_PAUSE_MUSIC) {
-    UpdatePauseMusic();
+    if (!g_shuttingDown) {
+      UpdatePauseMusic();
+    }
     return 0;
   }
-  if (msg == WM_ACTIVATEAPP) {
-    g_windowInactive = (wParam == FALSE);
-    UpdatePauseMusic();
-  } else if (msg == WM_ACTIVATE) {
-    g_windowInactive = (LOWORD(wParam) == WA_INACTIVE);
-    UpdatePauseMusic();
-  } else if (msg == WM_KILLFOCUS) {
-    g_focusLost = true;
-    UpdatePauseMusic();
-  } else if (msg == WM_SETFOCUS) {
-    g_focusLost = false;
-    UpdatePauseMusic();
+
+  if (!g_shuttingDown) {
+    if (msg == WM_ACTIVATEAPP) {
+      g_windowInactive = (wParam == FALSE);
+      UpdatePauseMusic();
+    } else if (msg == WM_ACTIVATE) {
+      g_windowInactive = (LOWORD(wParam) == WA_INACTIVE);
+      UpdatePauseMusic();
+    } else if (msg == WM_KILLFOCUS) {
+      g_focusLost = true;
+      UpdatePauseMusic();
+    } else if (msg == WM_SETFOCUS) {
+      g_focusLost = false;
+      UpdatePauseMusic();
+    }
   }
-  return CallWindowProcA(g_origWndProc, hwnd, msg, wParam, lParam);
+  return CallWindowProcA(origProc, hwnd, msg, wParam, lParam);
 }
 
 void EnsureWindowHooks() {
-  if (g_windowHookAttempt) {
+  if (g_windowHookAttempt || g_shuttingDown) {
     return;
   }
   void *ps = *reinterpret_cast<void *const *>(ADDR_PS_GLOBAL);
@@ -811,8 +877,19 @@ void EnsureWindowHooks() {
 
 void __fastcall Hook_AudioService(void *self, void * /*edx*/) {
   g_origAudioService(self);
-  EnsureWindowHooks();
-  UpdatePauseMusic();
+  if (!g_shuttingDown) {
+    EnsureWindowHooks();
+    UpdatePauseMusic();
+  }
+}
+
+void __fastcall Hook_SampleTerminate(void *self, void * /*edx*/) {
+  if (g_lockInit) {
+    EnterCriticalSection(&g_lock);
+    CloseActiveStream(false);
+    LeaveCriticalSection(&g_lock);
+  }
+  g_origSampleTerminate(self);
 }
 
 bool PatchCallRel32(uintptr_t callAddr, int32_t newRel32) {
@@ -845,12 +922,27 @@ bool InstallHooks() {
       static_cast<int32_t>(reinterpret_cast<uintptr_t>(&Hook_AudioService) -
                            (ADDR_CALL_AUDIO_SERVICE + 5));
   g_patched = PatchCallRel32(ADDR_CALL_AUDIO_SERVICE, hookRel32);
+
+  if (*reinterpret_cast<const uint8_t *>(ADDR_CALL_SAMPLE_TERMINATE) == 0xE8) {
+    g_origSampleTerminateRel32 =
+        *reinterpret_cast<const int32_t *>(ADDR_CALL_SAMPLE_TERMINATE + 1);
+    g_origSampleTerminate = reinterpret_cast<SampleTerminateFn>(
+        ADDR_CALL_SAMPLE_TERMINATE + 5 + g_origSampleTerminateRel32);
+    const int32_t termRel32 = static_cast<int32_t>(
+        reinterpret_cast<uintptr_t>(&Hook_SampleTerminate) -
+        (ADDR_CALL_SAMPLE_TERMINATE + 5));
+    g_patchedSampleTerminate =
+        PatchCallRel32(ADDR_CALL_SAMPLE_TERMINATE, termRel32);
+  }
+
   WriteLog(g_patched ? "InstallHooks OK"
                      : "InstallHooks PatchCallRel32 FAILED");
   return g_patched;
 }
 
 void RemoveHooks() {
+  g_shuttingDown = true;
+
   if (g_stopEvent) {
     SetEvent(g_stopEvent);
   }
@@ -884,6 +976,10 @@ void RemoveHooks() {
     PatchCallRel32(ADDR_CALL_AUDIO_SERVICE, g_origRel32);
     g_patched = false;
   }
+  if (g_patchedSampleTerminate) {
+    PatchCallRel32(ADDR_CALL_SAMPLE_TERMINATE, g_origSampleTerminateRel32);
+    g_patchedSampleTerminate = false;
+  }
 }
 
 } // namespace
@@ -897,6 +993,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD reason, LPVOID lpReserved) {
     ReloadConfig(true);
     InstallHooks();
   } else if (reason == DLL_PROCESS_DETACH) {
+    g_shuttingDown = true;
     if (lpReserved == nullptr) {
       RemoveHooks();
     }
