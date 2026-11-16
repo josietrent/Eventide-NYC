@@ -1,0 +1,399 @@
+{$CLEO .cs}
+{$USE CLEO}
+{$INCLUDE ../utils/globals.txt}
+nop
+
+script_name 'TRIBLIP'
+
+int buf = 0
+int ptr = 0
+int patchAddr = 0
+int relTarget = 0
+int relAddr = 0
+int copySrc = 0
+int copyDst = 0
+int copyLen = 0
+int callSite = 0
+int callTarget = 0
+int tmp = 0
+int pFlag = 0
+float fA = 0.0
+float fB = 0.0
+
+while not Player.IsPlaying($player)
+    wait 0
+end
+
+// Already installed earlier in this gta3.exe process (persistent VirtualAlloc memory)
+tmp = Memory.Read(0x4A49DA, 1, False)
+if
+    tmp == 0xE8
+then
+    terminate_this_custom_script
+end
+
+if not DynamicLibrary.Load("kernel32.dll", tmp)
+then
+    terminate_this_custom_script
+end
+
+if not DynamicLibrary.GetProcedure("VirtualAlloc", tmp, ptr)
+then
+    terminate_this_custom_script
+end
+
+// VirtualAlloc(lpAddress=NULL, dwSize=2048, flAllocationType=0x3000, flProtect=0x40)
+// 0AA7 pushes args in script order, so reverse them for stdcall right-to-left stack order
+Memory.CallFunctionReturn(ptr, 4, 0, 0x40, 0x3000, 2048, 0, buf)
+if
+    buf == 0
+then
+    terminate_this_custom_script
+end
+
+// Compute aspect-corrected HUD width scale: ((4.0 / 3.0) / (w / h)) / 640.0
+tmp = Memory.Read(0x8F436C, 4, False)
+fA =# tmp
+tmp = Memory.Read(0x8F4370, 4, False)
+fB =# tmp
+fA /= fB       // fA = aspect
+fB = 4.0
+fB /= 3.0
+fB /= fA
+fB /= 640.0    // fB = scale
+
+// Buffer layout:
+// +0x000: scale (4B)
+// +0x004: blipFlag (1B)
+// +0x010: EntityZHook (70B)
+// +0x060: CoordZHook (75B)
+// +0x0B0: DrawHelper (166B)
+// +0x160: UpTri (326B)
+// +0x2B0: DownTri (326B)
+// +0x400: UpEntry (14B)
+// +0x410: DownEntry (14B)
+// +0x420/+0x440/+0x460/+0x480: CallWraps (23B each)
+Memory.Write(buf, 4, fB, False)
+pFlag = buf + 0x004
+
+// Copy machine-code blocks into persistent VirtualAlloc memory
+copySrc = Memory.GetLabelPointer(@TB_EntityZHook)
+copyDst = buf + 0x010
+copyLen = 70
+gosub @TB_CopyBytes
+
+copySrc = Memory.GetLabelPointer(@TB_CoordZHook)
+copyDst = buf + 0x060
+copyLen = 75
+gosub @TB_CopyBytes
+
+copySrc = Memory.GetLabelPointer(@TB_DrawHelper)
+copyDst = buf + 0x0B0
+copyLen = 166
+gosub @TB_CopyBytes
+
+copySrc = Memory.GetLabelPointer(@TB_UpTri)
+copyDst = buf + 0x160
+copyLen = 326
+gosub @TB_CopyBytes
+
+copySrc = Memory.GetLabelPointer(@TB_DownTri)
+copyDst = buf + 0x2B0
+copyLen = 326
+gosub @TB_CopyBytes
+
+copySrc = Memory.GetLabelPointer(@TB_EntryStub)
+copyDst = buf + 0x400
+copyLen = 14
+gosub @TB_CopyBytes
+
+copySrc = Memory.GetLabelPointer(@TB_EntryStub)
+copyDst = buf + 0x410
+copyLen = 14
+gosub @TB_CopyBytes
+
+// Relocate EntityZHook (+0x010)
+ptr = buf + 0x010
+patchAddr = ptr + 2
+Memory.Write(patchAddr, 4, pFlag, False)
+patchAddr = ptr + 8
+relTarget = 0x4A11C0
+gosub @TB_WriteRel32
+patchAddr = ptr + 36
+Memory.Write(patchAddr, 4, pFlag, False)
+patchAddr = ptr + 58
+Memory.Write(patchAddr, 4, pFlag, False)
+
+// Relocate CoordZHook (+0x060)
+ptr = buf + 0x060
+patchAddr = ptr + 2
+Memory.Write(patchAddr, 4, pFlag, False)
+patchAddr = ptr + 8
+relTarget = 0x4A11C0
+gosub @TB_WriteRel32
+patchAddr = ptr + 41
+Memory.Write(patchAddr, 4, pFlag, False)
+patchAddr = ptr + 63
+Memory.Write(patchAddr, 4, pFlag, False)
+
+// Relocate DrawHelper (+0x0B0: CSprite2d::Draw2DPolygon + RwRenderStateSet)
+ptr = buf + 0x0B0
+patchAddr = ptr + 42
+relTarget = 0x51F070
+gosub @TB_WriteRel32
+patchAddr = ptr + 54
+relTarget = 0x5A43C0
+gosub @TB_WriteRel32
+patchAddr = ptr + 65
+relTarget = 0x5A43C0
+gosub @TB_WriteRel32
+patchAddr = ptr + 76
+relTarget = 0x5A43C0
+gosub @TB_WriteRel32
+patchAddr = ptr + 87
+relTarget = 0x5A43C0
+gosub @TB_WriteRel32
+patchAddr = ptr + 108
+relTarget = 0x5A43C0
+gosub @TB_WriteRel32
+patchAddr = ptr + 124
+relTarget = 0x5A4430
+gosub @TB_WriteRel32
+patchAddr = ptr + 136
+relTarget = 0x5A43C0
+gosub @TB_WriteRel32
+patchAddr = ptr + 147
+relTarget = 0x5A43C0
+gosub @TB_WriteRel32
+patchAddr = ptr + 158
+relTarget = 0x5A43C0
+gosub @TB_WriteRel32
+
+// Relocate UpTri (+0x160; 0x6000B8 = 2.0f blip outline scale)
+ptr = buf + 0x160
+patchAddr = ptr + 25
+Memory.Write(patchAddr, 4, buf, False)
+patchAddr = ptr + 58
+Memory.Write(patchAddr, 4, 0x6000B8, False)
+patchAddr = ptr + 75
+Memory.Write(patchAddr, 4, 0x6000B8, False)
+patchAddr = ptr + 86
+Memory.Write(patchAddr, 4, 0x6000B8, False)
+patchAddr = ptr + 161
+relTarget = buf + 0x0B0
+gosub @TB_WriteRel32
+patchAddr = ptr + 201
+Memory.Write(patchAddr, 4, buf, False)
+patchAddr = ptr + 312
+relTarget = buf + 0x0B0
+gosub @TB_WriteRel32
+
+// Relocate DownTri (+0x2B0)
+ptr = buf + 0x2B0
+patchAddr = ptr + 25
+Memory.Write(patchAddr, 4, buf, False)
+patchAddr = ptr + 58
+Memory.Write(patchAddr, 4, 0x6000B8, False)
+patchAddr = ptr + 75
+Memory.Write(patchAddr, 4, 0x6000B8, False)
+patchAddr = ptr + 86
+Memory.Write(patchAddr, 4, 0x6000B8, False)
+patchAddr = ptr + 161
+relTarget = buf + 0x0B0
+gosub @TB_WriteRel32
+patchAddr = ptr + 201
+Memory.Write(patchAddr, 4, buf, False)
+patchAddr = ptr + 312
+relTarget = buf + 0x0B0
+gosub @TB_WriteRel32
+
+// Relocate UpEntry (+0x400) & DownEntry (+0x410)
+patchAddr = buf + 0x40A
+relTarget = buf + 0x160
+gosub @TB_WriteRel32
+patchAddr = buf + 0x41A
+relTarget = buf + 0x2B0
+gosub @TB_WriteRel32
+
+// Install 4 Z-comparison CALL hooks in gta3.exe (overwriting 5 bytes: mov eax, ebx; shr eax, 8)
+callTarget = buf + 0x010
+callSite = 0x4A45C7
+gosub @TB_PatchCall
+callSite = 0x4A4798
+gosub @TB_PatchCall
+callSite = 0x4A49DA
+gosub @TB_PatchCall
+
+callTarget = buf + 0x060
+callSite = 0x4A4BA4
+gosub @TB_PatchCall
+
+// Wrap the 4 ShowRadarTraceWithHeight CALL sites (preserving WidescreenFix or vanilla target for level blips)
+ptr = buf + 0x420
+callSite = 0x4A45FC
+gosub @TB_InstallDrawWrap
+
+ptr = buf + 0x440
+callSite = 0x4A47CD
+gosub @TB_InstallDrawWrap
+
+ptr = buf + 0x460
+callSite = 0x4A4A0F
+gosub @TB_InstallDrawWrap
+
+ptr = buf + 0x480
+callSite = 0x4A4BD9
+gosub @TB_InstallDrawWrap
+
+terminate_this_custom_script
+
+// Inputs: copySrc, copyDst, copyLen (uses relAddr as byte scratch)
+:TB_CopyBytes
+while copyLen > 0
+    relAddr = Memory.Read(copySrc, 1, False)
+    Memory.Write(copyDst, 1, relAddr, False)
+    copySrc += 1
+    copyDst += 1
+    copyLen -= 1
+end
+return
+
+// Inputs: patchAddr = address of rel32 field (in RW buf), relTarget = target
+:TB_WriteRel32
+relAddr = relTarget
+relAddr -= patchAddr
+relAddr -= 4
+Memory.Write(patchAddr, 4, relAddr, False)
+return
+
+// Inputs: callSite in gta3.exe, callTarget
+:TB_PatchCall
+Memory.Write(callSite, 1, 0xE8, True)
+patchAddr = callSite + 1
+relAddr = callTarget
+relAddr -= patchAddr
+relAddr -= 4
+Memory.Write(patchAddr, 4, relAddr, True)
+return
+
+// Inputs: ptr = wrapper slot in buf, callSite = existing CALL site in gta3.exe
+:TB_InstallDrawWrap
+copySrc = Memory.GetLabelPointer(@TB_CallWrap)
+copyDst = ptr
+copyLen = 23
+gosub @TB_CopyBytes
+
+patchAddr = callSite + 1
+tmp = Memory.Read(patchAddr, 4, False)
+tmp += callSite
+tmp += 5
+
+patchAddr = ptr + 2
+Memory.Write(patchAddr, 4, pFlag, False)
+patchAddr = ptr + 8
+relTarget = buf + 0x400
+gosub @TB_WriteRel32
+patchAddr = ptr + 14
+relTarget = buf + 0x410
+gosub @TB_WriteRel32
+patchAddr = ptr + 19
+relTarget = tmp
+gosub @TB_WriteRel32
+
+callTarget = ptr
+gosub @TB_PatchCall
+return
+
+:TB_EntityZHook
+hex
+    C6 05 00 00 00 00 00 E8 00 00 00 00 D9 40 08 D8
+    6F 3C D8 15 38 06 60 00 DF E0 80 E4 45 F6 C4 41
+    74 1C FE 05 00 00 00 00 D8 15 38 26 60 00 DF E0
+    80 E4 05 80 FC 01 75 06 FE 05 00 00 00 00 DD D8
+    89 D8 C1 E8 08 C3
+end
+
+:TB_CoordZHook
+hex
+    C6 05 00 00 00 00 00 E8 00 00 00 00 D9 40 08 A1
+    18 45 4A 00 D8 2C 30 D8 15 38 06 60 00 DF E0 80
+    E4 45 F6 C4 41 74 1C FE 05 00 00 00 00 D8 15 38
+    26 60 00 DF E0 80 E4 05 80 FC 01 75 06 FE 05 00
+    00 00 00 DD D8 89 D8 C1 E8 08 C3
+end
+
+:TB_DrawHelper
+hex
+    53 8B 5C 24 28 53 53 53 53 FF 74 24 34 FF 74 24
+    34 FF 74 24 34 FF 74 24 34 FF 74 24 34 FF 74 24
+    34 FF 74 24 34 FF 74 24 34 E8 00 00 00 00 83 C4
+    30 6A 00 6A 01 E8 00 00 00 00 59 59 6A 01 6A 07
+    E8 00 00 00 00 59 59 6A 00 6A 06 E8 00 00 00 00
+    59 59 6A 00 6A 08 E8 00 00 00 00 80 7B 03 FF 59
+    59 75 04 6A 00 EB 02 6A 01 6A 0C E8 00 00 00 00
+    59 59 6A 04 68 68 91 6E 00 6A 05 E8 00 00 00 00
+    83 C4 0C 6A 01 6A 06 E8 00 00 00 00 59 59 6A 01
+    6A 08 E8 00 00 00 00 59 59 6A 02 6A 07 E8 00 00
+    00 00 59 59 5B C3
+end
+
+:TB_UpTri
+hex
+    8A 5D 20 C7 45 FC 00 00 00 00 88 5D FF 8D 45 FC
+    50 DB 05 64 43 8F 00 D8 0D 00 00 00 00 DB 05 68
+    43 8F 00 D8 0D 58 71 5F 00 D9 45 08 D9 45 0C DB
+    45 10 D8 05 B0 00 60 00 D8 05 00 00 00 00 D8 CC
+    DB 45 10 D8 05 B0 00 60 00 D8 05 00 00 00 00 D8
+    CC DB 45 10 D8 05 00 00 00 00 D8 CD D9 C1 D8 EC
+    50 D9 1C 24 D9 C4 50 D9 1C 24 D9 C1 D8 EC 50 D9
+    1C 24 D9 C4 50 D9 1C 24 D9 C0 D8 C4 50 D9 1C 24
+    D9 C2 D8 ED 50 D9 1C 24 D9 C0 D8 C4 50 D9 1C 24
+    D9 C2 D8 C5 50 D9 1C 24 DE D9 DE D9 DE D9 DD D8
+    E8 00 00 00 00 83 C4 24 8A 45 14 88 45 FC 8A 45
+    18 88 45 FD 8A 45 1C 88 45 FE 88 5D FF 8D 45 FC
+    50 DB 05 64 43 8F 00 D8 0D 00 00 00 00 DB 05 68
+    43 8F 00 D8 0D 58 71 5F 00 D9 45 08 D9 45 0C DB
+    45 10 D8 05 B0 00 60 00 D8 CC DB 45 10 D8 05 B0
+    00 60 00 D8 CC D9 C0 D8 EB 50 D9 1C 24 D9 C3 50
+    D9 1C 24 D9 C0 D8 EB 50 D9 1C 24 D9 C3 50 D9 1C
+    24 D9 C0 D8 C3 50 D9 1C 24 D9 C1 D8 EC 50 D9 1C
+    24 D9 C0 D8 C3 50 D9 1C 24 D9 C1 D8 C4 50 D9 1C
+    24 DE D9 DE D9 DE D9 E8 00 00 00 00 83 C4 24 8B
+    5D F8 8B E5 5D C3
+end
+
+:TB_DownTri
+hex
+    8A 5D 20 C7 45 FC 00 00 00 00 88 5D FF 8D 45 FC
+    50 DB 05 64 43 8F 00 D8 0D 00 00 00 00 DB 05 68
+    43 8F 00 D8 0D 58 71 5F 00 D9 45 08 D9 45 0C DB
+    45 10 D8 05 B0 00 60 00 D8 05 00 00 00 00 D8 CC
+    DB 45 10 D8 05 B0 00 60 00 D8 05 00 00 00 00 D8
+    CC DB 45 10 D8 05 00 00 00 00 D8 CD D9 C0 D8 EC
+    50 D9 1C 24 D9 C2 D8 ED 50 D9 1C 24 D9 C0 D8 EC
+    50 D9 1C 24 D9 C2 D8 C5 50 D9 1C 24 D9 C1 D8 C4
+    50 D9 1C 24 D9 C4 50 D9 1C 24 D9 C0 D8 C4 50 D9
+    1C 24 D9 C4 50 D9 1C 24 DE D9 DE D9 DE D9 DD D8
+    E8 00 00 00 00 83 C4 24 8A 45 14 88 45 FC 8A 45
+    18 88 45 FD 8A 45 1C 88 45 FE 88 5D FF 8D 45 FC
+    50 DB 05 64 43 8F 00 D8 0D 00 00 00 00 DB 05 68
+    43 8F 00 D8 0D 58 71 5F 00 D9 45 08 D9 45 0C DB
+    45 10 D8 05 B0 00 60 00 D8 CC DB 45 10 D8 05 B0
+    00 60 00 D8 CC D9 C0 D8 EB 50 D9 1C 24 D9 C1 D8
+    EC 50 D9 1C 24 D9 C0 D8 EB 50 D9 1C 24 D9 C1 D8
+    C4 50 D9 1C 24 D9 C0 D8 C3 50 D9 1C 24 D9 C3 50
+    D9 1C 24 D9 C0 D8 C3 50 D9 1C 24 D9 C3 50 D9 1C
+    24 DE D9 DE D9 DE D9 E8 00 00 00 00 83 C4 24 8B
+    5D F8 8B E5 5D C3
+end
+
+:TB_EntryStub
+hex
+    55 89 E5 83 EC 08 89 5D F8 E9 00 00 00 00
+end
+
+:TB_CallWrap
+hex
+    FE 0D 00 00 00 00 0F 8C 00 00 00 00 0F 85 00 00
+    00 00 E9 00 00 00 00
+end
