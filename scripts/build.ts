@@ -262,6 +262,7 @@ async function compileAsiIfChanged(
     "/LD",
     "/O2",
     "/MT",
+    "/EHsc",
     "/W4",
     "/WX",
     ...toolchain.includes.map((dir) => `/I${dir}`),
@@ -588,6 +589,20 @@ if (shouldRun(11, "pauseradio")) {
 
   await Deno.copyFile(asiOutput, join(modStagingDir, basename(asiOutput)));
   say.done(`  Packaged modloader/${modName}/${basename(asiOutput)}`);
+}
+
+// Step 12: PauseMusic ASI Plugin
+if (shouldRun(12, "pausemusic")) {
+  say.heading("Step 12 (pausemusic): Compiling PauseMusic.asi...");
+  const asiInput = join(cwd, "plugins", "PauseMusic", "PauseMusic.cpp");
+  const asiOutput = join(cwd, "plugins", "PauseMusic", "PauseMusic.asi");
+  const iniInput = join(cwd, "plugins", "PauseMusic", "PauseMusic.ini");
+  await compileAsiIfChanged(asiInput, asiOutput, join(stagingDir, "obj"));
+
+  await Deno.copyFile(asiOutput, join(modStagingDir, basename(asiOutput)));
+  await Deno.copyFile(iniInput, join(modStagingDir, basename(iniInput)));
+  say.done(`  Packaged modloader/${modName}/${basename(asiOutput)}`);
+  say.done(`  Packaged modloader/${modName}/${basename(iniInput)}`);
 }
 
 // Clean compiler scratch directory before zipping
