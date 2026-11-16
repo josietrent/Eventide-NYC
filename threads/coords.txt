@@ -13,12 +13,24 @@ while not Player.IsPlaying($player)
     wait 250
 end
 
-while not Player.CanStartMission($player)
-    wait 0
-end
+if
+    $Intro_Passed == 0
+then
+    while not Player.CanStartMission($player)
+        wait 0
+    end
 
-wait 6500
-Text.PrintHelp('CORHELP')
+    if
+        $Intro_Passed == 0
+    then
+        wait 6500
+        if
+            $Intro_Passed == 0
+        then
+            Text.PrintHelp('CORHELP')
+        end
+    end
+end
 
 while true
     wait 0
