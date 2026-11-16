@@ -1,6 +1,8 @@
 #define WIN32_LEAN_AND_MEAN
 #include <algorithm>
 #include <cctype>
+#include <cstdio>
+#include <cstring>
 #include <stdint.h>
 #include <string>
 #include <vector>
@@ -36,6 +38,10 @@ constexpr uintptr_t IAT_AIL_PAUSE_STREAM =
     0x61D5FC; // void (__stdcall*)(uint32_t, int32_t)
 constexpr uintptr_t IAT_AIL_SET_STREAM_LOOP_COUNT =
     0x61D65C; // void (__stdcall*)(uint32_t, int32_t)
+constexpr uintptr_t IAT_AIL_SERVICE_STREAM =
+    0x61D660; // void (__stdcall*)(uint32_t, int32_t)
+constexpr uintptr_t IAT_AIL_START_STREAM =
+    0x61D664; // void (__stdcall*)(uint32_t)
 constexpr uintptr_t IAT_AIL_SET_STREAM_MS_POSITION =
     0x61D668; // void (__stdcall*)(uint32_t, int32_t)
 constexpr uintptr_t IAT_AIL_SET_STREAM_VOLUME =
@@ -57,6 +63,8 @@ using AilOpenStreamFn = uint32_t(__stdcall *)(uint32_t digDriver,
                                               int32_t streamMem);
 using AilCloseStreamFn = void(__stdcall *)(uint32_t stream);
 using AilPauseStreamFn = void(__stdcall *)(uint32_t stream, int32_t onoff);
+using AilServiceStreamFn = void(__stdcall *)(uint32_t stream, int32_t fillup);
+using AilStartStreamFn = void(__stdcall *)(uint32_t stream);
 using AilStreamStatusFn = int32_t(__stdcall *)(uint32_t stream);
 using AilSetStreamLoopCountFn = void(__stdcall *)(uint32_t stream,
                                                   int32_t count);
@@ -66,6 +74,7 @@ using AilStreamMsPositionFn = void(__stdcall *)(uint32_t stream,
 using AilSetStreamMsPositionFn = void(__stdcall *)(uint32_t stream,
                                                    int32_t posMs);
 using AilSetStreamVolumeFn = void(__stdcall *)(uint32_t stream, int32_t volume);
+using AilLastErrorFn = const char *(__stdcall *)();
 
 struct PauseMusicConfig {
   std::string path;
@@ -95,6 +104,7 @@ HANDLE g_watchThread = nullptr;
 std::string g_asiDir;
 std::string g_exeDir;
 std::string g_iniPath;
+std::string g_logPath;
 FILETIME g_iniWriteTime = {};
 bool g_hasIniTime = false;
 uint32_t g_lastIniCheckTick = 0;
@@ -110,6 +120,22 @@ float g_fadeAlpha = 0.0f;
 int32_t g_lastAppliedVol = -1;
 uint32_t g_lastFadeTick = 0;
 uint32_t g_retryAfterTick = 0;
+
+void WriteLog(const char *line) {
+  if (g_logPath.empty() || !line) {
+    return;
+  }
+  HANDLE f = CreateFileA(g_logPath.c_str(), FILE_APPEND_DATA,
+                         FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr,
+                         OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
+  if (f == INVALID_HANDLE_VALUE) {
+    return;
+  }
+  DWORD written = 0;
+  WriteFile(f, line, static_cast<DWORD>(std::strlen(line)), &written, nullptr);
+  WriteFile(f, "\r\n", 2, &written, nullptr);
+  CloseHandle(f);
+}
 
 std::string DirOfPath(const std::string &fullPath) {
   const size_t pos = fullPath.find_last_of("\\/");
@@ -129,10 +155,19 @@ void InitModulePaths(HMODULE hModule) {
   }
   if (!g_asiDir.empty()) {
     g_iniPath = g_asiDir + "\\PauseMusic.ini";
+    g_logPath = g_asiDir + "\\PauseMusic.log";
   } else if (!g_exeDir.empty()) {
     g_iniPath = g_exeDir + "\\PauseMusic.ini";
+    g_logPath = g_exeDir + "\\PauseMusic.log";
   } else {
     g_iniPath = "PauseMusic.ini";
+    g_logPath = "PauseMusic.log";
+  }
+  HANDLE f = CreateFileA(g_logPath.c_str(), GENERIC_WRITE,
+                         FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr,
+                         CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
+  if (f != INVALID_HANDLE_VALUE) {
+    CloseHandle(f);
   }
 }
 
@@ -281,6 +316,21 @@ inline void AilPauseStream(uint32_t stream, int32_t pause) {
   }
 }
 
+inline void AilStartStream(uint32_t stream) {
+  auto fn = *reinterpret_cast<const AilStartStreamFn *>(IAT_AIL_START_STREAM);
+  if (fn && stream) {
+    fn(stream);
+  }
+}
+
+inline void AilServiceStream(uint32_t stream, int32_t fillup) {
+  auto fn =
+      *reinterpret_cast<const AilServiceStreamFn *>(IAT_AIL_SERVICE_STREAM);
+  if (fn && stream) {
+    fn(stream, fillup);
+  }
+}
+
 inline int32_t AilStreamStatus(uint32_t stream) {
   auto fn = *reinterpret_cast<const AilStreamStatusFn *>(IAT_AIL_STREAM_STATUS);
   return (fn && stream) ? fn(stream) : 0;
@@ -319,6 +369,20 @@ inline void AilSetStreamVolume(uint32_t stream, int32_t volume) {
   if (fn && stream) {
     fn(stream, volume);
   }
+}
+
+const char *GetAilLastError() {
+  HMODULE mss = GetModuleHandleA("Mss32.dll");
+  if (!mss) {
+    return "Mss32.dll not loaded";
+  }
+  auto fn = reinterpret_cast<AilLastErrorFn>(
+      GetProcAddress(mss, "_AIL_last_error@0"));
+  if (!fn) {
+    return "AIL_last_error unavailable";
+  }
+  const char *err = fn();
+  return (err && err[0]) ? err : "(empty)";
 }
 
 void CloseActiveStream(bool savePosition) {
@@ -454,6 +518,13 @@ void ReloadConfig(bool force) {
         }
       }
     }
+
+    char msg[1024] = {};
+    std::snprintf(msg, sizeof(msg),
+                  "Config loaded: ini='%s' path='%s' resolved='%s' tracks=%zu",
+                  activeIni.c_str(), g_cfg.path.c_str(), resolved.c_str(),
+                  g_tracks.size());
+    WriteLog(msg);
   }
 }
 
@@ -529,6 +600,10 @@ bool OpenTrackStream(uint32_t digDriver, int32_t initialVolume) {
   const std::string &track = g_tracks[g_trackIndex];
   const uint32_t stream = AilOpenStream(digDriver, track.c_str());
   if (stream == 0) {
+    char msg[1024] = {};
+    std::snprintf(msg, sizeof(msg), "AIL_open_stream FAILED for '%s': %s",
+                  track.c_str(), GetAilLastError());
+    WriteLog(msg);
     return false;
   }
 
@@ -544,10 +619,18 @@ bool OpenTrackStream(uint32_t digDriver, int32_t initialVolume) {
   }
 
   AilSetStreamVolume(stream, initialVolume);
+  AilStartStream(stream);
   AilPauseStream(stream, 0);
+  AilServiceStream(stream, 0);
 
   g_stream = stream;
   g_lastAppliedVol = initialVolume;
+
+  char msg[1024] = {};
+  std::snprintf(msg, sizeof(msg),
+                "Started stream 0x%08X track='%s' initVol=%d status=%d", stream,
+                track.c_str(), initialVolume, AilStreamStatus(stream));
+  WriteLog(msg);
   return true;
 }
 
@@ -595,6 +678,8 @@ void UpdatePauseMusic() {
     }
 
     if (g_stream != 0) {
+      AilServiceStream(g_stream, 0);
+
       if (g_cfg.fadeInMs <= 0) {
         g_fadeAlpha = 1.0f;
       } else if (g_fadeAlpha < 1.0f) {
@@ -621,6 +706,7 @@ void UpdatePauseMusic() {
     if (immediateCut || g_cfg.fadeOutMs <= 0) {
       CloseActiveStream(true);
     } else {
+      AilServiceStream(g_stream, 0);
       g_fadeAlpha -=
           static_cast<float>(dtMs) / static_cast<float>(g_cfg.fadeOutMs);
       if (g_fadeAlpha <= 0.001f) {
@@ -729,6 +815,7 @@ bool InstallHooks() {
   const uint8_t op =
       *reinterpret_cast<const uint8_t *>(ADDR_CALL_AUDIO_SERVICE);
   if (op != 0xE8) {
+    WriteLog("InstallHooks FAILED: expected 0xE8 at ADDR_CALL_AUDIO_SERVICE");
     return false;
   }
 
@@ -740,6 +827,8 @@ bool InstallHooks() {
       static_cast<int32_t>(reinterpret_cast<uintptr_t>(&Hook_AudioService) -
                            (ADDR_CALL_AUDIO_SERVICE + 5));
   g_patched = PatchCallRel32(ADDR_CALL_AUDIO_SERVICE, hookRel32);
+  WriteLog(g_patched ? "InstallHooks OK"
+                     : "InstallHooks PatchCallRel32 FAILED");
   return g_patched;
 }
 
