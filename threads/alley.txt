@@ -303,6 +303,18 @@ end
 $LuigiBlip = Blip.AddSpriteForContactPoint(1214.89, -327.47, 26.07, RadarSprite.Luigi)
 $KenjiBlip = Blip.AddSpriteForContactPoint(1004.42, -49.06, 7.44, RadarSprite.Kenji)
 Text.PrintHelpString("A new Point of Contact is available.")
+while true
+    wait 250
+    if or
+        not Char.IsStillAlive(Luigi)
+        not Car.IsStillAlive(Cheetah)
+        not Player.IsPlaying($player)
+        $onmission == 1
+        not Car.Locate3D(Cheetah, 1214.89, -327.47, 26.07, 120.0, 120.0, 50.0, False)
+    then
+        break
+    end
+end
 if
     Char.IsStillAlive(Luigi)
 then
