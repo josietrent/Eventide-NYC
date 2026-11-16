@@ -94,6 +94,7 @@ wait 2000
 $CarMissionDone = false
 $BarrierIND = true
 $BarrierCOM = true
+$DriveHelpPlayed = 0
 
 // Spawn BG threads
 start_new_script @Driving

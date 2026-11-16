@@ -52,6 +52,23 @@ while true
     // Mega-switch on player state for specific tutorials
     //====================================================
 
+    // 0. Enter/Exit Vehicle Check near $Canyonero at startup
+    if and
+        $DriveHelpPlayed == 0
+        $Intro_Passed == 0
+        not Player.IsInAnyCar($player)
+    then
+        if Car.IsStillAlive($Canyonero)
+        then
+            if Char.LocateAnyMeansCar3D($scplayer, $Canyonero, 20.0, 20.0, 8.0, False)
+            then
+                $DriveHelpPlayed = 1
+                Text.PrintHelp('DRIVE')
+                continue
+            end
+        end
+    end
+
     // 1. Car Tutorial Check
     if and
         Player.IsInAnyCar($player)
@@ -122,6 +139,7 @@ while true
 
     // 7. Completion Check
     if and
+        $DriveHelpPlayed == 1
         $BoatHelpPlayed == 1
         $BribeHelpPlayed == 1
         $CarTutorialPlayed == 1
@@ -154,6 +172,7 @@ end
 return
 
 :PrintHowToDrive
+    $DriveHelpPlayed = 1
     $CarTutorialPlayed = 1
     wait 100
     Text.PrintHelp('DRIVE2')
