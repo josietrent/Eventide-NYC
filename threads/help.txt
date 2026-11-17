@@ -64,6 +64,7 @@ while true
             then
                 $DriveHelpPlayed = 1
                 Text.PrintHelp('DRIVE')
+                Car.MarkAsNoLongerNeeded($Canyonero)
                 continue
             end
         end
@@ -74,6 +75,11 @@ while true
         Player.IsInAnyCar($player)
         $CarTutorialPlayed == 0
     then
+        if
+            Car.IsStillAlive($Canyonero)
+        then
+            Car.MarkAsNoLongerNeeded($Canyonero)
+        end
         PrintHowToDrive()
         continue
     end

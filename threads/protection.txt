@@ -43,6 +43,7 @@ wait 1000
 Player.SetControl($player, False)
 
 // Create Louie at the top of the stairs
+World.ClearArea(1219.74, -313.32, 29.95, 6.0, True)
 Luigi = Char.Create(PedType.Special, #SPECIAL01, 1219.74, -313.32, 29.95)
 
 // Position the player out of sight before fading in
@@ -70,15 +71,15 @@ while not Char.LocateAnyMeans2D(Luigi, 1219.74, -325.69, 0.5, 0.5, False)
     end
 end
 
-// Reposition the camera to the lower angle, turn Louie to the player, and start speaking
+// Reposition the camera to the lower angle, turn Louie to face the camera/player, and start speaking
 Camera.SetFixedPosition(1213.84, -325.56, 26.07, 0.0, 0.0, 0.0)
+Camera.PointAtChar(Luigi, CameraMode.Fixed, SwitchType.JumpCut)
 Char.SetObjNoObj(Luigi)
+wait 250
+Char.SetHeading(Luigi, 269.0)
+Player.SetHeading($player, 89.0)
 Char.SetObjWaitOnFoot(Luigi)
-Char.SetHeading(Luigi, 89.0)
-Player.SetHeading($player, 269.0)
-Char.TurnToFacePlayer(Luigi, $player)
-Player.TurnToFaceChar($player, Luigi)
-wait 500
+wait 250
 Text.PrintString("One of our guys has been holding out on his protection money.", 5000)
 wait 5000
 Text.PrintString("Go find him and make sure he understands the cost of doing business.", 6000)
@@ -87,6 +88,8 @@ wait 6000
 // Transition out of the briefing scene
 Camera.DoFade(1500, Fade.Out)
 wait 1500
+World.ClearArea(1202.93, -426.60, 25.07, 6.0, True)
+World.ClearArea(1186.04, -464.43, 25.07, 6.0, True)
 Deadbeat = Char.Create(PedType.CivMale, #B_MAN1, 1202.93, -426.60, 25.07)
 Char.SetObjWaitOnFoot(Deadbeat)
 DeadbeatCar = Car.Create(#PEREN, 1186.04, -464.43, 25.07)
@@ -551,10 +554,27 @@ Mission.Finish()
 $ProtectionDone = 1
 $onmission = 0
 Protection_Cleanup()
-if
-    Char.IsStillAlive(Luigi)
+if not Deadbeat == 0
 then
-    Char.MarkAsNoLongerNeeded(Luigi)
+    if
+        Char.IsStillAlive(Deadbeat)
+    then
+        Char.Delete(Deadbeat)
+    else
+        Char.RemoveElegantly(Deadbeat)
+        Char.Delete(Deadbeat)
+    end
+    Deadbeat = 0
+end
+if not DeadbeatCar == 0
+then
+    Car.MarkAsNoLongerNeeded(DeadbeatCar)
+    DeadbeatCar = 0
+end
+if not Luigi == 0
+then
+    Char.RemoveElegantly(Luigi)
+    Luigi = 0
 end
 Streaming.UnloadSpecialCharacter(1)
 Player.SetControl($player, True)
@@ -567,25 +587,46 @@ $ProtectionDone = 0
 Text.ClearPrints()
 Text.PrintBigString("Mission Failed!", 3000, TextStyle.Middle)
 wait 3000
+Camera.DoFade(1500, Fade.Out)
+wait 1500
 Protection_Cleanup()
-if
-    Char.IsStillAlive(Deadbeat)
+if not Deadbeat == 0
 then
-    Char.Delete(Deadbeat)
+    if
+        Char.IsStillAlive(Deadbeat)
+    then
+        Char.Delete(Deadbeat)
+    else
+        Char.RemoveElegantly(Deadbeat)
+        Char.Delete(Deadbeat)
+    end
+    Deadbeat = 0
 end
-if
-    Car.IsStillAlive(DeadbeatCar)
+if not DeadbeatCar == 0
 then
     Car.Delete(DeadbeatCar)
+    DeadbeatCar = 0
 end
-if
-    Char.IsStillAlive(Luigi)
+if not Luigi == 0
 then
-    Char.Delete(Luigi)
+    if
+        Char.IsStillAlive(Luigi)
+    then
+        Char.Delete(Luigi)
+    else
+        Char.RemoveElegantly(Luigi)
+        Char.Delete(Luigi)
+    end
+    Luigi = 0
 end
+World.ClearArea(1202.93, -426.60, 25.07, 6.0, True)
+World.ClearArea(1186.04, -464.43, 25.07, 6.0, True)
+World.ClearArea(1219.74, -313.32, 29.95, 6.0, True)
 Streaming.UnloadSpecialCharacter(1)
 Camera.RestoreJumpcut()
 Hud.SwitchWidescreen(False)
+Camera.DoFade(1500, Fade.In)
+wait 1500
 Player.SetControl($player, True)
 $OnProtectionMission = 0
 terminate_this_custom_script
@@ -594,16 +635,6 @@ terminate_this_custom_script
 Hud.ClearCounter($DeadbeatHealthBar)
 Blip.Remove(TargetBlip)
 Blip.Remove(LuigiBlip)
-if
-    Char.IsStillAlive(Deadbeat)
-then
-    Char.MarkAsNoLongerNeeded(Deadbeat)
-end
-if
-    Car.IsStillAlive(DeadbeatCar)
-then
-    Car.MarkAsNoLongerNeeded(DeadbeatCar)
-end
 Streaming.MarkModelAsNoLongerNeeded(#PEREN)
 Streaming.MarkModelAsNoLongerNeeded(#B_MAN1)
 return

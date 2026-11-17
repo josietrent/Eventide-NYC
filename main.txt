@@ -123,6 +123,7 @@ terminate_this_script
 Streaming.RequestModel(#LANDSTAL)
 Streaming.LoadAllModelsNow()
 wait 0
+World.ClearArea(935.2039, -218.0919, 4.956, 6.0, True)
 $Canyonero = Car.Create(#LANDSTAL, 935.2039, -218.0919, 4.956)
 // FIXME: The car ought point West
 Car.SetHeading($Canyonero, 110)

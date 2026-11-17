@@ -44,6 +44,8 @@ wait 1000
 Player.SetControl($player, False)
 Player.SetCoordinates($player, 1322.34, -476.86, 49.75)
 Player.SetCurrentWeapon($player, WeaponType.Pistol)
+World.ClearArea(1344.11, -448.69, 49.79, 6.0, True)
+World.ClearArea(1329.52, -452.97, 54.48, 6.0, True)
 Luigi = Char.Create(PedType.Special, #SPECIAL01, 1329.52, -452.97, 54.48)
 Cheetah = Car.Create(#CHEETAH, 1344.11, -448.69, 49.79)
 Car.SetHeading(Cheetah, 90.0)
@@ -315,15 +317,15 @@ while true
         break
     end
 end
-if
-    Char.IsStillAlive(Luigi)
+if not Luigi == 0
 then
-    Char.MarkAsNoLongerNeeded(Luigi)
+    Char.RemoveElegantly(Luigi)
+    Luigi = 0
 end
-if
-    Car.IsStillAlive(Cheetah)
+if not Cheetah == 0
 then
     Car.MarkAsNoLongerNeeded(Cheetah)
+    Cheetah = 0
 end
 Streaming.UnloadSpecialCharacter(1)
 Streaming.MarkModelAsNoLongerNeeded(#CHEETAH)
@@ -355,16 +357,25 @@ then
         Player.SetHeading($player, 180.0)
     end
 end
-if
-    Car.IsStillAlive(Cheetah)
+if not Cheetah == 0
 then
     Car.Delete(Cheetah)
+    Cheetah = 0
 end
-if
-    Char.IsStillAlive(Luigi)
+if not Luigi == 0
 then
-    Char.Delete(Luigi)
+    if
+        Char.IsStillAlive(Luigi)
+    then
+        Char.Delete(Luigi)
+    else
+        Char.RemoveElegantly(Luigi)
+        Char.Delete(Luigi)
+    end
+    Luigi = 0
 end
+World.ClearArea(1344.11, -448.69, 49.79, 6.0, True)
+World.ClearArea(1329.52, -452.97, 54.48, 6.0, True)
 Streaming.UnloadSpecialCharacter(1)
 Streaming.MarkModelAsNoLongerNeeded(#CHEETAH)
 Streaming.MarkModelAsNoLongerNeeded(#UZI)

@@ -40,12 +40,13 @@ wait 0
 
 :INIT_Car
 wait 500
-if
-    Car.IsStillAlive(Idaho)
+if not Idaho == 0
 then
-    Car.MarkAsNoLongerNeeded(Idaho)
+    Car.Delete(Idaho)
     Blip.Remove(CarBlip)
+    Idaho = 0
 end
+World.ClearArea(750.85, 84.69, 3.55, 6.0, True)
 
 Streaming.RequestModel(#IDAHO)
 Streaming.LoadAllModelsNow()
@@ -291,11 +292,12 @@ Text.PrintBig('MISFAIL', 3000, TextStyle.Middle)
 play_audio_stream_1channel "audio/EC/miasma.wav", True, 1.0
 IniFile.WriteString("Passed mission fail, checking Idaho", "Trace.ini", "Before", "Trace")
 // Clean up Idaho safely if it exists
-if
-    Car.IsStillAlive(Idaho)
+if not Idaho == 0
 then
     Car.Delete(Idaho)
+    Idaho = 0
 end
+World.ClearArea(750.85, 84.69, 3.55, 6.0, True)
 
 // RE-INITIALIZE THE IDAHO AND ITS BLIP HERE:
 Idaho = Car.Create(#IDAHO, 750.85, 84.69, 3.55)
@@ -319,6 +321,11 @@ Sphere.Remove(NoodleSphere)
 wait 0
 Text.PrintBig('MISPASS', 5000, TextStyle.MiddleSmaller)
 Audio.PlayMissionPassedTune(1)
+if not Idaho == 0
+then
+    Car.MarkAsNoLongerNeeded(Idaho)
+    Idaho = 0
+end
 Streaming.MarkModelAsNoLongerNeeded(#IDAHO)
 Stat.RegisterMissionPassed('MIS0NAM')
 Mission.Finish()

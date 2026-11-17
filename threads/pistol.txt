@@ -51,6 +51,8 @@ while not Streaming.HasModelLoaded(#COLT45)
 end
 
 :Gun_Spawn
+World.ClearArea(1243.45, -129.20, 14.63, 6.0, True)
+World.ClearArea(933.66, -252.64, 4.50, 6.0, True)
 PistolPickup = Pickup.CreateWithAmmo(#COLT45, PickupType.OnStreet, 600, 1272.72, -123.51, 15.16)
 GunBlip = Blip.AddForPickup(PistolPickup)
 Cheetah = Car.Create(#CHEETAH, 1243.45, -129.20, 14.63)
@@ -894,10 +896,41 @@ then
     $SprayShop_Active = 0
 end
 Hud.ClearTimer($TIMER)
-Streaming.UnloadSpecialCharacter(1)
 wait 3000
 Camera.DoFade(1500, Fade.Out)
 wait 1500
+if not Marie == 0
+then
+    if
+        Char.IsStillAlive(Marie)
+    then
+        Char.Delete(Marie)
+    else
+        Char.RemoveElegantly(Marie)
+        Char.Delete(Marie)
+    end
+    Marie = 0
+end
+Streaming.UnloadSpecialCharacter(1)
+if not Cheetah == 0
+then
+    if
+        Car.IsStillAlive(Cheetah)
+    then
+        if
+            Player.IsInCar($player, Cheetah)
+        then
+            Car.MarkAsNoLongerNeeded(Cheetah)
+        else
+            Car.Delete(Cheetah)
+        end
+    else
+        Car.Delete(Cheetah)
+    end
+    Cheetah = 0
+end
+World.ClearArea(1243.45, -129.20, 14.63, 6.0, True)
+World.ClearArea(933.66, -252.64, 4.50, 6.0, True)
 Camera.DoFade(1500, Fade.In)
 wait 1500
 Camera.Shake(0)
@@ -921,6 +954,23 @@ while not Player.LocateAnyMeans3D($player, 1419.15, -194.40, 49.74, 1.0, 1.0, 1.
         wait 3000
         Camera.DoFade(1500, Fade.Out)
         wait 1500
+        if not Cheetah == 0
+        then
+            if
+                Car.IsStillAlive(Cheetah)
+            then
+                if
+                    Car.Locate3D(Cheetah, 1243.45, -129.20, 14.63, 6.0, 6.0, 6.0, False)
+                then
+                    Car.Delete(Cheetah)
+                else
+                    Car.MarkAsNoLongerNeeded(Cheetah)
+                end
+            else
+                Car.Delete(Cheetah)
+            end
+            Cheetah = 0
+        end
         CarGenerator.Switch($CheetahGen, 101)
         Blip.Remove($Ammunation)
         Blip.Remove($SprayShopRES)

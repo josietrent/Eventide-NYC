@@ -631,7 +631,11 @@ if (shouldRun(13, "menulogo")) {
   const splash1Png = join(cwd, "plugins", "MenuLogo", "splash1.png");
   const splash1Txd = join(cwd, "plugins", "MenuLogo", "SPLASH1.txd");
   if (await allExist([splash1Png])) {
-    await buildSingleTextureTxd("splash1", splash1Png, splash1Txd);
+    const splashHash = await sha256(await Deno.readFile(splash1Png));
+    if (forceArg || !(await allExist([splash1Txd])) || hashCache[splash1Png] !== splashHash) {
+      await buildSingleTextureTxd("splash1", splash1Png, splash1Txd);
+      hashCache[splash1Png] = splashHash;
+    }
     await Deno.copyFile(splash1Txd, join(txdStagingDir, "SPLASH1.txd"));
     say.done(`  Packaged modloader/${modName}/txd/SPLASH1.txd`);
   }
@@ -640,8 +644,15 @@ if (shouldRun(13, "menulogo")) {
   const mainsc1Txd = join(cwd, "plugins", "MenuLogo", "mainsc1.txd");
   const mainsc2Txd = join(cwd, "plugins", "MenuLogo", "mainsc2.txd");
   if (await allExist([mainsc1Png])) {
-    await buildSingleTextureTxd("mainsc1", mainsc1Png, mainsc1Txd);
-    await buildSingleTextureTxd("mainsc2", mainsc1Png, mainsc2Txd);
+    const mainscHash = await sha256(await Deno.readFile(mainsc1Png));
+    if (forceArg || !(await allExist([mainsc1Txd])) || hashCache[mainsc1Txd] !== mainscHash) {
+      await buildSingleTextureTxd("mainsc1", mainsc1Png, mainsc1Txd);
+      hashCache[mainsc1Txd] = mainscHash;
+    }
+    if (forceArg || !(await allExist([mainsc2Txd])) || hashCache[mainsc2Txd] !== mainscHash) {
+      await buildSingleTextureTxd("mainsc2", mainsc1Png, mainsc2Txd);
+      hashCache[mainsc2Txd] = mainscHash;
+    }
     await Deno.copyFile(mainsc1Txd, join(txdStagingDir, "mainsc1.txd"));
     await Deno.copyFile(mainsc2Txd, join(txdStagingDir, "mainsc2.txd"));
     say.done(`  Packaged modloader/${modName}/txd/mainsc1.txd`);
