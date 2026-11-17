@@ -9,7 +9,6 @@
 script_name 'Marie'
 
 int FindMarie = 0
-int PistolCollected = 0
 int NeedsCar = 0
 int ZoeyHealth = 0
 int MarieGreeted = 0
