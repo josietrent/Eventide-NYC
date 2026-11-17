@@ -555,6 +555,46 @@ if (shouldRun(8, "protection")) {
   );
 }
 
+// Step 8b: Smuggle Mission
+if (shouldRun(8, "smuggle") || shouldRun(8, "protection")) {
+  const smuggleInput = join(cwd, "threads", "smuggle.txt");
+  const smuggleOutput = join(cwd, "threads", "smuggle.cm");
+  if (await allExist([smuggleInput])) {
+    say.heading("Step 8b (smuggle): Compiling smuggle mission...");
+    await compileIfChanged(smuggleInput, smuggleOutput);
+
+    const cleoStagingDir = join(modStagingDir, "CLEO");
+    await ensureDir(cleoStagingDir);
+    await Deno.copyFile(
+      smuggleOutput,
+      join(cleoStagingDir, basename(smuggleOutput)),
+    );
+    say.done(
+      `  Packaged modloader/${modName}/CLEO/${basename(smuggleOutput)}`,
+    );
+  }
+}
+
+// Step 8c: Statue Mission
+if (shouldRun(8, "statue")) {
+  const statueInput = join(cwd, "threads", "statue.txt");
+  const statueOutput = join(cwd, "threads", "statue.cm");
+  if (await allExist([statueInput])) {
+    say.heading("Step 8c (statue): Compiling statue mission...");
+    await compileIfChanged(statueInput, statueOutput);
+
+    const cleoStagingDir = join(modStagingDir, "CLEO");
+    await ensureDir(cleoStagingDir);
+    await Deno.copyFile(
+      statueOutput,
+      join(cleoStagingDir, basename(statueOutput)),
+    );
+    say.done(
+      `  Packaged modloader/${modName}/CLEO/${basename(statueOutput)}`,
+    );
+  }
+}
+
 // Step 9: World Thread
 if (shouldRun(9, "world")) {
   say.heading("Step 9 (world): Compiling world thread...");
