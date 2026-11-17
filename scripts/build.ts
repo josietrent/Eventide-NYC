@@ -669,6 +669,17 @@ if (shouldRun(13, "menulogo")) {
   }
 }
 
+// Step 14: WeaponSprint ASI Plugin
+if (shouldRun(14, "weaponsprint")) {
+  say.heading("Step 14 (weaponsprint): Compiling WeaponSprint.asi...");
+  const asiInput = join(cwd, "plugins", "WeaponSprint", "WeaponSprint.cpp");
+  const asiOutput = join(cwd, "plugins", "WeaponSprint", "WeaponSprint.asi");
+  await compileAsiIfChanged(asiInput, asiOutput, join(stagingDir, "obj"));
+
+  await Deno.copyFile(asiOutput, join(modStagingDir, basename(asiOutput)));
+  say.done(`  Packaged modloader/${modName}/${basename(asiOutput)}`);
+}
+
 // Clean compiler scratch directory before zipping
 try {
   await Deno.remove(join(stagingDir, "obj"), { recursive: true });
