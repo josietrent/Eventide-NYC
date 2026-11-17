@@ -58,6 +58,8 @@ MIS1NAM Driving Mr. Mute...
 MIS2NAM Finding Your Bearings...
 MIS3NAM Meddling in Her Affairs...
 MIS4NAM Pest Removal Ain't Easy...
+MIS5NAM Border Smugglers...
+MIS6NAM The Living Statue...
 MISDEAD	Marie's dead!
 MISFAIL	You fucked up!
 MISFIND Find Marie!
@@ -98,23 +100,17 @@ PACKON1	The Package Tracking System is already on, ~r~dumbass!
 PACKOFF Package Tracking System Disabled! Press the ~y~ P Key to re-enable it.
 PACKREW	Here's a bonus! $10000
 PAKTUT1	You have found a ~y~Hidden Package!
-PAKTUT2	If you find and collect them all, you will be greatly rewarded!
-PAKTUT3	A ~y~Package Tracking System~w~ is available. Pressing the ~y~ P Key~w~ will turn it on.
-PAKTUT4 Pressing the ~y~Comma~w~ or ~y~Period~w~ keys will change the currently tracked package.
-SAVE_1  This abandoned house will serve as a nice hideout.
-SAVE_2  For now, at least...
-SAVE_3  Walking into this sphere behind the bar will save the game.
-SAVE_4  When saving the game, you will lose any wanted level you may have, and time will advance by six hours.
-SPRINT  If you press the ~y~Left Shift~s~ key, you can sprint.
-SPRINT2 You will never tire, and can sprint for as long as you like.
-STARVE  Jesus, I'm fucking starving!
-SUBWAY  Drive to the nearby Subway entrance.
-TOMMY   If you need another car, you can visit Tommy's Cars in Harwood.
-TRYTRY  Try again, yo!
-UPSIDE  You rolled the royce! Run for it!
-VEHHEAL	Vehicle Health:
-VAGRANT	Shit! That's right, Marie isn't here right now, so the store is still closed. Godsdammit!
-VAGRONT	I guess I'll have to wait here... Like some dirty, loitering vagrant.
-WHEELS	You need some wheels for this gig!
-ZOEYBAD	...What have I done?!
-LANDSTK	Canyonero
+PAKTUT2	Collect 6 more for a special reward!
+PISTOL  Get a ~b~Pistol~w~ from the parking lot behind ~b~AMCo.~w~
+RADIO1	Press the ~k~~VEHICLE_CHANGE_RADIO_STATION~ key to change radio stations.
+RADIO2  You can change the radio station at any time by pressing the ~k~~VEHICLE_CHANGE_RADIO_STATION~ key.
+RADIO3  Listen to whatever station you want!
+REWARD	You've unlocked a new weapon!
+SEVEN	Go to ~b~Sex Club 7~w~ in the ~y~Red Light District~w~.
+SPRINT	Press the ~k~~PED_SPRINT~ ~w~key to sprint.
+TURRET	Look around using the Mouse to aim the turret.
+WANTED	You have a ~r~Wanted Level!~w~ The police are looking for you!
+WASTED  Wasted!
+WASTED2	You're lucky to be alive!
+WHERE	Where are you going?!
+MARHEAL Marie's Health:

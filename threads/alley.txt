@@ -527,7 +527,6 @@ end
 
 :Alley_Pass
 $LuigiBlip = Blip.AddSpriteForContactPoint(1214.89, -327.47, 26.07, RadarSprite.Luigi)
-$KenjiBlip = Blip.AddSpriteForContactPoint(1004.42, -49.06, 7.44, RadarSprite.Kenji)
 Text.PrintHelpString("A new Point of Contact is available.")
 while true
     wait 250
