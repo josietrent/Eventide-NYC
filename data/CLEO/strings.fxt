@@ -34,6 +34,7 @@ GETOUT  Leave this area at once!
 GOGAS	Go to the ~y~Gas Station.
 GOTHOSP	Drive to the ~g~Hospital.
 GTOROOF	How the hell did I get clear up here? How am I supposed to get down?!
+LANDSTA Canyonero
 LIFTDN	The Lift Bridge between Staunton and Shoreside is now operational.
 LIFTUP	The Lift Bridge is currently being repaired. Please come back later.
 LI_SHOP	Go to the Shops in Little Italy.
@@ -106,9 +107,13 @@ RADIO1	Press the ~k~~VEHICLE_CHANGE_RADIO_STATION~ key to change radio stations.
 RADIO2  You can change the radio station at any time by pressing the ~k~~VEHICLE_CHANGE_RADIO_STATION~ key.
 RADIO3  Listen to whatever station you want!
 REWARD	You've unlocked a new weapon!
+STARVE  Jesus, I'm starving!
 SEVEN	Go to ~b~Sex Club 7~w~ in the ~y~Red Light District~w~.
 SPRINT	Press the ~k~~PED_SPRINT~ ~w~key to sprint.
+SUBWAY  Drive to the nearby Subway Station.
+TOMMY   If you need another car, Tommy's in Harwood has some inventory in stock.
 TURRET	Look around using the Mouse to aim the turret.
+VEHHEAL Vehicle Health:
 WANTED	You have a ~r~Wanted Level!~w~ The police are looking for you!
 WASTED  Wasted!
 WASTED2	You're lucky to be alive!
