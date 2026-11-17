@@ -454,9 +454,118 @@ end
 if
     $ProtectionDone == 1
 then
+    $LuigiBlip = Blip.AddSpriteForContactPoint(1214.89, -327.47, 26.07, RadarSprite.Luigi)
+    start_new_script @Smuggle
     terminate_this_script
 else
     $OnProtectionMission = 0
     $LuigiBlip = Blip.AddSpriteForContactPoint(1214.89, -327.47, 26.07, RadarSprite.Luigi)
     goto @Affairs_Loop
+end
+
+/// Trigger mission 5: "Border Smugglers..."
+:Smuggle
+script_name 'Smuggle'
+
+:Smuggle_Loop
+while $OnSmuggleMission == 0
+    wait 250
+    if or
+        not Player.IsPlaying($player)
+        Camera.GetFadingStatus()
+    then
+        continue
+    end
+
+    if and
+        Player.CanStartMission($player)
+        $onmission == 0
+        Player.LocateAnyMeans3D($player, 1214.89, -327.47, 26.07, 1.5, 1.5, 2.0, False)
+    then
+        Blip.Remove($LuigiBlip)
+        Player.SetControl($player, False)
+        Text.PrintBigString("Border Smugglers...", 5000, TextStyle.BottomRight)
+        Camera.DoFade(1500, Fade.Out)
+        wait 1500
+        $OnSmuggleMission = 1
+        stream_custom_script "smuggle.cm"
+        break
+    else
+        if and
+            $onmission == 1
+            Player.LocateOnFoot3D($player, 1214.89, -327.47, 26.07, 3.0, 3.0, 3.0, False)
+        then
+            Text.PrintHelp('FUCKOFF')
+            wait 5000
+        end
+    end
+end
+
+while $OnSmuggleMission == 1
+    wait 250
+end
+
+if
+    $SmuggleMissionDone == 1
+then
+    $KenjiBlip = Blip.AddSpriteForContactPoint(1004.42, -49.06, 7.44, RadarSprite.Kenji)
+    Text.PrintHelpString("A new Point of Contact is available.")
+    start_new_script @Kenji
+    terminate_this_script
+else
+    $OnSmuggleMission = 0
+    $LuigiBlip = Blip.AddSpriteForContactPoint(1214.89, -327.47, 26.07, RadarSprite.Luigi)
+    goto @Smuggle_Loop
+end
+
+/// Trigger mission 6: "The Living Statue..."
+:Kenji
+script_name 'Kenji'
+
+:Kenji_Loop
+while $OnStatueMission == 0
+    wait 250
+    if or
+        not Player.IsPlaying($player)
+        Camera.GetFadingStatus()
+    then
+        continue
+    end
+
+    if and
+        Player.CanStartMission($player)
+        $onmission == 0
+        Player.LocateAnyMeans3D($player, 1004.42, -49.06, 7.44, 2.0, 2.0, 2.0, False)
+    then
+        Blip.Remove($KenjiBlip)
+        Player.SetControl($player, False)
+        Text.PrintBigString("The Living Statue...", 5000, TextStyle.BottomRight)
+        Camera.DoFade(1500, Fade.Out)
+        wait 1500
+        $OnStatueMission = 1
+        stream_custom_script "statue.cm"
+        break
+    else
+        if and
+            $onmission == 1
+            Player.LocateOnFoot3D($player, 1004.42, -49.06, 7.44, 3.0, 3.0, 3.0, False)
+        then
+            Text.PrintHelp('FUCKOFF')
+            wait 5000
+        end
+    end
+end
+
+while $OnStatueMission == 1
+    wait 250
+end
+
+if
+    $StatueMissionDone == 1
+then
+    terminate_this_script
+else
+    $OnStatueMission = 0
+    $KenjiBlip = Blip.AddSpriteForContactPoint(1004.42, -49.06, 7.44, RadarSprite.Kenji)
+    goto @Kenji_Loop
 end
