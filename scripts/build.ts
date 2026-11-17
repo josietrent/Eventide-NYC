@@ -581,6 +581,15 @@ if (shouldRun(10, "triblips")) {
   say.done(`  Packaged modloader/${modName}/CLEO/${basename(triOutput)}`);
 }
 
+// Package CLEO custom strings
+const stringsSrc = join(cwd, "data", "CLEO", "strings.fxt");
+if (await allExist([stringsSrc])) {
+  const cleoTextDir = join(modStagingDir, "CLEO", "cleo_text");
+  await ensureDir(cleoTextDir);
+  await Deno.copyFile(stringsSrc, join(cleoTextDir, "strings.fxt"));
+  say.done(`  Packaged modloader/${modName}/CLEO/cleo_text/strings.fxt`);
+}
+
 // Step 11: PauseRadio ASI Plugin
 if (shouldRun(11, "pauseradio")) {
   say.heading("Step 11 (pauseradio): Compiling PauseRadio.asi...");
@@ -632,9 +641,9 @@ if (shouldRun(13, "menulogo")) {
   const splash1Txd = join(cwd, "plugins", "MenuLogo", "SPLASH1.txd");
   if (await allExist([splash1Png])) {
     const splashHash = await sha256(await Deno.readFile(splash1Png));
-    if (forceArg || !(await allExist([splash1Txd])) || hashCache[splash1Png] !== splashHash) {
+    if (forceArg || !(await allExist([splash1Txd])) || hashCache[splash1Txd] !== splashHash) {
       await buildSingleTextureTxd("splash1", splash1Png, splash1Txd);
-      hashCache[splash1Png] = splashHash;
+      await saveHash(splash1Txd, splashHash);
     }
     await Deno.copyFile(splash1Txd, join(txdStagingDir, "SPLASH1.txd"));
     say.done(`  Packaged modloader/${modName}/txd/SPLASH1.txd`);
@@ -647,11 +656,11 @@ if (shouldRun(13, "menulogo")) {
     const mainscHash = await sha256(await Deno.readFile(mainsc1Png));
     if (forceArg || !(await allExist([mainsc1Txd])) || hashCache[mainsc1Txd] !== mainscHash) {
       await buildSingleTextureTxd("mainsc1", mainsc1Png, mainsc1Txd);
-      hashCache[mainsc1Txd] = mainscHash;
+      await saveHash(mainsc1Txd, mainscHash);
     }
     if (forceArg || !(await allExist([mainsc2Txd])) || hashCache[mainsc2Txd] !== mainscHash) {
       await buildSingleTextureTxd("mainsc2", mainsc1Png, mainsc2Txd);
-      hashCache[mainsc2Txd] = mainscHash;
+      await saveHash(mainsc2Txd, mainscHash);
     }
     await Deno.copyFile(mainsc1Txd, join(txdStagingDir, "mainsc1.txd"));
     await Deno.copyFile(mainsc2Txd, join(txdStagingDir, "mainsc2.txd"));
