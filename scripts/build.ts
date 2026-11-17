@@ -16,6 +16,7 @@ import { basename, dirname, extname, join } from "@std/path";
 import { ensureDir } from "@std/fs/ensure-dir";
 import { includeTree } from "./includes.ts";
 import { say } from "./log.ts";
+import { buildMenuTxd } from "./build-menu-txd.ts";
 
 // Bisection / filtering arguments
 const args = Deno.args;
@@ -603,6 +604,22 @@ if (shouldRun(12, "pausemusic")) {
   await Deno.copyFile(iniInput, join(modStagingDir, basename(iniInput)));
   say.done(`  Packaged modloader/${modName}/${basename(asiOutput)}`);
   say.done(`  Packaged modloader/${modName}/${basename(iniInput)}`);
+}
+
+// Step 13: MenuLogo ASI Plugin & eventide_menu.txd
+if (shouldRun(13, "menulogo")) {
+  say.heading("Step 13 (menulogo): Compiling MenuLogo.asi...");
+  const asiInput = join(cwd, "plugins", "MenuLogo", "MenuLogo.cpp");
+  const asiOutput = join(cwd, "plugins", "MenuLogo", "MenuLogo.asi");
+  const pngInput = join(cwd, "plugins", "MenuLogo", "eventidelogo128.png");
+  const txdOutput = join(cwd, "plugins", "MenuLogo", "eventide_menu.txd");
+  await compileAsiIfChanged(asiInput, asiOutput, join(stagingDir, "obj"));
+  await buildMenuTxd(pngInput, txdOutput);
+
+  await Deno.copyFile(asiOutput, join(modStagingDir, basename(asiOutput)));
+  await Deno.copyFile(txdOutput, join(modStagingDir, basename(txdOutput)));
+  say.done(`  Packaged modloader/${modName}/${basename(asiOutput)}`);
+  say.done(`  Packaged modloader/${modName}/${basename(txdOutput)}`);
 }
 
 // Clean compiler scratch directory before zipping
