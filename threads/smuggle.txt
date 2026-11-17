@@ -1,0 +1,303 @@
+{$CLEO .cm}
+
+{$USE CLEO}
+
+{$INCLUDE ../utils/globals.txt}
+
+//-------------Mission 5 (triggered by :Smuggle in main.txt)---------------
+:Smuggle
+script_name 'Smuggle'
+
+Char Luigi = 0
+Char Smuggler = 0
+Car SmugglerCar = 0
+Blip StashBlip = 0
+Blip SmugglerBlip = 0
+Blip SprayShopBlip = 0
+int SprayShopActive = 0
+int HasPackage = 0
+
+$onmission = 1
+$OnSmuggleMission = 1
+$SmuggleMissionDone = 0
+wait 100
+
+Streaming.RequestModel(#PEREN)
+Streaming.RequestModel(#B_MAN1)
+Streaming.LoadSpecialCharacter(1, 'LUIGI')
+wait 500
+Streaming.LoadAllModelsNow()
+wait 500
+
+while true
+    wait 0
+    if and
+        Streaming.HasModelLoaded(#PEREN)
+        Streaming.HasModelLoaded(#B_MAN1)
+        Streaming.HasSpecialCharacterLoaded(1)
+    then
+        break
+    end
+end
+
+Hud.SwitchWidescreen(True)
+wait 1000
+Player.SetControl($player, False)
+
+// Create Louie at Marco's Bistro
+World.ClearArea(1219.74, -313.32, 29.95, 6.0, True)
+Luigi = Char.Create(PedType.Special, #SPECIAL01, 1219.74, -313.32, 29.95)
+Char.SetHeading(Luigi, 180.0)
+
+// Position player
+Player.SetCoordinates($player, 1219.74, -316.50, 29.95)
+Player.SetHeading($player, 0.0)
+
+Camera.SetFixedPosition(1221.50, -318.00, 31.00, 0.0, 0.0, 0.0)
+Camera.PointAtChar(Luigi, CameraMode.FollowPed, SwitchType.JumpCut)
+Camera.DoFade(1500, Fade.In)
+wait 1500
+
+// Louie Dialogue Sequence with skip check
+Text.Print('SMUG1', 4000, 1)
+TIMERA = 0
+while TIMERA < 4000
+    wait 0
+    if or
+        Pad.IsKeyPressed(KeyCode.LeftShift)
+        Pad.IsKeyPressed(KeyCode.Space)
+        Pad.IsKeyPressed(KeyCode.F)
+    then
+        jump @Smuggle_Briefing_Skip
+    end
+end
+
+Text.Print('SMUG2', 4000, 1)
+TIMERA = 0
+while TIMERA < 4000
+    wait 0
+    if or
+        Pad.IsKeyPressed(KeyCode.LeftShift)
+        Pad.IsKeyPressed(KeyCode.Space)
+        Pad.IsKeyPressed(KeyCode.F)
+    then
+        jump @Smuggle_Briefing_Skip
+    end
+end
+
+Text.Print('SMUG3', 4000, 1)
+TIMERA = 0
+while TIMERA < 4000
+    wait 0
+    if or
+        Pad.IsKeyPressed(KeyCode.LeftShift)
+        Pad.IsKeyPressed(KeyCode.Space)
+        Pad.IsKeyPressed(KeyCode.F)
+    then
+        jump @Smuggle_Briefing_Skip
+    end
+end
+
+Text.Print('SMUG4', 4000, 1)
+TIMERA = 0
+while TIMERA < 4000
+    wait 0
+    if or
+        Pad.IsKeyPressed(KeyCode.LeftShift)
+        Pad.IsKeyPressed(KeyCode.Space)
+        Pad.IsKeyPressed(KeyCode.F)
+    then
+        jump @Smuggle_Briefing_Skip
+    end
+end
+
+:Smuggle_Briefing_Skip
+Text.ClearPrints()
+Camera.RestoreJumpcut()
+Hud.SwitchWidescreen(False)
+Player.SetControl($player, True)
+
+// Remove Louie elegantly
+if not Luigi == 0
+then
+    Char.RemoveElegantly(Luigi)
+    Luigi = 0
+end
+Streaming.UnloadSpecialCharacter(1)
+
+// Stage 1: Collect Contraband in Saint Mark's
+StashBlip = Blip.AddForCoord(1288.5, -314.0, 32.0)
+Text.PrintHelp('SMUG5')
+
+while HasPackage == 0
+    wait 250
+    if not Player.IsPlaying($player)
+    then
+        jump @Smuggle_Fail
+    end
+
+    if Player.LocateAnyMeans3D($player, 1288.5, -314.0, 32.0, 2.5, 2.5, 2.0, True)
+    then
+        Blip.Remove(StashBlip)
+        HasPackage = 1
+        // Police heat triggered!
+        Player.AlterWantedLevelNoDrop($player, 2)
+        Text.PrintHelp('SMUG6')
+        break
+    end
+end
+
+// Stage 2: Deliver to Smuggler near Harwood / Porter Tunnel edge (900.0, -45.0, 5.5)
+World.ClearArea(900.0, -45.0, 5.5, 10.0, True)
+SmugglerCar = Car.Create(#PEREN, 896.0, -45.0, 5.5)
+Car.SetHeading(SmugglerCar, 270.0)
+Smuggler = Char.Create(PedType.CivMale, #B_MAN1, 900.0, -45.0, 5.5)
+Char.SetHeading(Smuggler, 90.0)
+Char.SetObjWaitOnFoot(Smuggler)
+
+SmugglerBlip = Blip.AddForCoord(900.0, -45.0, 5.5)
+
+while true
+    wait 250
+    if or
+        not Player.IsPlaying($player)
+        not Char.IsStillAlive(Smuggler)
+    then
+        jump @Smuggle_Fail
+    end
+
+    // Check if player has heat near smuggler
+    if Player.LocateAnyMeans3D($player, 900.0, -45.0, 5.5, 25.0, 25.0, 10.0, False)
+    then
+        if Player.IsWantedLevelGreater($player, 0)
+        then
+            if SprayShopActive == 0
+            then
+                Text.PrintHelp('SMUG8')
+                SprayShopBlip = Blip.AddSpriteForCoord(924.0, -361.0, 10.0, RadarSprite.Spray)
+                SprayShopActive = 1
+            end
+        else
+            if SprayShopActive == 1
+            then
+                Blip.Remove(SprayShopBlip)
+                SprayShopActive = 0
+            end
+        end
+    end
+
+    // Meet smuggler on foot or in car when NOT wanted
+    if and
+        not Player.IsWantedLevelGreater($player, 0)
+        Player.LocateAnyMeans3D($player, 900.0, -45.0, 5.5, 4.0, 4.0, 3.0, True)
+    then
+        Blip.Remove(SmugglerBlip)
+        if SprayShopActive == 1
+        then
+            Blip.Remove(SprayShopBlip)
+            SprayShopActive = 0
+        end
+        jump @Smuggle_MeetCutscene
+    end
+end
+
+:Smuggle_MeetCutscene
+Player.SetControl($player, False)
+Hud.SwitchWidescreen(True)
+Camera.SetFixedPosition(905.0, -43.0, 7.0, 0.0, 0.0, 0.0)
+Camera.PointAtChar(Smuggler, CameraMode.FollowPed, SwitchType.JumpCut)
+wait 1000
+
+// Sudden barrier flare / eerie weather flicker
+play_audio_stream_1channel "audio/EC/miasma.wav", False, 1.0
+Weather.ForceNow(WeatherType.Foggy)
+Camera.SetFadingColor(80, 0, 120)
+Camera.DoFade(300, Fade.Out)
+wait 300
+Camera.DoFade(500, Fade.In)
+wait 500
+
+Text.Print('SMUGA', 3500, 1)
+wait 3500
+
+Text.Print('SMUGB', 3500, 1)
+Char.SetObjFleeCharAnyMeans(Smuggler, $scplayer)
+wait 2000
+
+Camera.RestoreJumpcut()
+Hud.SwitchWidescreen(False)
+Camera.SetFadingColor(0, 0, 0)
+Camera.DoFade(1000, Fade.In)
+wait 1000
+
+// Mission Success!
+Text.PrintWithNumberBig('MISPASS', 15000, 5000, TextStyle.Middle)
+Audio.PlayMissionPassedTune(1)
+Player.AddScore($player, 15000)
+Stat.RegisterMissionPassed('MIS5NAM')
+Mission.Finish()
+$SmuggleMissionDone = 1
+$onmission = 0
+
+// Cleanup
+if not Smuggler == 0
+then
+    Char.RemoveElegantly(Smuggler)
+    Smuggler = 0
+end
+if not SmugglerCar == 0
+then
+    Car.MarkAsNoLongerNeeded(SmugglerCar)
+    SmugglerCar = 0
+end
+Streaming.MarkModelAsNoLongerNeeded(#PEREN)
+Streaming.MarkModelAsNoLongerNeeded(#B_MAN1)
+Player.SetControl($player, True)
+$OnSmuggleMission = 0
+terminate_this_custom_script
+
+:Smuggle_Fail
+$onmission = 0
+$SmuggleMissionDone = 0
+Text.ClearPrints()
+if not StashBlip == 0
+then
+    Blip.Remove(StashBlip)
+end
+if not SmugglerBlip == 0
+then
+    Blip.Remove(SmugglerBlip)
+end
+if not SprayShopBlip == 0
+then
+    Blip.Remove(SprayShopBlip)
+end
+Text.PrintBigString("Mission Failed!", 3000, TextStyle.Middle)
+wait 3000
+Camera.DoFade(1500, Fade.Out)
+wait 1500
+if not Luigi == 0
+then
+    Char.Delete(Luigi)
+    Luigi = 0
+end
+if not Smuggler == 0
+then
+    Char.Delete(Smuggler)
+    Smuggler = 0
+end
+if not SmugglerCar == 0
+then
+    Car.Delete(SmugglerCar)
+    SmugglerCar = 0
+end
+Streaming.UnloadSpecialCharacter(1)
+Streaming.MarkModelAsNoLongerNeeded(#PEREN)
+Streaming.MarkModelAsNoLongerNeeded(#B_MAN1)
+Camera.RestoreJumpcut()
+Hud.SwitchWidescreen(False)
+Camera.DoFade(1500, Fade.In)
+wait 1500
+Player.SetControl($player, True)
+$OnSmuggleMission = 0
+terminate_this_custom_script
