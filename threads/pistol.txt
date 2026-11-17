@@ -13,7 +13,6 @@ int PistolCollected = 0
 int NeedsCar = 0
 int ZoeyHealth = 0
 int MarieGreeted = 0
-Pickup PistolPickup = 0
 Blip GunBlip = 0
 Blip Destination = 0
 Blip MarieBlip = 0
