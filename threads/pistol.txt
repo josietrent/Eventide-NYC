@@ -5,8 +5,8 @@
 {$INCLUDE ../utils/globals.txt}
 
 //-------------Mission 2 (triggered by :Pistol)---------------
-:Gun
-script_name 'Gun'
+:Marie
+script_name 'Marie'
 
 int FindMarie = 0
 int PistolCollected = 0
@@ -29,20 +29,18 @@ $SafeAndSound = 0
 $SprayShop_Active = 0
 wait 100
 
-:Gun_Loading
-Streaming.RequestModel(#COLT45)
+:Marie_Loading
 Streaming.RequestModel(#CHEETAH)
 Streaming.LoadSpecialCharacter(1, 'MISTY') // Temporary GTA III ped model placeholder for Marie until custom character models/bones are added
 wait 500
 Streaming.LoadAllModelsNow()
 
-:Gun_LoadCheck
-while not Streaming.HasModelLoaded(#COLT45)
+:Marie_LoadCheck
+while not Streaming.HasModelLoaded(#CHEETAH)
     wait 250
     if and
         Streaming.HasSpecialCharacterLoaded(1)
         Streaming.HasModelLoaded(#CHEETAH)
-        Streaming.HasModelLoaded(#COLT45)
     then
         break
     else
@@ -50,30 +48,15 @@ while not Streaming.HasModelLoaded(#COLT45)
     end
 end
 
-:Gun_Spawn
+:Marie_Spawn
 World.ClearArea(1243.45, -129.20, 14.63, 6.0, True)
 World.ClearArea(933.66, -252.64, 4.50, 6.0, True)
-PistolPickup = Pickup.CreateWithAmmo(#COLT45, PickupType.OnStreet, 600, 1272.72, -123.51, 15.16)
-GunBlip = Blip.AddForPickup(PistolPickup)
 Cheetah = Car.Create(#CHEETAH, 1243.45, -129.20, 14.63)
 Blip.ChangeColor(GunBlip, BlipColor.LightBlue)
 Player.SetControl($player, True)
 wait 0
 Camera.DoFade(500, Fade.In)
 wait 500
-Text.PrintNow('FINDPIS', 2000, 0)
-
-:Gun_Collected
-while not Pickup.HasBeenCollected(PistolPickup)
-    wait 0
-end
-
-wait 0
-
-PistolCollected = 1
-Blip.Remove(GunBlip)
-wait 500
-
 Marie = Char.Create(PedType.CivFemale, #SPECIAL01, 1119.10, -437.00, 19.97)
 Char.SetObjWaitOnFoot(Marie)
 wait 250
@@ -112,7 +95,7 @@ while not Player.LocateOnFoot3D($player, 1147.61, -95.21, 7.02, 1.0, 1.0, 0.75, 
                 Pad.IsKeyPressed(KeyCode.Space)
                 Pad.IsKeyPressed(KeyCode.F)
             then
-                jump @Pistol_Gas_Skip
+                jump @Marie_Gas_Skip
             end
         end
         Hud.SwitchWidescreen(True)
@@ -128,7 +111,7 @@ while not Player.LocateOnFoot3D($player, 1147.61, -95.21, 7.02, 1.0, 1.0, 0.75, 
                 Pad.IsKeyPressed(KeyCode.Space)
                 Pad.IsKeyPressed(KeyCode.F)
             then
-                jump @Pistol_Gas_Skip
+                jump @Marie_Gas_Skip
             end
         end
         Camera.DoFade(500, Fade.In)
@@ -140,7 +123,7 @@ while not Player.LocateOnFoot3D($player, 1147.61, -95.21, 7.02, 1.0, 1.0, 0.75, 
                 Pad.IsKeyPressed(KeyCode.Space)
                 Pad.IsKeyPressed(KeyCode.F)
             then
-                jump @Pistol_Gas_Skip
+                jump @Marie_Gas_Skip
             end
         end
         Text.Print('VAGRANT', 4000, 0)
@@ -152,7 +135,7 @@ while not Player.LocateOnFoot3D($player, 1147.61, -95.21, 7.02, 1.0, 1.0, 0.75, 
                 Pad.IsKeyPressed(KeyCode.Space)
                 Pad.IsKeyPressed(KeyCode.F)
             then
-                jump @Pistol_Gas_Skip
+                jump @Marie_Gas_Skip
             end
         end
         Text.Print('VAGRONT', 5000, 0)
@@ -164,7 +147,7 @@ while not Player.LocateOnFoot3D($player, 1147.61, -95.21, 7.02, 1.0, 1.0, 0.75, 
                 Pad.IsKeyPressed(KeyCode.Space)
                 Pad.IsKeyPressed(KeyCode.F)
             then
-                jump @Pistol_Gas_Skip
+                jump @Marie_Gas_Skip
             end
         end
         Camera.DoFade(1500, Fade.Out)
@@ -176,7 +159,7 @@ while not Player.LocateOnFoot3D($player, 1147.61, -95.21, 7.02, 1.0, 1.0, 0.75, 
                 Pad.IsKeyPressed(KeyCode.Space)
                 Pad.IsKeyPressed(KeyCode.F)
             then
-                jump @Pistol_Gas_Skip
+                jump @Marie_Gas_Skip
             end
         end
         Camera.PointAtChar(Marie, CameraMode.FollowPed, SwitchType.JumpCut)
@@ -188,7 +171,7 @@ while not Player.LocateOnFoot3D($player, 1147.61, -95.21, 7.02, 1.0, 1.0, 0.75, 
                 Pad.IsKeyPressed(KeyCode.Space)
                 Pad.IsKeyPressed(KeyCode.F)
             then
-                jump @Pistol_Gas_Skip
+                jump @Marie_Gas_Skip
             end
         end
         Camera.DoFade(500, Fade.In)
@@ -200,7 +183,7 @@ while not Player.LocateOnFoot3D($player, 1147.61, -95.21, 7.02, 1.0, 1.0, 0.75, 
                 Pad.IsKeyPressed(KeyCode.Space)
                 Pad.IsKeyPressed(KeyCode.F)
             then
-                jump @Pistol_Gas_Skip
+                jump @Marie_Gas_Skip
             end
         end
         Text.PrintHelp('LIQUOR')
@@ -212,7 +195,7 @@ while not Player.LocateOnFoot3D($player, 1147.61, -95.21, 7.02, 1.0, 1.0, 0.75, 
                 Pad.IsKeyPressed(KeyCode.Space)
                 Pad.IsKeyPressed(KeyCode.F)
             then
-                jump @Pistol_Gas_Skip
+                jump @Marie_Gas_Skip
             end
         end
         Camera.DoFade(1500, Fade.Out)
@@ -224,7 +207,7 @@ while not Player.LocateOnFoot3D($player, 1147.61, -95.21, 7.02, 1.0, 1.0, 0.75, 
                 Pad.IsKeyPressed(KeyCode.Space)
                 Pad.IsKeyPressed(KeyCode.F)
             then
-                jump @Pistol_Gas_Skip
+                jump @Marie_Gas_Skip
             end
         end
         Camera.RestoreJumpcut()
@@ -234,7 +217,7 @@ while not Player.LocateOnFoot3D($player, 1147.61, -95.21, 7.02, 1.0, 1.0, 0.75, 
         Player.SetControl($player, True)
         break
 
-        :Pistol_Gas_Skip
+        :Marie_Gas_Skip
         Text.ClearPrints()
         Char.SetUsePednodeSeek(Marie, True)
         Char.SetObjGotoCoordOnFoot(Marie, 933.66, -252.64)
@@ -247,7 +230,7 @@ while not Player.LocateOnFoot3D($player, 1147.61, -95.21, 7.02, 1.0, 1.0, 0.75, 
     end
 end
 
-:Marie
+:Marie_Meetup
 MarieBlip = Blip.AddForChar(Marie)
 Blip.ChangeDisplay(MarieBlip, BlipDisplay.Both)
 Blip.ChangeColor(MarieBlip, BlipColor.Cyan)
@@ -314,13 +297,13 @@ while not Player.LocateAnyMeans3D($player, 933.66, -252.64, 4.50, 1.0, 1.0, 1.0,
     if
         $TIMER == 0
     then
-        jump @GunFail
+        jump @Marie_Fail
     end
 
     if
         Char.IsDead(Marie)
     then
-        jump @GunFail
+        jump @Marie_Fail
     end
 
     if and
@@ -348,7 +331,7 @@ while true
     if
         not Char.IsStillAlive(Marie)
     then
-        jump @GunFail
+        jump @Marie_Fail
     end
 
     if
@@ -382,7 +365,7 @@ while true
     if
         not Char.IsStillAlive(Marie)
     then
-        jump @GunFail
+        jump @Marie_Fail
     end
 
     if
@@ -488,7 +471,7 @@ while true
     if
         not Char.IsStillAlive(Marie)
     then
-        jump @GunFail
+        jump @Marie_Fail
     end
     if
         not Car.IsStillAlive(MyCar)
@@ -571,7 +554,7 @@ while FindMarie == 1
     if
         not Char.IsStillAlive(Marie)
     then
-        jump @GunFail
+        jump @Marie_Fail
     end
     if
         not Car.IsStillAlive(MyCar)
@@ -617,7 +600,7 @@ while true
     if
         not Char.IsStillAlive(Marie)
     then
-        jump @GunFail
+        jump @Marie_Fail
     end
 
     // 1. Car dead or on fire (< 250 HP): bail out & flee before it explodes
@@ -644,7 +627,7 @@ while true
             if
                 not Char.IsStillAlive(Marie)
             then
-                jump @GunFail
+                jump @Marie_Fail
             end
         end
         jump @CarMarie
@@ -672,7 +655,7 @@ while true
                 if
                     not Char.IsStillAlive(Marie)
                 then
-                    jump @GunFail
+                    jump @Marie_Fail
                 end
                 if
                     not Car.IsStillAlive(MyCar)
@@ -694,7 +677,7 @@ while true
             if
                 not Char.IsStillAlive(Marie)
             then
-                jump @GunFail
+                jump @Marie_Fail
             end
         end
         jump @CarMarie
@@ -722,7 +705,7 @@ while true
                 if
                     not Char.IsStillAlive(Marie)
                 then
-                    jump @GunFail
+                    jump @Marie_Fail
                 end
                 if
                     not Car.IsStillAlive(MyCar)
@@ -756,7 +739,7 @@ while true
                 if
                     not Char.IsStillAlive(Marie)
                 then
-                    jump @GunFail
+                    jump @Marie_Fail
                 end
                 if
                     not Car.IsStillAlive(MyCar)
@@ -794,7 +777,7 @@ while true
             if
                 not Char.IsStillAlive(Marie)
             then
-                jump @GunFail
+                jump @Marie_Fail
             end
 
             if
@@ -831,7 +814,7 @@ while true
                 $TIMER == 0
             then
                 Text.Print('MISTAXI', 3000, 1)
-                jump @GunFail
+                jump @Marie_Fail
             end
         end
 
@@ -888,7 +871,7 @@ while true
                 Pad.IsKeyPressed(KeyCode.Space)
                 Pad.IsKeyPressed(KeyCode.F)
             then
-                jump @Pistol_Dropoff_Skip
+                jump @Marie_Dropoff_Skip
             end
         end
         Text.Print('MISLUI', 4000, 0)
@@ -900,7 +883,7 @@ while true
                 Pad.IsKeyPressed(KeyCode.Space)
                 Pad.IsKeyPressed(KeyCode.F)
             then
-                jump @Pistol_Dropoff_Skip
+                jump @Marie_Dropoff_Skip
             end
         end
         Text.Print('MISLUI2', 5000, 0)
@@ -912,7 +895,7 @@ while true
                 Pad.IsKeyPressed(KeyCode.Space)
                 Pad.IsKeyPressed(KeyCode.F)
             then
-                jump @Pistol_Dropoff_Skip
+                jump @Marie_Dropoff_Skip
             end
         end
         Text.Print('MISLUI3', 5000, 0)
@@ -924,7 +907,7 @@ while true
                 Pad.IsKeyPressed(KeyCode.Space)
                 Pad.IsKeyPressed(KeyCode.F)
             then
-                jump @Pistol_Dropoff_Skip
+                jump @Marie_Dropoff_Skip
             end
         end
         Text.Print('MISMONY', 5000, 0)
@@ -941,7 +924,7 @@ while true
                 Pad.IsKeyPressed(KeyCode.Space)
                 Pad.IsKeyPressed(KeyCode.F)
             then
-                jump @Pistol_Dropoff_Skip
+                jump @Marie_Dropoff_Skip
             end
         end
         Text.Print('MISWORK', 8000, 0)
@@ -953,7 +936,7 @@ while true
                 Pad.IsKeyPressed(KeyCode.Space)
                 Pad.IsKeyPressed(KeyCode.F)
             then
-                jump @Pistol_Dropoff_Skip
+                jump @Marie_Dropoff_Skip
             end
         end
         Char.SetObjLeaveCar(Marie, MyCar)
@@ -962,7 +945,7 @@ while true
             if
                 not Char.IsStillAlive(Marie)
             then
-                jump @GunFail
+                jump @Marie_Fail
             end
             if
                 not Car.IsStillAlive(MyCar)
@@ -974,7 +957,7 @@ while true
                 Pad.IsKeyPressed(KeyCode.Space)
                 Pad.IsKeyPressed(KeyCode.F)
             then
-                jump @Pistol_Dropoff_Skip
+                jump @Marie_Dropoff_Skip
             end
         end
 
@@ -986,7 +969,7 @@ while true
             if
                 not Char.IsStillAlive(Marie)
             then
-                jump @GunFail
+                jump @Marie_Fail
             end
             if
                 TIMERA >= 12000
@@ -998,7 +981,7 @@ while true
                 Pad.IsKeyPressed(KeyCode.Space)
                 Pad.IsKeyPressed(KeyCode.F)
             then
-                jump @Pistol_Dropoff_Skip
+                jump @Marie_Dropoff_Skip
             end
         end
 
@@ -1010,7 +993,7 @@ while true
             if
                 not Char.IsStillAlive(Marie)
             then
-                jump @GunFail
+                jump @Marie_Fail
             end
             if
                 TIMERA >= 12000
@@ -1022,7 +1005,7 @@ while true
                 Pad.IsKeyPressed(KeyCode.Space)
                 Pad.IsKeyPressed(KeyCode.F)
             then
-                jump @Pistol_Dropoff_Skip
+                jump @Marie_Dropoff_Skip
             end
         end
 
@@ -1032,9 +1015,9 @@ while true
         Destination = Blip.AddForCoord(1419.15, -194.40, 49.74)
         Blip.ChangeColor(Destination, BlipColor.Yellow)
         GunSphere = Sphere.Create(1419.15, -194.40, 49.74, 3.0)
-        jump @Gun_Success
+        jump @Marie_Success
 
-        :Pistol_Dropoff_Skip
+        :Marie_Dropoff_Skip
         Text.ClearPrints()
         if MarieGreeted == 0
         then
@@ -1050,7 +1033,7 @@ while true
         Destination = Blip.AddForCoord(1419.15, -194.40, 49.74)
         Blip.ChangeColor(Destination, BlipColor.Yellow)
         GunSphere = Sphere.Create(1419.15, -194.40, 49.74, 3.0)
-        jump @Gun_Success
+        jump @Marie_Success
     end
 end
 
@@ -1082,7 +1065,7 @@ Player.SetControl($player, True)
 Text.Print('ZOEYBAD', 5000, 0)
 wait 5000
 
-:GunFail
+:Marie_Fail
 //Mission.Fail()
 Text.PrintBig('MISFAIL', 3000, TextStyle.Middle)
 if
@@ -1152,7 +1135,7 @@ Player.SetControl($player, True)
 $OnGunMission = 0
 terminate_this_custom_script
 
-:Gun_Success
+:Marie_Success
 while not Player.LocateAnyMeans3D($player, 1419.15, -194.40, 49.74, 1.0, 1.0, 1.0, False)
     wait 0
     if
@@ -1205,5 +1188,5 @@ while not Player.LocateAnyMeans3D($player, 1419.15, -194.40, 49.74, 1.0, 1.0, 1.
     end
 end
 
-:Gun_6666
+:Marie_6666
 terminate_this_custom_script
