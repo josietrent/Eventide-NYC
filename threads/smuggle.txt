@@ -221,7 +221,7 @@ Text.Print('SMUGA', 3500, 1)
 wait 3500
 
 Text.Print('SMUGB', 3500, 1)
-Char.SetObjFleeCharAnyMeans(Smuggler, $scplayer)
+Char.SetObjFleeOnFootTillSafe(Smuggler)
 wait 2000
 
 Camera.RestoreJumpcut()
