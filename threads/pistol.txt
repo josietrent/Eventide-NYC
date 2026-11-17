@@ -1075,7 +1075,6 @@ else
 end
 $OnCarMission = 0
 $onmission = 0
-PistolCollected = 0
 $SafeAndSound = 0
 CarGenerator.Switch($CheetahGen, 0)
 Blip.Remove(Destination)
