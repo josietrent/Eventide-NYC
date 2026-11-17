@@ -16,7 +16,7 @@ import { basename, dirname, extname, join } from "@std/path";
 import { ensureDir } from "@std/fs/ensure-dir";
 import { includeTree } from "./includes.ts";
 import { say } from "./log.ts";
-import { buildMenuTxd } from "./build-menu-txd.ts";
+import { buildMenuTxd, buildSingleTextureTxd } from "./build-menu-txd.ts";
 
 // Bisection / filtering arguments
 const args = Deno.args;
@@ -606,9 +606,11 @@ if (shouldRun(12, "pausemusic")) {
   say.done(`  Packaged modloader/${modName}/${basename(iniInput)}`);
 }
 
-// Step 13: MenuLogo ASI Plugin & eventide_menu.txd
+// Step 13: MenuLogo ASI Plugin & eventide_menu.txd & Splash Screens
 if (shouldRun(13, "menulogo")) {
-  say.heading("Step 13 (menulogo): Compiling MenuLogo.asi...");
+  say.heading(
+    "Step 13 (menulogo): Compiling MenuLogo.asi & Menu/Splash TXDs...",
+  );
   const asiInput = join(cwd, "plugins", "MenuLogo", "MenuLogo.cpp");
   const asiOutput = join(cwd, "plugins", "MenuLogo", "MenuLogo.asi");
   const pngInput = join(cwd, "plugins", "MenuLogo", "eventidelogo128.png");
@@ -621,6 +623,30 @@ if (shouldRun(13, "menulogo")) {
   await Deno.copyFile(txdOutput, join(modStagingDir, basename(txdOutput)));
   say.done(`  Packaged modloader/${modName}/${basename(asiOutput)}`);
   say.done(`  Packaged modloader/${modName}/${basename(txdOutput)}`);
+
+  // Build & package Splash / Startup Loading Screen TXDs into modloader/Eventide/txd/
+  const txdStagingDir = join(modStagingDir, "txd");
+  await ensureDir(txdStagingDir);
+
+  const splash1Png = join(cwd, "plugins", "MenuLogo", "splash1.png");
+  const splash1Txd = join(cwd, "plugins", "MenuLogo", "SPLASH1.txd");
+  if (await allExist([splash1Png])) {
+    await buildSingleTextureTxd("splash1", splash1Png, splash1Txd);
+    await Deno.copyFile(splash1Txd, join(txdStagingDir, "SPLASH1.txd"));
+    say.done(`  Packaged modloader/${modName}/txd/SPLASH1.txd`);
+  }
+
+  const mainsc1Png = join(cwd, "plugins", "MenuLogo", "mainsc1.png");
+  const mainsc1Txd = join(cwd, "plugins", "MenuLogo", "mainsc1.txd");
+  const mainsc2Txd = join(cwd, "plugins", "MenuLogo", "mainsc2.txd");
+  if (await allExist([mainsc1Png])) {
+    await buildSingleTextureTxd("mainsc1", mainsc1Png, mainsc1Txd);
+    await buildSingleTextureTxd("mainsc2", mainsc1Png, mainsc2Txd);
+    await Deno.copyFile(mainsc1Txd, join(txdStagingDir, "mainsc1.txd"));
+    await Deno.copyFile(mainsc2Txd, join(txdStagingDir, "mainsc2.txd"));
+    say.done(`  Packaged modloader/${modName}/txd/mainsc1.txd`);
+    say.done(`  Packaged modloader/${modName}/txd/mainsc2.txd`);
+  }
 }
 
 // Clean compiler scratch directory before zipping

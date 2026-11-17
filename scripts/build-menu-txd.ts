@@ -47,7 +47,7 @@ function pngChunk(type: string, data: Uint8Array): Uint8Array {
   return out;
 }
 
-async function encodePngRgba(
+export async function encodePngRgba(
   width: number,
   height: number,
   rgba: Uint8Array,
@@ -93,7 +93,7 @@ function paethPredictor(a: number, b: number, c: number): number {
   return c;
 }
 
-async function decodePngRgba(bytes: Uint8Array): Promise<{
+export async function decodePngRgba(bytes: Uint8Array): Promise<{
   width: number;
   height: number;
   rgba: Uint8Array;
@@ -346,7 +346,7 @@ function writeFixedCString(buf: Uint8Array, offset: number, str: string) {
   buf.set(enc.subarray(0, 31), offset);
 }
 
-interface TxdTextureInput {
+export interface TxdTextureInput {
   name: string;
   width: number;
   height: number;
@@ -358,7 +358,7 @@ function buildRwTextureNative(tex: TxdTextureInput): Uint8Array {
   const structPayload = new Uint8Array(88 + 4 + pixelBytes);
   const sdv = new DataView(structPayload.buffer);
 
-  // RwTextureNative D3D8 raster struct (matches GTA III PC menu.txd)
+  // RwTextureNative D3D8 raster struct (matches GTA III PC menu.txd / splash.txd)
   sdv.setUint32(0, 8, true); // platformId = D3D8
   sdv.setUint32(4, 0x1102, true); // filter=LINEAR, uAddressing=WRAP, vAddressing=WRAP
   writeFixedCString(structPayload, 8, tex.name);
@@ -393,7 +393,7 @@ function buildRwTextureNative(tex: TxdTextureInput): Uint8Array {
   return rwChunk(0x15, texNativePayload);
 }
 
-function buildRw33Txd(textures: TxdTextureInput[]): Uint8Array {
+export function buildRw33Txd(textures: TxdTextureInput[]): Uint8Array {
   const nativeChunks = textures.map(buildRwTextureNative);
 
   const dictHeader = new Uint8Array(4);
@@ -416,6 +416,17 @@ function buildRw33Txd(textures: TxdTextureInput[]): Uint8Array {
   txdPayload.set(dictExtChunk, off);
 
   return rwChunk(0x16, txdPayload);
+}
+
+export async function buildSingleTextureTxd(
+  texName: string,
+  pngPath: string,
+  txdPath: string,
+) {
+  const pngBytes = await Deno.readFile(pngPath);
+  const { width, height, rgba } = await decodePngRgba(pngBytes);
+  const txdBytes = buildRw33Txd([{ name: texName, width, height, rgba }]);
+  await Deno.writeFile(txdPath, txdBytes);
 }
 
 export async function buildMenuTxd(
