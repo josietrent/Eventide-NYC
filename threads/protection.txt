@@ -52,9 +52,29 @@ Player.SetCoordinates($player, 1207.98, -325.48, 26.07)
 // Set up the initial camera overview at the stairs
 Camera.SetFixedPosition(1219.81, -321.13, 35.46, 0.0, 0.0, 0.0)
 Camera.PointAtChar(Luigi, CameraMode.FollowPed, SwitchType.JumpCut)
-wait 500
+TIMERA = 0
+while TIMERA < 500
+    wait 0
+    if or
+        Pad.IsKeyPressed(KeyCode.LeftShift)
+        Pad.IsKeyPressed(KeyCode.Space)
+        Pad.IsKeyPressed(KeyCode.F)
+    then
+        jump @Protection_Briefing_Skip
+    end
+end
 Camera.DoFade(1500, Fade.In)
-wait 1500
+TIMERA = 0
+while TIMERA < 1500
+    wait 0
+    if or
+        Pad.IsKeyPressed(KeyCode.LeftShift)
+        Pad.IsKeyPressed(KeyCode.Space)
+        Pad.IsKeyPressed(KeyCode.F)
+    then
+        jump @Protection_Briefing_Skip
+    end
+end
 
 // Order Louie to walk down to the base of the stairs
 Char.SetObjGotoCoordOnFoot(Luigi, 1219.74, -325.69)
@@ -69,21 +89,68 @@ while not Char.LocateAnyMeans2D(Luigi, 1219.74, -325.69, 0.5, 0.5, False)
     then
         jump @Protection_Fail
     end
+    if or
+        Pad.IsKeyPressed(KeyCode.LeftShift)
+        Pad.IsKeyPressed(KeyCode.Space)
+        Pad.IsKeyPressed(KeyCode.F)
+    then
+        jump @Protection_Briefing_Skip
+    end
 end
 
 // Reposition the camera to the lower angle, turn Louie to face the camera/player, and start speaking
 Camera.SetFixedPosition(1213.84, -325.56, 26.07, 0.0, 0.0, 0.0)
 Camera.PointAtChar(Luigi, CameraMode.Fixed, SwitchType.JumpCut)
 Char.SetObjNoObj(Luigi)
-wait 250
+TIMERA = 0
+while TIMERA < 250
+    wait 0
+    if or
+        Pad.IsKeyPressed(KeyCode.LeftShift)
+        Pad.IsKeyPressed(KeyCode.Space)
+        Pad.IsKeyPressed(KeyCode.F)
+    then
+        jump @Protection_Briefing_Skip
+    end
+end
 Char.SetHeading(Luigi, 269.0)
 Player.SetHeading($player, 89.0)
 Char.SetObjWaitOnFoot(Luigi)
-wait 250
+TIMERA = 0
+while TIMERA < 250
+    wait 0
+    if or
+        Pad.IsKeyPressed(KeyCode.LeftShift)
+        Pad.IsKeyPressed(KeyCode.Space)
+        Pad.IsKeyPressed(KeyCode.F)
+    then
+        jump @Protection_Briefing_Skip
+    end
+end
 Text.PrintString("One of our guys has been holding out on his protection money.", 5000)
-wait 5000
+TIMERA = 0
+while TIMERA < 5000
+    wait 0
+    if or
+        Pad.IsKeyPressed(KeyCode.LeftShift)
+        Pad.IsKeyPressed(KeyCode.Space)
+        Pad.IsKeyPressed(KeyCode.F)
+    then
+        jump @Protection_Briefing_Skip
+    end
+end
 Text.PrintString("Go find him and make sure he understands the cost of doing business.", 6000)
-wait 6000
+TIMERA = 0
+while TIMERA < 6000
+    wait 0
+    if or
+        Pad.IsKeyPressed(KeyCode.LeftShift)
+        Pad.IsKeyPressed(KeyCode.Space)
+        Pad.IsKeyPressed(KeyCode.F)
+    then
+        jump @Protection_Briefing_Skip
+    end
+end
 
 // Transition out of the briefing scene
 Camera.DoFade(1500, Fade.Out)
@@ -103,6 +170,35 @@ Player.SetControl($player, True)
 Text.PrintString("Find the Deadbeat. He should be nearby.", 5000)
 
 // Give the player a blip to find the target
+TargetBlip = Blip.AddForChar(Deadbeat)
+Blip.ChangeColor(TargetBlip, BlipColor.Green)
+jump @Protection_Approach
+
+:Protection_Briefing_Skip
+Text.ClearPrints()
+Camera.RestoreJumpcut()
+Hud.SwitchWidescreen(False)
+Player.SetCoordinates($player, 1207.98, -325.48, 26.07)
+Player.SetHeading($player, 89.0)
+if not Luigi == 0
+then
+    Char.SetCoordinates(Luigi, 1219.74, -325.69, 26.07)
+    Char.SetHeading(Luigi, 269.0)
+    Char.SetObjWaitOnFoot(Luigi)
+end
+if Deadbeat == 0
+then
+    World.ClearArea(1202.93, -426.60, 25.07, 6.0, True)
+    World.ClearArea(1186.04, -464.43, 25.07, 6.0, True)
+    Deadbeat = Char.Create(PedType.CivMale, #B_MAN1, 1202.93, -426.60, 25.07)
+    Char.SetObjWaitOnFoot(Deadbeat)
+    DeadbeatCar = Car.Create(#PEREN, 1186.04, -464.43, 25.07)
+    Car.SetHeading(DeadbeatCar, 180.0)
+end
+Camera.DoFade(500, Fade.In)
+wait 500
+Player.SetControl($player, True)
+Text.PrintString("Find the Deadbeat. He should be nearby.", 5000)
 TargetBlip = Blip.AddForChar(Deadbeat)
 Blip.ChangeColor(TargetBlip, BlipColor.Green)
 
@@ -516,20 +612,70 @@ while not Player.LocateOnFootChar3D($player, Luigi, 5.0, 5.0, 0.75, False)
         Blip.Remove(LuigiBlip)
         Player.SetControl($player, False)
         Camera.DoFade(1500, Fade.Out)
-        wait 1500
+        TIMERA = 0
+        while TIMERA < 1500
+            wait 0
+            if or
+                Pad.IsKeyPressed(KeyCode.LeftShift)
+                Pad.IsKeyPressed(KeyCode.Space)
+                Pad.IsKeyPressed(KeyCode.F)
+            then
+                jump @Protection_Finish_Skip
+            end
+        end
         Hud.SwitchWidescreen(True)
         Camera.SetFixedPosition(1213.84, -325.56, 26.07, 0.0, 0.0, 0.0)
         Camera.PointAtChar(Luigi, CameraMode.Fixed, SwitchType.JumpCut)
         wait 0
         Camera.DoFade(1500, Fade.In)
-        wait 1500
+        TIMERA = 0
+        while TIMERA < 1500
+            wait 0
+            if or
+                Pad.IsKeyPressed(KeyCode.LeftShift)
+                Pad.IsKeyPressed(KeyCode.Space)
+                Pad.IsKeyPressed(KeyCode.F)
+            then
+                jump @Protection_Finish_Skip
+            end
+        end
         Text.PrintString("Nicely done, kid. I'll take that dough off your hands. ", 5000)
         Player.AddScore($player, -50000)
-        wait 5000
+        RouteState = 1
+        TIMERA = 0
+        while TIMERA < 5000
+            wait 0
+            if or
+                Pad.IsKeyPressed(KeyCode.LeftShift)
+                Pad.IsKeyPressed(KeyCode.Space)
+                Pad.IsKeyPressed(KeyCode.F)
+            then
+                jump @Protection_Finish_Skip
+            end
+        end
         Text.PrintString("Now, make yourself scarce. The cops will be looking for you, so watch yourself. Capiche?", 4000)
-        wait 4000
+        TIMERA = 0
+        while TIMERA < 4000
+            wait 0
+            if or
+                Pad.IsKeyPressed(KeyCode.LeftShift)
+                Pad.IsKeyPressed(KeyCode.Space)
+                Pad.IsKeyPressed(KeyCode.F)
+            then
+                jump @Protection_Finish_Skip
+            end
+        end
         Camera.DoFade(1500, Fade.Out)
         wait 1500
+        jump @Protection_Success
+
+        :Protection_Finish_Skip
+        Text.ClearPrints()
+        if RouteState == 0
+        then
+            Player.AddScore($player, -50000)
+            RouteState = 1
+        end
         jump @Protection_Success
     end
     if

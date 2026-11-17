@@ -40,7 +40,17 @@ end
 
 :Alley_101
 Hud.SwitchWidescreen(True)
-wait 1000
+TIMERA = 0
+while TIMERA < 1000
+    wait 0
+    if or
+        Pad.IsKeyPressed(KeyCode.LeftShift)
+        Pad.IsKeyPressed(KeyCode.Space)
+        Pad.IsKeyPressed(KeyCode.F)
+    then
+        jump @Alley_Briefing_Skip
+    end
+end
 Player.SetControl($player, False)
 Player.SetCoordinates($player, 1322.34, -476.86, 49.75)
 Player.SetCurrentWeapon($player, WeaponType.Pistol)
@@ -51,9 +61,29 @@ Cheetah = Car.Create(#CHEETAH, 1344.11, -448.69, 49.79)
 Car.SetHeading(Cheetah, 90.0)
 Camera.SetFixedPosition(1330.05, -469.82, 49.77, 0.0, 0.0, 0.0)
 Camera.PointAtChar(Luigi, CameraMode.FollowPed, SwitchType.JumpCut)
-wait 500
+TIMERA = 0
+while TIMERA < 500
+    wait 0
+    if or
+        Pad.IsKeyPressed(KeyCode.LeftShift)
+        Pad.IsKeyPressed(KeyCode.Space)
+        Pad.IsKeyPressed(KeyCode.F)
+    then
+        jump @Alley_Briefing_Skip
+    end
+end
 Camera.DoFade(1500, Fade.In)
-wait 1500
+TIMERA = 0
+while TIMERA < 1500
+    wait 0
+    if or
+        Pad.IsKeyPressed(KeyCode.LeftShift)
+        Pad.IsKeyPressed(KeyCode.Space)
+        Pad.IsKeyPressed(KeyCode.F)
+    then
+        jump @Alley_Briefing_Skip
+    end
+end
 Char.SetObjGotoCoordOnFoot(Luigi, 1330.30, -465.53)
 
 :Alley_102
@@ -65,6 +95,13 @@ while not Char.LocateAnyMeans2D(Luigi, 1330.30, -465.53, 0.5, 0.5, False)
         not Car.IsStillAlive(Cheetah)
     then
         jump @Alley_Fail
+    end
+    if or
+        Pad.IsKeyPressed(KeyCode.LeftShift)
+        Pad.IsKeyPressed(KeyCode.Space)
+        Pad.IsKeyPressed(KeyCode.F)
+    then
+        jump @Alley_Briefing_Skip
     end
 end
 
@@ -78,42 +115,149 @@ while not Char.LocateAnyMeans2D(Luigi, 1325.80, -472.60, 0.5, 0.5, False)
     then
         jump @Alley_Fail
     end
+    if or
+        Pad.IsKeyPressed(KeyCode.LeftShift)
+        Pad.IsKeyPressed(KeyCode.Space)
+        Pad.IsKeyPressed(KeyCode.F)
+    then
+        jump @Alley_Briefing_Skip
+    end
 end
 
 Camera.SetFixedPosition(1324.07, -474.73, 50.55, 0.0, 0.0, 0.0)
 Camera.PointAtChar(Luigi, CameraMode.Fixed, SwitchType.JumpCut)
 Char.SetObjNoObj(Luigi)
-wait 250
+TIMERA = 0
+while TIMERA < 250
+    wait 0
+    if or
+        Pad.IsKeyPressed(KeyCode.LeftShift)
+        Pad.IsKeyPressed(KeyCode.Space)
+        Pad.IsKeyPressed(KeyCode.F)
+    then
+        jump @Alley_Briefing_Skip
+    end
+end
 Char.SetHeading(Luigi, 140.9)
 Player.SetHeading($player, 320.9)
 wait 0
 Text.PrintString("I've never seen you around before. You're new to the city, ain't ya?", 5000)
-wait 5000
+TIMERA = 0
+while TIMERA < 5000
+    wait 0
+    if or
+        Pad.IsKeyPressed(KeyCode.LeftShift)
+        Pad.IsKeyPressed(KeyCode.Space)
+        Pad.IsKeyPressed(KeyCode.F)
+    then
+        jump @Alley_Briefing_Skip
+    end
+end
 Camera.PointAtChar($scplayer, CameraMode.Fixed, SwitchType.JumpCut)
-wait 3500
+TIMERA = 0
+while TIMERA < 3500
+    wait 0
+    if or
+        Pad.IsKeyPressed(KeyCode.LeftShift)
+        Pad.IsKeyPressed(KeyCode.Space)
+        Pad.IsKeyPressed(KeyCode.F)
+    then
+        jump @Alley_Briefing_Skip
+    end
+end
 Camera.PointAtChar(Luigi, CameraMode.Fixed, SwitchType.JumpCut)
 Text.PrintString("You don't talk much. What, did a cat cut out your tongue?", 4000)
-wait 4000
+TIMERA = 0
+while TIMERA < 4000
+    wait 0
+    if or
+        Pad.IsKeyPressed(KeyCode.LeftShift)
+        Pad.IsKeyPressed(KeyCode.Space)
+        Pad.IsKeyPressed(KeyCode.F)
+    then
+        jump @Alley_Briefing_Skip
+    end
+end
 Text.PrintString("That's a nice piece you've got there.", 3500)
-wait 3500
+TIMERA = 0
+while TIMERA < 3500
+    wait 0
+    if or
+        Pad.IsKeyPressed(KeyCode.LeftShift)
+        Pad.IsKeyPressed(KeyCode.Space)
+        Pad.IsKeyPressed(KeyCode.F)
+    then
+        jump @Alley_Briefing_Skip
+    end
+end
 Text.PrintString("I'm curious... Do you know how to use it?", 4000)
-wait 3500
+TIMERA = 0
+while TIMERA < 3500
+    wait 0
+    if or
+        Pad.IsKeyPressed(KeyCode.LeftShift)
+        Pad.IsKeyPressed(KeyCode.Space)
+        Pad.IsKeyPressed(KeyCode.F)
+    then
+        jump @Alley_Briefing_Skip
+    end
+end
 Camera.PointAtPlayer($player, CameraMode.Fixed, SwitchType.JumpCut)
 Char.PlayAnimation($scplayer, AnimGroup.Man, 45, 4.0)
-wait 1000
+TIMERA = 0
+while TIMERA < 1000
+    wait 0
+    if or
+        Pad.IsKeyPressed(KeyCode.LeftShift)
+        Pad.IsKeyPressed(KeyCode.Space)
+        Pad.IsKeyPressed(KeyCode.F)
+    then
+        jump @Alley_Briefing_Skip
+    end
+end
 Camera.PointAtChar(Luigi, CameraMode.Fixed, SwitchType.JumpCut)
 Text.PrintString("Woah there, now! Take it easy, kid! I was just bustin' your balls!", 5000)
 Char.SetWaitState(Luigi, WaitState.PlayAnimHandsUp, 2000)
-wait 2000
+TIMERA = 0
+while TIMERA < 2000
+    wait 0
+    if or
+        Pad.IsKeyPressed(KeyCode.LeftShift)
+        Pad.IsKeyPressed(KeyCode.Space)
+        Pad.IsKeyPressed(KeyCode.F)
+    then
+        jump @Alley_Briefing_Skip
+    end
+end
 Char.SetObjNoObj($scplayer)
 Char.SetHeading(Luigi, 140.9)
 Player.SetHeading($player, 320.9)
 Text.PrintString("I can see clearly that you do, but do you know your way around town?", 6000)
-wait 6000
+TIMERA = 0
+while TIMERA < 6000
+    wait 0
+    if or
+        Pad.IsKeyPressed(KeyCode.LeftShift)
+        Pad.IsKeyPressed(KeyCode.Space)
+        Pad.IsKeyPressed(KeyCode.F)
+    then
+        jump @Alley_Briefing_Skip
+    end
+end
 Text.PrintString("Come with me! I'll show you around.", 4000)
 Char.SetObjGotoCoordOnFoot(Luigi, 1336.43, -466.82)
 Char.SetRunning(Luigi, True)
-wait 2500
+TIMERA = 0
+while TIMERA < 2500
+    wait 0
+    if or
+        Pad.IsKeyPressed(KeyCode.LeftShift)
+        Pad.IsKeyPressed(KeyCode.Space)
+        Pad.IsKeyPressed(KeyCode.F)
+    then
+        jump @Alley_Briefing_Skip
+    end
+end
 Camera.DoFade(1500, Fade.Out)
 wait 1500
 Player.SetCoordinates($player, 1330.38, -470.49, 49.75)
@@ -134,8 +278,44 @@ while not Char.LocateAnyMeans2D(Luigi, 1336.43, -466.82, 1.5, 1.5, False)
     then
         jump @Alley_Fail
     end
+    if or
+        Pad.IsKeyPressed(KeyCode.LeftShift)
+        Pad.IsKeyPressed(KeyCode.Space)
+        Pad.IsKeyPressed(KeyCode.F)
+    then
+        jump @Alley_Briefing_Skip
+    end
 end
 Char.SetObjEnterCarAsPassenger(Luigi, Cheetah)
+jump @Alley_103
+
+:Alley_Briefing_Skip
+Text.ClearPrints()
+Char.SetObjNoObj($scplayer)
+Camera.RestoreJumpcut()
+Hud.SwitchWidescreen(False)
+Player.SetCoordinates($player, 1330.38, -470.49, 49.75)
+Player.SetHeading($player, 320.9)
+if not Cheetah == 0
+then
+    if not Car.IsStillAlive(Cheetah)
+    then
+        jump @Alley_Fail
+    end
+    if not Luigi == 0
+    then
+        if not Char.IsStillAlive(Luigi)
+        then
+            jump @Alley_Fail
+        end
+        Char.SetCoordinates(Luigi, 1344.0, -446.5, 49.79)
+        Char.SetObjEnterCarAsPassenger(Luigi, Cheetah)
+    end
+end
+Camera.DoFade(500, Fade.In)
+wait 500
+Player.SetControl($player, True)
+jump @Alley_103
 
 :Alley_103
 while true
@@ -244,16 +424,60 @@ while true
         Player.SetControl($player, False)
         Hud.SwitchWidescreen(True)
         Camera.DoFade(1500, Fade.Out)
-        wait 1500
+        TIMERA = 0
+        while TIMERA < 1500
+            wait 0
+            if or
+                Pad.IsKeyPressed(KeyCode.LeftShift)
+                Pad.IsKeyPressed(KeyCode.Space)
+                Pad.IsKeyPressed(KeyCode.F)
+            then
+                jump @Alley_Outro_Skip
+            end
+        end
         Player.ClearWantedLevel($player)
         Camera.DoFade(1500, Fade.In)
-        wait 1500
+        TIMERA = 0
+        while TIMERA < 1500
+            wait 0
+            if or
+                Pad.IsKeyPressed(KeyCode.LeftShift)
+                Pad.IsKeyPressed(KeyCode.Space)
+                Pad.IsKeyPressed(KeyCode.F)
+            then
+                jump @Alley_Outro_Skip
+            end
+        end
         Text.PrintString("Not bad. You're good at following directions, and you seem pretty handy.", 5000)
-        wait 5000
+        TIMERA = 0
+        while TIMERA < 5000
+            wait 0
+            if or
+                Pad.IsKeyPressed(KeyCode.LeftShift)
+                Pad.IsKeyPressed(KeyCode.Space)
+                Pad.IsKeyPressed(KeyCode.F)
+            then
+                jump @Alley_Outro_Skip
+            end
+        end
         Text.PrintString("Meet me back here later. I might have some work for you.", 6000)
-        wait 6000
+        TIMERA = 0
+        while TIMERA < 6000
+            wait 0
+            if or
+                Pad.IsKeyPressed(KeyCode.LeftShift)
+                Pad.IsKeyPressed(KeyCode.Space)
+                Pad.IsKeyPressed(KeyCode.F)
+            then
+                jump @Alley_Outro_Skip
+            end
+        end
         Camera.DoFade(1500, Fade.Out)
         wait 1500
+
+        :Alley_Outro_Skip
+        Text.ClearPrints()
+        Camera.RestoreJumpcut()
         if
             Streaming.HasModelLoaded(#UZI)
         then

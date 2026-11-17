@@ -229,55 +229,78 @@ while Player.IsPlaying($player)
     Player.SetHeading($player, 180.0)
     Hud.SwitchWidescreen(True)
     Blip.Remove(Destination)
-    if or
-        Pad.IsKeyPressed(KeyCode.LeftShift)
-        Pad.IsKeyPressed(KeyCode.Space)
-        Pad.IsKeyPressed(KeyCode.F)
-    then
-        jump @carPass
-    else
-        Camera.SetFixedPosition(1423.41, -199.77, 75.43, 0.0, 0.0, 0.0)
-        Camera.PointAtPoint(1454.08, -173.18, 55.77, SwitchType.JumpCut)
-        Camera.DoFade(1500, Fade.In)
-        wait 1500
-        Text.PrintHelp('SAVE_1') // This abandoned house will serve as a nice hideout.
+
+    Camera.SetFixedPosition(1423.41, -199.77, 75.43, 0.0, 0.0, 0.0)
+    Camera.PointAtPoint(1454.08, -173.18, 55.77, SwitchType.JumpCut)
+    Camera.DoFade(1500, Fade.In)
+
+    TIMERA = 0
+    while TIMERA < 1500
+        wait 0
+        if or
+            Pad.IsKeyPressed(KeyCode.LeftShift)
+            Pad.IsKeyPressed(KeyCode.Space)
+            Pad.IsKeyPressed(KeyCode.F)
+        then
+            jump @carPass
+        end
     end
-    wait 0
-    if or
-        Pad.IsKeyPressed(KeyCode.LeftShift)
-        Pad.IsKeyPressed(KeyCode.Space)
-        Pad.IsKeyPressed(KeyCode.F)
-    then
-        jump @carPass
-    else
-        wait 5000
-        Text.PrintHelp('SAVE_2') // For now, at least...
+
+    Text.PrintHelp('SAVE_1') // This abandoned house will serve as a nice hideout.
+    TIMERA = 0
+    while TIMERA < 5000
+        wait 0
+        if or
+            Pad.IsKeyPressed(KeyCode.LeftShift)
+            Pad.IsKeyPressed(KeyCode.Space)
+            Pad.IsKeyPressed(KeyCode.F)
+        then
+            jump @carPass
+        end
     end
-    wait 3000
-    if or
-        Pad.IsKeyPressed(KeyCode.LeftShift)
-        Pad.IsKeyPressed(KeyCode.Space)
-        Pad.IsKeyPressed(KeyCode.F)
-    then
-        jump @carPass
-    else
-        Camera.SetFixedPosition(1461.19, -177.64, 55.77, 0.0, 0.0, 0.0)
-        Camera.PointAtPoint(1453.64, -173.11, 55.77, SwitchType.JumpCut)
-        CarSphere = Sphere.Create(1453.64, -173.11, 55.77, 3.0)
-        Text.PrintHelp('SAVE_3') // Walking into this sphere behind the bar will save the game.
+
+    Text.PrintHelp('SAVE_2') // For now, at least...
+    TIMERA = 0
+    while TIMERA < 3000
+        wait 0
+        if or
+            Pad.IsKeyPressed(KeyCode.LeftShift)
+            Pad.IsKeyPressed(KeyCode.Space)
+            Pad.IsKeyPressed(KeyCode.F)
+        then
+            jump @carPass
+        end
     end
-    wait 6000
-    if or
-        Pad.IsKeyPressed(KeyCode.LeftShift)
-        Pad.IsKeyPressed(KeyCode.Space)
-        Pad.IsKeyPressed(KeyCode.F)
-    then
-        jump @carPass
-    else
-        Text.PrintHelp('SAVE_4') // When saving the game, you will lose any wanted level you may have, and time will advance by six hours.
-        wait 6000
-        jump @carPass
+
+    Camera.SetFixedPosition(1461.19, -177.64, 55.77, 0.0, 0.0, 0.0)
+    Camera.PointAtPoint(1453.64, -173.11, 55.77, SwitchType.JumpCut)
+    CarSphere = Sphere.Create(1453.64, -173.11, 55.77, 3.0)
+    Text.PrintHelp('SAVE_3') // Walking into this sphere behind the bar will save the game.
+    TIMERA = 0
+    while TIMERA < 6000
+        wait 0
+        if or
+            Pad.IsKeyPressed(KeyCode.LeftShift)
+            Pad.IsKeyPressed(KeyCode.Space)
+            Pad.IsKeyPressed(KeyCode.F)
+        then
+            jump @carPass
+        end
     end
+
+    Text.PrintHelp('SAVE_4') // When saving the game, you will lose any wanted level you may have, and time will advance by six hours.
+    TIMERA = 0
+    while TIMERA < 6000
+        wait 0
+        if or
+            Pad.IsKeyPressed(KeyCode.LeftShift)
+            Pad.IsKeyPressed(KeyCode.Space)
+            Pad.IsKeyPressed(KeyCode.F)
+        then
+            jump @carPass
+        end
+    end
+    jump @carPass
 end
 
 :carFail
@@ -326,6 +349,7 @@ $OnCarMission = 0
 terminate_this_custom_script
 
 :carPass
+Text.ClearPrints()
 Camera.DoFade(1500, Fade.Out)
 wait 1500
 Sphere.Remove(CarSphere)

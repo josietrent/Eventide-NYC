@@ -104,29 +104,140 @@ while not Player.LocateOnFoot3D($player, 1147.61, -95.21, 7.02, 1.0, 1.0, 0.75, 
         Sphere.Remove(GunSphere)
         Player.SetControl($player, False)
         Camera.DoFade(1500, Fade.Out)
-        wait 1500
+        TIMERA = 0
+        while TIMERA < 1500
+            wait 0
+            if or
+                Pad.IsKeyPressed(KeyCode.LeftShift)
+                Pad.IsKeyPressed(KeyCode.Space)
+                Pad.IsKeyPressed(KeyCode.F)
+            then
+                jump @Pistol_Gas_Skip
+            end
+        end
         Hud.SwitchWidescreen(True)
         Camera.SetFixedPosition(1162.58, -75.06, 20.53, 0.0, 0.0, 0.0)
         Camera.PointAtPoint(1161.11, -105.09, 7.64, SwitchType.JumpCut)
         Char.SetUsePednodeSeek(Marie, True)
         Char.SetObjGotoCoordOnFoot(Marie, 933.66, -252.64)
-        wait 500
+        TIMERA = 0
+        while TIMERA < 500
+            wait 0
+            if or
+                Pad.IsKeyPressed(KeyCode.LeftShift)
+                Pad.IsKeyPressed(KeyCode.Space)
+                Pad.IsKeyPressed(KeyCode.F)
+            then
+                jump @Pistol_Gas_Skip
+            end
+        end
         Camera.DoFade(500, Fade.In)
-        wait 500
+        TIMERA = 0
+        while TIMERA < 500
+            wait 0
+            if or
+                Pad.IsKeyPressed(KeyCode.LeftShift)
+                Pad.IsKeyPressed(KeyCode.Space)
+                Pad.IsKeyPressed(KeyCode.F)
+            then
+                jump @Pistol_Gas_Skip
+            end
+        end
         Text.Print('VAGRANT', 4000, 0)
-        wait 4000
+        TIMERA = 0
+        while TIMERA < 4000
+            wait 0
+            if or
+                Pad.IsKeyPressed(KeyCode.LeftShift)
+                Pad.IsKeyPressed(KeyCode.Space)
+                Pad.IsKeyPressed(KeyCode.F)
+            then
+                jump @Pistol_Gas_Skip
+            end
+        end
         Text.Print('VAGRONT', 5000, 0)
-        wait 5000
+        TIMERA = 0
+        while TIMERA < 5000
+            wait 0
+            if or
+                Pad.IsKeyPressed(KeyCode.LeftShift)
+                Pad.IsKeyPressed(KeyCode.Space)
+                Pad.IsKeyPressed(KeyCode.F)
+            then
+                jump @Pistol_Gas_Skip
+            end
+        end
         Camera.DoFade(1500, Fade.Out)
-        wait 1500
+        TIMERA = 0
+        while TIMERA < 1500
+            wait 0
+            if or
+                Pad.IsKeyPressed(KeyCode.LeftShift)
+                Pad.IsKeyPressed(KeyCode.Space)
+                Pad.IsKeyPressed(KeyCode.F)
+            then
+                jump @Pistol_Gas_Skip
+            end
+        end
         Camera.PointAtChar(Marie, CameraMode.FollowPed, SwitchType.JumpCut)
-        wait 1000
+        TIMERA = 0
+        while TIMERA < 1000
+            wait 0
+            if or
+                Pad.IsKeyPressed(KeyCode.LeftShift)
+                Pad.IsKeyPressed(KeyCode.Space)
+                Pad.IsKeyPressed(KeyCode.F)
+            then
+                jump @Pistol_Gas_Skip
+            end
+        end
+        Camera.DoFade(500, Fade.In)
+        TIMERA = 0
+        while TIMERA < 500
+            wait 0
+            if or
+                Pad.IsKeyPressed(KeyCode.LeftShift)
+                Pad.IsKeyPressed(KeyCode.Space)
+                Pad.IsKeyPressed(KeyCode.F)
+            then
+                jump @Pistol_Gas_Skip
+            end
+        end
+        Text.PrintHelp('LIQUOR')
+        TIMERA = 0
+        while TIMERA < 5000
+            wait 0
+            if or
+                Pad.IsKeyPressed(KeyCode.LeftShift)
+                Pad.IsKeyPressed(KeyCode.Space)
+                Pad.IsKeyPressed(KeyCode.F)
+            then
+                jump @Pistol_Gas_Skip
+            end
+        end
+        Camera.DoFade(1500, Fade.Out)
+        TIMERA = 0
+        while TIMERA < 1500
+            wait 0
+            if or
+                Pad.IsKeyPressed(KeyCode.LeftShift)
+                Pad.IsKeyPressed(KeyCode.Space)
+                Pad.IsKeyPressed(KeyCode.F)
+            then
+                jump @Pistol_Gas_Skip
+            end
+        end
+        Camera.RestoreJumpcut()
+        Hud.SwitchWidescreen(False)
         Camera.DoFade(500, Fade.In)
         wait 500
-        Text.PrintHelp('LIQUOR')
-        wait 5000
-        Camera.DoFade(1500, Fade.Out)
-        wait 1500
+        Player.SetControl($player, True)
+        break
+
+        :Pistol_Gas_Skip
+        Text.ClearPrints()
+        Char.SetUsePednodeSeek(Marie, True)
+        Char.SetObjGotoCoordOnFoot(Marie, 933.66, -252.64)
         Camera.RestoreJumpcut()
         Hud.SwitchWidescreen(False)
         Camera.DoFade(500, Fade.In)
@@ -769,18 +880,82 @@ while true
         Blip.Remove(Destination)
         Sphere.Remove(GunSphere)
         Text.PrintNow('MISRIDE', 3000, 0)
-        wait 3000
+        TIMERA = 0
+        while TIMERA < 3000
+            wait 0
+            if or
+                Pad.IsKeyPressed(KeyCode.LeftShift)
+                Pad.IsKeyPressed(KeyCode.Space)
+                Pad.IsKeyPressed(KeyCode.F)
+            then
+                jump @Pistol_Dropoff_Skip
+            end
+        end
         Text.Print('MISLUI', 4000, 0)
-        wait 4000
+        TIMERA = 0
+        while TIMERA < 4000
+            wait 0
+            if or
+                Pad.IsKeyPressed(KeyCode.LeftShift)
+                Pad.IsKeyPressed(KeyCode.Space)
+                Pad.IsKeyPressed(KeyCode.F)
+            then
+                jump @Pistol_Dropoff_Skip
+            end
+        end
         Text.Print('MISLUI2', 5000, 0)
-        wait 5000
+        TIMERA = 0
+        while TIMERA < 5000
+            wait 0
+            if or
+                Pad.IsKeyPressed(KeyCode.LeftShift)
+                Pad.IsKeyPressed(KeyCode.Space)
+                Pad.IsKeyPressed(KeyCode.F)
+            then
+                jump @Pistol_Dropoff_Skip
+            end
+        end
         Text.Print('MISLUI3', 5000, 0)
-        wait 5000
+        TIMERA = 0
+        while TIMERA < 5000
+            wait 0
+            if or
+                Pad.IsKeyPressed(KeyCode.LeftShift)
+                Pad.IsKeyPressed(KeyCode.Space)
+                Pad.IsKeyPressed(KeyCode.F)
+            then
+                jump @Pistol_Dropoff_Skip
+            end
+        end
         Text.Print('MISMONY', 5000, 0)
-        Player.AddScore($player, 2000)
-        wait 5000
+        if MarieGreeted == 0
+        then
+            Player.AddScore($player, 2000)
+            MarieGreeted = 1
+        end
+        TIMERA = 0
+        while TIMERA < 5000
+            wait 0
+            if or
+                Pad.IsKeyPressed(KeyCode.LeftShift)
+                Pad.IsKeyPressed(KeyCode.Space)
+                Pad.IsKeyPressed(KeyCode.F)
+            then
+                jump @Pistol_Dropoff_Skip
+            end
+        end
         Text.Print('MISWORK', 8000, 0)
-        wait 5500
+        TIMERA = 0
+        while TIMERA < 5500
+            wait 0
+            if or
+                Pad.IsKeyPressed(KeyCode.LeftShift)
+                Pad.IsKeyPressed(KeyCode.Space)
+                Pad.IsKeyPressed(KeyCode.F)
+            then
+                jump @Pistol_Dropoff_Skip
+            end
+        end
         Char.SetObjLeaveCar(Marie, MyCar)
         while Char.IsInCar(Marie, MyCar)
             wait 0
@@ -793,6 +968,13 @@ while true
                 not Car.IsStillAlive(MyCar)
             then
                 break
+            end
+            if or
+                Pad.IsKeyPressed(KeyCode.LeftShift)
+                Pad.IsKeyPressed(KeyCode.Space)
+                Pad.IsKeyPressed(KeyCode.F)
+            then
+                jump @Pistol_Dropoff_Skip
             end
         end
 
@@ -811,6 +993,13 @@ while true
             then
                 break
             end
+            if or
+                Pad.IsKeyPressed(KeyCode.LeftShift)
+                Pad.IsKeyPressed(KeyCode.Space)
+                Pad.IsKeyPressed(KeyCode.F)
+            then
+                jump @Pistol_Dropoff_Skip
+            end
         end
 
         Char.SetObjGotoCoordOnFoot(Marie, 1171.00, -108.68)
@@ -828,9 +1017,34 @@ while true
             then
                 break
             end
+            if or
+                Pad.IsKeyPressed(KeyCode.LeftShift)
+                Pad.IsKeyPressed(KeyCode.Space)
+                Pad.IsKeyPressed(KeyCode.F)
+            then
+                jump @Pistol_Dropoff_Skip
+            end
         end
 
         Char.RemoveElegantly(Marie)
+        Player.SetControl($player, True)
+        Text.PrintHelp('HIDEOUT')
+        Destination = Blip.AddForCoord(1419.15, -194.40, 49.74)
+        Blip.ChangeColor(Destination, BlipColor.Yellow)
+        GunSphere = Sphere.Create(1419.15, -194.40, 49.74, 3.0)
+        jump @Gun_Success
+
+        :Pistol_Dropoff_Skip
+        Text.ClearPrints()
+        if MarieGreeted == 0
+        then
+            Player.AddScore($player, 2000)
+            MarieGreeted = 1
+        end
+        if not Marie == 0
+        then
+            Char.RemoveElegantly(Marie)
+        end
         Player.SetControl($player, True)
         Text.PrintHelp('HIDEOUT')
         Destination = Blip.AddForCoord(1419.15, -194.40, 49.74)
