@@ -36,6 +36,8 @@ while true
     end
 
     $Packages = Game.GetCollectablesCollected()
+
+    // Tutorial check on first package
     if and
         $Packages >= 1
         $Intro_Passed == 0
@@ -51,38 +53,156 @@ while true
         Text.PrintHelp('PAKTUT4')
     end
 
+    // ==========================================
+    // REWARDS LOGIC (Always active even if tracker is off)
+    // ==========================================
+    if $Packages >= 6
+    then
+        if $Reward1Given == 0
+        then
+            $Reward1Given = 1
+            Stat.PlayerMadeProgress(1)
+            Pager.AddMessage('PACK6', 140, 2, 0)
+            Pickup.Create(#BAT, PickupType.OnStreet, 1482.88, -200.08, 55.59, 7@)
+        end
+    end
+
+    if $Packages >= 12
+    then
+        if $Reward2Given == 0
+        then
+            $Reward2Given = 1
+            Stat.PlayerMadeProgress(1)
+            Pager.AddMessage('PACK12', 140, 2, 0)
+            Pickup.CreateWithAmmo(#COLT45, PickupType.OnStreet, 500, 1472.27, -192.85, 55.47, 7@)
+        end
+    end
+
+    if $Packages >= 18
+    then
+        if $Reward3Given == 0
+        then
+            $Reward3Given = 1
+            Stat.PlayerMadeProgress(1)
+            Pager.AddMessage('PACK18', 140, 2, 0)
+            Pickup.CreateWithAmmo(#SHOTGUN, PickupType.OnStreet, 40, 1460.34, -165.63, 55.50, 7@)
+        end
+    end
+
+    if $Packages >= 24
+    then
+        if $Reward4Given == 0
+        then
+            $Reward4Given = 1
+            Stat.PlayerMadeProgress(1)
+            Pager.AddMessage('PACK24', 140, 2, 0)
+            Pickup.CreateWithAmmo(#UZI, PickupType.OnStreet, 500, 1488.08, -171.86, 55.59, 7@)
+        end
+    end
+
+    if $Packages >= 30
+    then
+        if $Reward5Given == 0
+        then
+            $Reward5Given = 1
+            Stat.PlayerMadeProgress(1)
+            Pager.AddMessage('PACK30', 140, 2, 0)
+            Pickup.CreateWithAmmo(#M16, PickupType.OnStreet, 150, 1479.09, -169.66, 55.63, 7@)
+        end
+    end
+
+    if $Packages >= 36
+    then
+        if $Reward6Given == 0
+        then
+            $Reward6Given = 1
+            Stat.PlayerMadeProgress(1)
+            Pager.AddMessage('PACK36', 140, 2, 0)
+            Pickup.CreateWithAmmo(#SNIPER, PickupType.OnStreet, 30, 1470.42, -167.22, 55.58, 7@)
+        end
+    end
+
+    if $Packages >= 42
+    then
+        if $Reward7Given == 0
+        then
+            $Reward7Given = 1
+            Stat.PlayerMadeProgress(1)
+            Pager.AddMessage('PACK42', 140, 2, 0)
+            Pickup.CreateWithAmmo(#FLAME, PickupType.OnStreet, 500, 1462.00, -165.00, 55.50, 7@)
+        end
+    end
+
+    if $Packages >= 48
+    then
+        if $Reward8Given == 0
+        then
+            $Reward8Given = 1
+            Stat.PlayerMadeProgress(1)
+            Pager.AddMessage('PACK48', 140, 2, 0)
+            Pickup.CreateWithAmmo(#GRENADE, PickupType.OnStreet, 30, 1454.61, -164.78, 55.40, 7@)
+        end
+    end
+
+    if $Packages >= 54
+    then
+        if $Reward9Given == 0
+        then
+            $Reward9Given = 1
+            Stat.PlayerMadeProgress(1)
+            Pager.AddMessage('PACK54', 140, 2, 0)
+            Pickup.CreateWithAmmo(#ROCKET, PickupType.OnStreet, 1000, 1446.00, -161.00, 55.50, 7@)
+        end
+    end
+
+    if $Packages >= PACKAGE_COUNT
+    then
+        if $Reward10Given == 0
+        then
+            $Reward10Given = 1
+            Stat.PlayerMadeProgress(1)
+            Text.PrintBig('PACKALL', 5000, TextStyle.Middle)
+            wait 5000
+            Text.PrintBig('PACKREW', 5000, TextStyle.Middle)
+            Player.AddScore($player, 10000)
+        end
+    end
+
+    // ==========================================
+    // TRACKER TOGGLE KEY HANDLER (O / P)
+    // ==========================================
     if
         not $Packages == PACKAGE_COUNT
     then
         if
             Pad.IsKeyPressed(KeyCode.O)
         then
-            Text.PrintHelp('PACKOFF')
-            $PackHunt = 0
-            if $PackBlip > 0
+            if $PackHunt == 1
             then
-                Blip.Remove($PackBlip)
-                $PackBlip = 0
+                Text.PrintHelp('PACKOFF')
+                $PackHunt = 0
+                if $PackBlip > 0
+                then
+                    Blip.Remove($PackBlip)
+                    $PackBlip = 0
+                end
+                terminate_all_scripts_with_this_name 'PACKAGE'
+                wait 500
             end
-            terminate_all_scripts_with_this_name 'PACKAGE'
-            wait 500
         end
 
         if
             Pad.IsKeyPressed(KeyCode.P)
         then
-
-            if $PackHunt == 1 // If it's already running, insult the player for being an imbecile.
+            if $PackHunt == 1
             then
                 Text.Print('PACKON1', 3000, 0)
             else
-                // It's off, so turn it on
                 $PackHunt = 1
                 Text.PrintHelp('PACKON')
                 terminate_all_scripts_with_this_name 'PACKAGE'
                 start_new_script @PACKAGE
             end
-            // Debounce delay so holding the key doesn't trigger this 30 times a second
             wait 500
         end
     else
@@ -102,26 +222,45 @@ terminate_this_script
 script_name 'PACKAGE'
 
 $Packages = Game.GetCollectablesCollected()
-$PackIndex = $Packages // // Separate tracking pointer from raw game count
-$BlipActive = 1 // Tells the game whether or not a Blip for the package tracker is being shown
-2@ = 0  // Barrier Block Notice Flag
+$PackIndex = $Packages
+$BlipActive = 1
+2@ = 0
 $PackBlip = 0
-// Is this not self-explanitory? See: https://getyarn.io/yarn-clip/f28899df-070d-436a-9b37-1b79f29e92b8
-$LastPackCount = $Packages // Previous collection count tracker
+$LastPackCount = $Packages
 
 while true
     wait 250
-        while not Player.IsPlaying($player)
-            wait 250
-        end
+    while not Player.IsPlaying($player)
+        wait 250
+    end
 
-    // Fetch current packages collected from game save
+    if $PackHunt == 0
+    then
+        if $PackBlip > 0
+        then
+            Blip.Remove($PackBlip)
+            $PackBlip = 0
+        end
+        terminate_this_script
+    end
+
     $Packages = Game.GetCollectablesCollected()
+
+    // Auto-advance tracker if a package was collected
+    if $Packages > $LastPackCount
+    then
+        $LastPackCount = $Packages
+        $PackIndex = $Packages
+        $BlipActive = 1
+    end
 
     // ==========================================
     // MANUAL INDEX OVERRIDE SNIFFER (COMMA / PERIOD)
+    // Only works and updates blip if tracker is running ($PackHunt == 1)
     // ==========================================
-    if Pad.IsKeyPressed(KeyCode.OemComma)  // Press ',' to go to previous package
+    if and
+        $PackHunt == 1
+        Pad.IsKeyPressed(KeyCode.OemComma)
     then
         if $PackIndex > 0
         then
@@ -133,10 +272,12 @@ while true
         else
             Text.PrintHelpFormatted("Already tracking ~y~Package 1~w~ of %d.", PACKAGE_COUNT)
         end
-        wait 300 // Debounce so it doesn't fly down 10 indices per second
+        wait 300
     end
 
-    if Pad.IsKeyPressed(KeyCode.OemPeriod) // Press '.' to skip to next package
+    if and
+        $PackHunt == 1
+        Pad.IsKeyPressed(KeyCode.OemPeriod)
     then
         if and
             $BarrierIND == 1
@@ -162,197 +303,76 @@ while true
                 Text.PrintHelpFormatted("Already tracking ~y~Package %d~w~ of %d.", PACKAGE_COUNT, PACKAGE_COUNT)
             end
         end
-        wait 300 // Debounce
+        wait 300
     end
 
+    // ==========================================
+    // BLIP MANAGEMENT
+    // Only creates/shows a blip while $PackHunt == 1
+    // ==========================================
     if $PackHunt == 1
     then
-
-        // --- REWARDS LOGIC ---
-        if $Packages >= 6
+        if $Packages < PACKAGE_COUNT
         then
-            if $Reward1Given == 0
+            if and
+                $PackIndex >= 26
+                $BarrierIND == 1
             then
-                $Reward1Given = 1
-                Stat.PlayerMadeProgress(1)
-                Pager.AddMessage('PACK6', 140, 2, 0)
-                Pickup.Create(#BAT, PickupType.OnStreet, 1482.88, -200.08, 55.59, 7@)
-            end
-        end
-
-        if $Packages >= 12
-        then
-            if $Reward2Given == 0
-            then
-                $Reward2Given = 1
-                Stat.PlayerMadeProgress(1)
-                Pager.AddMessage('PACK12', 140, 2, 0)
-                Pickup.CreateWithAmmo(#COLT45, PickupType.OnStreet, 500, 1472.27, -192.85, 55.47, 7@)
-            end
-        end
-
-        if $Packages >= 18
-        then
-            if $Reward3Given == 0
-            then
-                $Reward3Given = 1
-                Stat.PlayerMadeProgress(1)
-                Pager.AddMessage('PACK18', 140, 2, 0)
-                Pickup.CreateWithAmmo(#SHOTGUN, PickupType.OnStreet, 40, 1460.34, -165.63, 55.50, 7@)
-            end
-        end
-
-        if $Packages >= 24
-        then
-            if $Reward4Given == 0
-            then
-                $Reward4Given = 1
-                Stat.PlayerMadeProgress(1)
-                Pager.AddMessage('PACK24', 140, 2, 0)
-                Pickup.CreateWithAmmo(#UZI, PickupType.OnStreet, 500, 1488.08, -171.86, 55.59, 7@)
-            end
-        end
-
-        if $Packages >= 30
-        then
-            if $Reward5Given == 0
-            then
-                $Reward5Given = 1
-                Stat.PlayerMadeProgress(1)
-                Pager.AddMessage('PACK30', 140, 2, 0)
-                Pickup.CreateWithAmmo(#M16, PickupType.OnStreet, 150, 1479.09, -169.66, 55.63, 7@)
-            end
-        end
-
-        if $Packages >= 36
-        then
-            if $Reward6Given == 0
-            then
-                $Reward6Given = 1
-                Stat.PlayerMadeProgress(1)
-                Pager.AddMessage('PACK36', 140, 2, 0)
-                Pickup.CreateWithAmmo(#SNIPER, PickupType.OnStreet, 30, 1470.42, -167.22, 55.58, 7@)
-            end
-        end
-
-        if $Packages >= 42
-        then
-            if $Reward7Given == 0
-            then
-                $Reward7Given = 1
-                Stat.PlayerMadeProgress(1)
-                Pager.AddMessage('PACK42', 140, 2, 0)
-                Pickup.CreateWithAmmo(#FLAME, PickupType.OnStreet, 500, 1462.00, -165.00, 55.50, 7@)
-            end
-        end
-
-        if $Packages >= 48
-        then
-            if $Reward8Given == 0
-            then
-                $Reward8Given = 1
-                Stat.PlayerMadeProgress(1)
-                Pager.AddMessage('PACK48', 140, 2, 0)
-                Pickup.CreateWithAmmo(#GRENADE, PickupType.OnStreet, 30, 1454.61, -164.78, 55.40, 7@)
-            end
-        end
-
-        if $Packages >= 54
-        then
-            if $Reward9Given == 0
-            then
-                $Reward9Given = 1
-                Stat.PlayerMadeProgress(1)
-                Pager.AddMessage('PACK54', 140, 2, 0)
-                Pickup.CreateWithAmmo(#ROCKET, PickupType.OnStreet, 1000, 1446.00, -161.00, 55.50, 7@)
-            end
-        end
-
-        if $Packages >= PACKAGE_COUNT
-        then
-            if $Reward10Given == 0
-            then
-                $Reward10Given = 1
-                Stat.PlayerMadeProgress(1)
-                Text.PrintBig('PACKALL', 5000, TextStyle.Middle)
-                wait 5000
-                Text.PrintBig('PACKREW', 5000, TextStyle.Middle)
-                Player.AddScore($player, 10000)
-            end
-        end
-
-
-        if $PackHunt == 1
-        then
-            if $Packages < PACKAGE_COUNT
-            then
-                // Map the current collection count directly to your coordinate index
-                $CurrentPackages = $Packages
-
-                if and
-                    $PackIndex >= 26
-                    $BarrierIND == 1
+                if 2@ == 0
                 then
-                    if 2@ == 0
+                    2@ = 1
+                    if $PackBlip > 0
                     then
-                        2@ = 1
-                        if $PackBlip > 0
-                        then
-                            Blip.Remove($PackBlip)
-                            $PackBlip = 0
-                        end
-                        Text.PrintHelp('PACK_ST')
+                        Blip.Remove($PackBlip)
+                        $PackBlip = 0
                     end
-                else
-                    if 2@ == 1
-                    then
-                        2@ = 0
-                        $BlipActive = 1
-                    end
-
-                    GetPackageCoords()
-
-                    // If $PackCoordX is 0.0, the lookup table index is missing or out of bounds!
-                    if $BlipActive == 1
-                    then
-                        $BlipActive = 0
-
-                        if $PackBlip > 0
-                        then
-                            Blip.Remove($PackBlip)
-                            $PackBlip = 0
-                        end
-
-                        // Safety check to ensure that a blip isn't added at 0,0,0
-                        if
-                            not $PackCoordX == 0.0
-                        then
-                            $PackBlip = Blip.AddForCoord($PackCoordX, $PackCoordY, $PackCoordZ)
-                            Blip.ChangeColor($PackBlip, BlipColor.Red)
-                        end
-                    end
-
+                    Text.PrintHelp('PACK_ST')
                 end
             else
-                if $PackBlip > 0
+                if 2@ == 1
                 then
-                    Blip.Remove($PackBlip)
-                    $PackBlip = 0
+                    2@ = 0
+                    $BlipActive = 1
                 end
-                terminate_this_script
+
+                GetPackageCoords()
+
+                if $BlipActive == 1
+                then
+                    $BlipActive = 0
+
+                    if $PackBlip > 0
+                    then
+                        Blip.Remove($PackBlip)
+                        $PackBlip = 0
+                    end
+
+                    if not $PackCoordX == 0.0
+                    then
+                        $PackBlip = Blip.AddForCoord($PackCoordX, $PackCoordY, $PackCoordZ)
+                        Blip.ChangeColor($PackBlip, BlipColor.Red)
+                    end
+                end
             end
         else
-            // If hunt is toggled off, make sure the blip clears out using class syntax
             if $PackBlip > 0
             then
                 Blip.Remove($PackBlip)
                 $PackBlip = 0
             end
+            $PackHunt = 0
+            terminate_this_script
         end
+    else
+        if $PackBlip > 0
+        then
+            Blip.Remove($PackBlip)
+            $PackBlip = 0
+        end
+        terminate_this_script
     end
 end
 
-// TODO(chances): Automate this into geography scripts
 :GetPackageCoords
 if $PackIndex == 0
 then
