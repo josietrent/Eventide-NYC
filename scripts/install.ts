@@ -1,9 +1,8 @@
 /**
  * install.ts
  *
- * Installs the Eventide mod by extracting dist/Drag-N-Drop.zip
- * over into the GTA III game directory, and ensuring the unflagged runner
- * hard-link exists.
+ * Extracts the latest `dist/Drag-N-Drop.zip` archive into the GTA III
+ * installation directory specified in `.env`.
  */
 
 import { dirname, join } from "@std/path";
@@ -143,19 +142,6 @@ try {
   }
 } catch {
   // Optional if source strings.fxt does not exist
-}
-
-// Ensure unflagged runner hard-link exists (bypasses Windows UAC elevation)
-const gtaExe = join(gta3Base, "gta3-game.exe");
-try {
-  await Deno.stat(gtaExe);
-} catch {
-  try {
-    await Deno.link(gtaExe, gtaExe);
-    say.done("  Created runner link gta3-game.exe (bypasses UAC)");
-  } catch {
-    // Ignore if link unsupported
-  }
 }
 
 say.pass("Eventide mod installation complete");

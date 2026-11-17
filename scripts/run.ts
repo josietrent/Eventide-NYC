@@ -29,20 +29,9 @@ try {
   Deno.exit(1);
 }
 
-// Prefer unflagged hardlink runner to bypass HKLM UAC elevation prompt
-const runnerExe = join(gta3Base, "gta3-game.exe");
-let targetExe = exePath;
+say.info(`Launching Grand Theft Auto III: ${exePath}`);
 
-try {
-  const stat = await Deno.stat(runnerExe);
-  if (stat.isFile) targetExe = runnerExe;
-} catch {
-  // Fall back to gta3.exe
-}
-
-say.info(`Launching Grand Theft Auto III: ${targetExe}`);
-
-const command = new Deno.Command(targetExe, {
+const command = new Deno.Command(exePath, {
   cwd: gta3Base,
 });
 
@@ -99,9 +88,9 @@ function describe(event: TimedPacket): string {
     return `${time}${channelName(event.channel)} ${event.kind} ${event.value}`;
   }
   const [x, y, z] = event.pos.map((n) => n.toFixed(1));
-  return `${time}${event.type.toUpperCase()} ${x}, ${y}, ${z} h${
-    event.heading.toFixed(0)
-  }`;
+  return `${time}${event.type.toUpperCase()} ${x}, ${y}, ${z} h${event.heading.toFixed(
+    0,
+  )}`;
 }
 
 function report(summary: Summary, path: string) {
@@ -112,13 +101,12 @@ function report(summary: Summary, path: string) {
   say.heading("Telemetry");
   const channels = [...summary.channels].sort(([a], [b]) => a - b);
   for (const [channel, stats] of channels) {
-    const range = stats.min === stats.max
-      ? ""
-      : `  range ${stats.min}..${stats.max}`;
+    const range =
+      stats.min === stats.max ? "" : `  range ${stats.min}..${stats.max}`;
     say.text(
-      `${
-        channelName(channel).padEnd(26)
-      }${stats.kind}  n=${stats.count}  last=${stats.last}${range}`,
+      `${channelName(channel).padEnd(
+        26,
+      )}${stats.kind}  n=${stats.count}  last=${stats.last}${range}`,
     );
   }
   say.text(
@@ -129,3 +117,11 @@ function report(summary: Summary, path: string) {
   for (const event of summary.recent) say.skip(`  ${describe(event)}`);
   say.skip(`Log: ${path}`);
 }
+
+const names = new Map<number, string>([
+  [0, "PLAYER_ACTOR"],
+  [1, "PLAYER_CHAR"],
+  [2, "PLAYER_PED"],
+  [3, "MISSION"],
+  [4, "THREAD"],
+]);
