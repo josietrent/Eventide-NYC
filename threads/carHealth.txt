@@ -3,9 +3,15 @@ script_name 'CarHlth'
 
 :CarHealth101
 while true
-    wait 0
+    wait 250
+    if or
+        not Player.IsPlaying($player)
+        Camera.GetFadingStatus()
+    then
+        continue
+    end
+
     if and
-        Player.IsPlaying($player)
         Player.CanStartMission($player)
         Player.IsInAnyCar($player)
     then

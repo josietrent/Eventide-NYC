@@ -150,7 +150,14 @@ script_name 'Driving'
 0@ = 0
 
 while true
-    wait 0
+    wait 250
+    if or
+        not Player.IsPlaying($player)
+        Camera.GetFadingStatus()
+    then
+        continue
+    end
+
     if and
         $onmission == false
         $Intro_Passed == false
@@ -187,7 +194,7 @@ while true
 end
 
 while true
-    wait 0
+    wait 250
     if and
         $onmission == true
         $Intro_Passed == false
@@ -209,7 +216,14 @@ end
 script_name 'Vehicle'
 
 while true
-    wait 0
+    wait 250
+    if or
+        not Player.IsPlaying($player)
+        Camera.GetFadingStatus()
+    then
+        continue
+    end
+
     if and
         $onmission == false
         $Intro_Passed == true
@@ -263,6 +277,12 @@ $MissionTriggerSphere = Sphere.Create(1120.63, 27.91, 2.12, 3.0)
 :Pistol_Loop
 while $OnGunMission == 0
     wait 250
+    if or
+        not Player.IsPlaying($player)
+        Camera.GetFadingStatus()
+    then
+        continue
+    end
 
     // Heat Check Logic
     if and
@@ -331,7 +351,14 @@ script_name 'Stairs'
 
 :Stairs_Loop
 while $OnAlleyMission == 0
-    wait 0
+    wait 250
+    if or
+        not Player.IsPlaying($player)
+        Camera.GetFadingStatus()
+    then
+        continue
+    end
+
     if and
         Player.CanStartMission($player)
         $onmission == 0
@@ -379,7 +406,14 @@ script_name 'Affairs'
 
 :Affairs_Loop
 while $OnProtectionMission == 0
-    wait 0
+    wait 250
+    if or
+        not Player.IsPlaying($player)
+        Camera.GetFadingStatus()
+    then
+        continue
+    end
+
     if and
         Player.CanStartMission($player)
         $onmission == 0
