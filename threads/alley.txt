@@ -550,6 +550,7 @@ then
     Car.MarkAsNoLongerNeeded(Cheetah)
     Cheetah = 0
 end
+World.ClearArea(1335.96, -462.10, 49.76, 10.0, True)
 Streaming.UnloadSpecialCharacter(1)
 Streaming.MarkModelAsNoLongerNeeded(#CHEETAH)
 Streaming.MarkModelAsNoLongerNeeded(#UZI)
