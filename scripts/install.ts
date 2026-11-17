@@ -111,17 +111,38 @@ const shadowedFiles = [
   )),
 ];
 if (shadowedFiles.length > 0) {
-  say.info(
-    "Cleaning up loose files in [gta3]/CLEO that duplicate packaged modloader/Eventide files:",
+  say.error(
+    "Conflict: these files in [gta3]/CLEO duplicate packaged modloader/Eventide files and may be stale:",
   );
-  for (const file of shadowedFiles) {
-    try {
-      await Deno.remove(file);
-      say.done(`  Removed loose duplicate: ${file}`);
-    } catch (err) {
-      say.warn(`  Could not remove ${file}: ${err}`);
-    }
+  for (const file of shadowedFiles) say.fail(`      ${file}`);
+  say.fail("    Remove them so the modloader copies are the ones that run.");
+  Deno.exit(1);
+}
+
+// Sync custom strings to CLEO/cleo_text only when missing or changed
+const localStrings = join(cwd, "data", "CLEO", "strings.fxt");
+const customStrings = join(gta3Base, "CLEO", "cleo_text", "strings.fxt");
+try {
+  const localBytes = await Deno.readFile(localStrings);
+  let destBytes: Uint8Array | null = null;
+  try {
+    destBytes = await Deno.readFile(customStrings);
+  } catch {
+    // Not installed yet
   }
+  const isUnchanged =
+    destBytes !== null &&
+    destBytes.length === localBytes.length &&
+    localBytes.every((b, i) => b === destBytes![i]);
+  if (isUnchanged) {
+    say.skip("  Custom strings in CLEO are up to date");
+  } else {
+    await Deno.mkdir(dirname(customStrings), { recursive: true });
+    await Deno.copyFile(localStrings, customStrings);
+    say.done("  Copied updated custom strings into CLEO");
+  }
+} catch {
+  // Optional if source strings.fxt does not exist
 }
 
 // Ensure unflagged runner hard-link exists (bypasses Windows UAC elevation)
@@ -130,7 +151,7 @@ try {
   await Deno.stat(gtaExe);
 } catch {
   try {
-    await Deno.link(join(gta3Base, "gta3.exe"), gtaExe);
+    await Deno.link(gtaExe, gtaExe);
     say.done("  Created runner link gta3-game.exe (bypasses UAC)");
   } catch {
     // Ignore if link unsupported

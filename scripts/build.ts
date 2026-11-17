@@ -581,13 +581,13 @@ if (shouldRun(10, "triblips")) {
   say.done(`  Packaged modloader/${modName}/CLEO/${basename(triOutput)}`);
 }
 
-// Package CLEO custom strings
+// Package CLEO custom strings into CLEO/cleo_text (CLEO reads .fxt from here, not modloader)
 const stringsSrc = join(cwd, "data", "CLEO", "strings.fxt");
 if (await allExist([stringsSrc])) {
-  const cleoTextDir = join(modStagingDir, "CLEO", "cleo_text");
+  const cleoTextDir = join(stagingDir, "CLEO", "cleo_text");
   await ensureDir(cleoTextDir);
   await Deno.copyFile(stringsSrc, join(cleoTextDir, "strings.fxt"));
-  say.done(`  Packaged modloader/${modName}/CLEO/cleo_text/strings.fxt`);
+  say.done("  Packaged CLEO/cleo_text/strings.fxt");
 }
 
 // Step 11: PauseRadio ASI Plugin
@@ -667,6 +667,17 @@ if (shouldRun(13, "menulogo")) {
     say.done(`  Packaged modloader/${modName}/txd/mainsc1.txd`);
     say.done(`  Packaged modloader/${modName}/txd/mainsc2.txd`);
   }
+}
+
+// Step 14: WeaponSprint ASI Plugin
+if (shouldRun(14, "weaponsprint")) {
+  say.heading("Step 14 (weaponsprint): Compiling WeaponSprint.asi...");
+  const asiInput = join(cwd, "plugins", "WeaponSprint", "WeaponSprint.cpp");
+  const asiOutput = join(cwd, "plugins", "WeaponSprint", "WeaponSprint.asi");
+  await compileAsiIfChanged(asiInput, asiOutput, join(stagingDir, "obj"));
+
+  await Deno.copyFile(asiOutput, join(modStagingDir, basename(asiOutput)));
+  say.done(`  Packaged modloader/${modName}/${basename(asiOutput)}`);
 }
 
 // Clean compiler scratch directory before zipping
