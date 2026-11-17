@@ -254,12 +254,12 @@ function generateDefaultEventideLogo(): Uint8Array {
           const px = x + sx;
           const py = y + sy;
 
-          // Outer rounded square matching R* badge silhouette
-          const boxDist = sdRoundedBox(px, py, 64, 64, 58, 58, 16);
+          // Outer rounded square filling 124x124 of the 128x128 canvas
+          const boxDist = sdRoundedBox(px, py, 64, 64, 62, 62, 17);
           const alpha = smoothstep(0.9, -0.9, boxDist);
 
           // Base twilight indigo-teal gradient
-          const gradT = clamp01((py - 10) / 108);
+          const gradT = clamp01((py - 4) / 120);
           let r = 34 * (1 - gradT) + 18 * gradT;
           let g = 68 * (1 - gradT) + 38 * gradT;
           let b = 104 * (1 - gradT) + 74 * gradT;
@@ -273,24 +273,24 @@ function generateDefaultEventideLogo(): Uint8Array {
           }
 
           // Crescent moon + Eventide III three-star triad
-          const moonOuter = Math.hypot(px - 57, py - 62) - 31;
-          const moonCut = Math.hypot(px - 71, py - 56) - 26;
+          const moonOuter = Math.hypot(px - 56, py - 62) - 33;
+          const moonCut = Math.hypot(px - 71, py - 56) - 28;
           const crescent = Math.max(moonOuter, -moonCut);
 
-          const s1 = sdStar(px, py, 86, 44, 7.2, 3.0, 5);
-          const s2 = sdStar(px, py, 94, 62, 5.8, 2.4, 5);
-          const s3 = sdStar(px, py, 83, 79, 6.4, 2.7, 5);
+          const s1 = sdStar(px, py, 87, 43, 7.6, 3.2, 5);
+          const s2 = sdStar(px, py, 96, 62, 6.2, 2.6, 5);
+          const s3 = sdStar(px, py, 84, 80, 6.8, 2.9, 5);
 
           const emblemDist = Math.min(crescent, s1, s2, s3);
 
           const shadowDist = Math.min(
             Math.max(
-              Math.hypot(px - 58.5, py - 64.5) - 31,
-              -(Math.hypot(px - 72.5, py - 58.5) - 26),
+              Math.hypot(px - 57.5, py - 64.5) - 33,
+              -(Math.hypot(px - 72.5, py - 58.5) - 28),
             ),
-            sdStar(px, py, 87.5, 46.5, 7.2, 3.0, 5),
-            sdStar(px, py, 95.5, 64.5, 5.8, 2.4, 5),
-            sdStar(px, py, 84.5, 81.5, 6.4, 2.7, 5),
+            sdStar(px, py, 88.5, 45.5, 7.6, 3.2, 5),
+            sdStar(px, py, 97.5, 64.5, 6.2, 2.6, 5),
+            sdStar(px, py, 85.5, 82.5, 6.8, 2.9, 5),
           );
           const shadowCov = smoothstep(1.2, -1.2, shadowDist);
           r = r * (1 - shadowCov * 0.55) + 8 * (shadowCov * 0.55);
