@@ -426,7 +426,14 @@ export async function buildSingleTextureTxd(
   const pngBytes = await Deno.readFile(pngPath);
   const { width, height, rgba } = await decodePngRgba(pngBytes);
   const txdBytes = buildRw33Txd([{ name: texName, width, height, rgba }]);
-  await Deno.writeFile(txdPath, txdBytes);
+  const tmpPath = `${txdPath}.${Date.now()}.tmp`;
+  await Deno.writeFile(tmpPath, txdBytes);
+  try {
+    await Deno.remove(txdPath);
+  } catch {
+    // Ignore if file does not exist
+  }
+  await Deno.rename(tmpPath, txdPath);
 }
 
 export async function buildMenuTxd(
