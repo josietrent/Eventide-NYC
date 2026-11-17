@@ -612,9 +612,10 @@ if (shouldRun(13, "menulogo")) {
   const asiInput = join(cwd, "plugins", "MenuLogo", "MenuLogo.cpp");
   const asiOutput = join(cwd, "plugins", "MenuLogo", "MenuLogo.asi");
   const pngInput = join(cwd, "plugins", "MenuLogo", "eventidelogo128.png");
+  const titlePngInput = join(cwd, "plugins", "MenuLogo", "gtalogo128.png");
   const txdOutput = join(cwd, "plugins", "MenuLogo", "eventide_menu.txd");
   await compileAsiIfChanged(asiInput, asiOutput, join(stagingDir, "obj"));
-  await buildMenuTxd(pngInput, txdOutput);
+  await buildMenuTxd(pngInput, txdOutput, titlePngInput);
 
   await Deno.copyFile(asiOutput, join(modStagingDir, basename(asiOutput)));
   await Deno.copyFile(txdOutput, join(modStagingDir, basename(txdOutput)));

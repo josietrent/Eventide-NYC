@@ -8,6 +8,9 @@
 namespace {
 
 // GTA III v1.0 addresses
+constexpr uintptr_t ADDR_CALL_LOAD_MENU_SPRITE_TEX =
+    0x47A406; // inside CMenuManager::LoadAllTextures() ->
+              // CSprite2d::SetTexture(name, mask)
 constexpr uintptr_t ADDR_CALL_UNLOAD_MENU_TXD =
     0x47A4BC; // inside CMenuManager::UnloadTextures() -> CTxdStore::RemoveTxd()
 constexpr uintptr_t ADDR_CALL_DRAW_STD_MENUS =
@@ -94,12 +97,16 @@ std::string g_logPath;
 
 int32_t g_origDrawRel32 = 0;
 int32_t g_origRemoveTxdRel32 = 0;
+int32_t g_origMenuSetTexRel32 = 0;
 bool g_patchedDraw = false;
 bool g_patchedRemoveTxd = false;
+bool g_patchedMenuSetTex = false;
 
 DrawStdMenusFn g_origDrawStdMenus =
     reinterpret_cast<DrawStdMenusFn>(ADDR_FN_DRAW_STD_MENUS);
 RemoveTxdFn g_origRemoveTxd = reinterpret_cast<RemoveTxdFn>(ADDR_FN_REMOVE_TXD);
+SpriteSetTexMaskFn g_origMenuSetTexMask =
+    reinterpret_cast<SpriteSetTexMaskFn>(ADDR_SPRITE_SET_TEXTURE_MASK);
 
 void WriteLog(const char *line) {
   if (g_logPath.empty() || !line) {
@@ -141,6 +148,33 @@ void InitPaths(HMODULE hModule) {
   }
 }
 
+int32_t EnsureEvTxdLoaded() {
+  if (g_evTxdSlot != -1) {
+    return g_evTxdSlot;
+  }
+  if (GetFileAttributesA(g_txdPath.c_str()) == INVALID_FILE_ATTRIBUTES) {
+    return -1;
+  }
+
+  auto findSlot = reinterpret_cast<TxdFindSlotFn>(ADDR_TXD_FIND_SLOT);
+  auto addSlot = reinterpret_cast<TxdAddSlotFn>(ADDR_TXD_ADD_SLOT);
+  auto loadTxd = reinterpret_cast<TxdLoadFn>(ADDR_TXD_LOAD);
+  auto addRef = reinterpret_cast<TxdAddRefFn>(ADDR_TXD_ADD_REF);
+
+  int32_t evSlot = findSlot("evmenu");
+  if (evSlot == -1) {
+    evSlot = addSlot("evmenu");
+  }
+  if (evSlot != -1 && loadTxd(evSlot, g_txdPath.c_str())) {
+    addRef(evSlot);
+    g_evTxdSlot = evSlot;
+    return g_evTxdSlot;
+  }
+
+  WriteLog("Failed to load eventide_menu.txd");
+  return -1;
+}
+
 void EnsureLogoLoaded() {
   if (g_logoSprite.m_pTexture != nullptr || g_loadAttempted) {
     return;
@@ -148,12 +182,9 @@ void EnsureLogoLoaded() {
   g_loadAttempted = true;
 
   auto findSlot = reinterpret_cast<TxdFindSlotFn>(ADDR_TXD_FIND_SLOT);
-  auto addSlot = reinterpret_cast<TxdAddSlotFn>(ADDR_TXD_ADD_SLOT);
-  auto loadTxd = reinterpret_cast<TxdLoadFn>(ADDR_TXD_LOAD);
   auto setCurrent = reinterpret_cast<TxdSetCurrentFn>(ADDR_TXD_SET_CURRENT);
   auto pushCurrent = reinterpret_cast<TxdPushPopFn>(ADDR_TXD_PUSH_CURRENT);
   auto popCurrent = reinterpret_cast<TxdPushPopFn>(ADDR_TXD_POP_CURRENT);
-  auto addRef = reinterpret_cast<TxdAddRefFn>(ADDR_TXD_ADD_REF);
   auto setTex = reinterpret_cast<SpriteSetTexFn>(ADDR_SPRITE_SET_TEXTURE);
   auto setTexMask =
       reinterpret_cast<SpriteSetTexMaskFn>(ADDR_SPRITE_SET_TEXTURE_MASK);
@@ -172,15 +203,9 @@ void EnsureLogoLoaded() {
   }
 
   // 2. Otherwise load standalone eventide_menu.txd next to MenuLogo.asi
-  if (g_logoSprite.m_pTexture == nullptr &&
-      GetFileAttributesA(g_txdPath.c_str()) != INVALID_FILE_ATTRIBUTES) {
-    int32_t evSlot = findSlot("evmenu");
-    if (evSlot == -1) {
-      evSlot = addSlot("evmenu");
-    }
-    if (evSlot != -1 && loadTxd(evSlot, g_txdPath.c_str())) {
-      addRef(evSlot);
-      g_evTxdSlot = evSlot;
+  if (g_logoSprite.m_pTexture == nullptr) {
+    const int32_t evSlot = EnsureEvTxdLoaded();
+    if (evSlot != -1) {
       pushCurrent();
       setCurrent(evSlot);
       setTex(&g_logoSprite, "eventidelogo128");
@@ -188,8 +213,6 @@ void EnsureLogoLoaded() {
         setTexMask(&g_logoSprite, "eventidelogo128", "eventidelogo128m");
       }
       popCurrent();
-    } else {
-      WriteLog("Failed to load eventide_menu.txd");
     }
   }
 
@@ -270,6 +293,35 @@ void DrawBottomRightLogo(void *menuMgr) {
   spriteDraw(&g_logoSprite, &rect, &color);
 }
 
+void __fastcall Hook_MenuLoadSetTexMask(CSprite2d *self, void * /*edx*/,
+                                        const char *name, const char *mask) {
+  if (name != nullptr && std::strcmp(name, "gtaLogo128") == 0) {
+    const int32_t evSlot = EnsureEvTxdLoaded();
+    if (evSlot != -1) {
+      auto setCurrent = reinterpret_cast<TxdSetCurrentFn>(ADDR_TXD_SET_CURRENT);
+      auto pushCurrent = reinterpret_cast<TxdPushPopFn>(ADDR_TXD_PUSH_CURRENT);
+      auto popCurrent = reinterpret_cast<TxdPushPopFn>(ADDR_TXD_POP_CURRENT);
+      auto setTex = reinterpret_cast<SpriteSetTexFn>(ADDR_SPRITE_SET_TEXTURE);
+
+      pushCurrent();
+      setCurrent(evSlot);
+      setTex(self, "gtaLogo128");
+      popCurrent();
+
+      if (self->m_pTexture != nullptr) {
+        const RwRaster *raster = self->m_pTexture->raster;
+        char msg[256] = {};
+        std::snprintf(msg, sizeof(msg),
+                      "Replaced gtaLogo128 from eventide_menu.txd (%dx%d)",
+                      raster ? raster->width : 0, raster ? raster->height : 0);
+        WriteLog(msg);
+        return;
+      }
+    }
+  }
+  g_origMenuSetTexMask(self, name, mask);
+}
+
 void __fastcall Hook_DrawStdMenus(void *self, void * /*edx*/) {
   g_origDrawStdMenus(self);
   DrawBottomRightLogo(self);
@@ -319,7 +371,22 @@ bool InstallHooks() {
     g_patchedRemoveTxd = PatchCallRel32(ADDR_CALL_UNLOAD_MENU_TXD, remRel32);
   }
 
-  WriteLog(g_patchedDraw ? "InstallHooks OK" : "InstallHooks FAILED");
+  if (*reinterpret_cast<const uint8_t *>(ADDR_CALL_LOAD_MENU_SPRITE_TEX) ==
+      0xE8) {
+    g_origMenuSetTexRel32 =
+        *reinterpret_cast<const int32_t *>(ADDR_CALL_LOAD_MENU_SPRITE_TEX + 1);
+    g_origMenuSetTexMask = reinterpret_cast<SpriteSetTexMaskFn>(
+        ADDR_CALL_LOAD_MENU_SPRITE_TEX + 5 + g_origMenuSetTexRel32);
+    const int32_t setTexRel32 = static_cast<int32_t>(
+        reinterpret_cast<uintptr_t>(&Hook_MenuLoadSetTexMask) -
+        (ADDR_CALL_LOAD_MENU_SPRITE_TEX + 5));
+    g_patchedMenuSetTex =
+        PatchCallRel32(ADDR_CALL_LOAD_MENU_SPRITE_TEX, setTexRel32);
+  }
+
+  WriteLog((g_patchedDraw && g_patchedMenuSetTex)
+               ? "InstallHooks OK"
+               : "InstallHooks partial/failed");
   return g_patchedDraw;
 }
 
@@ -331,6 +398,10 @@ void RemoveHooks() {
   if (g_patchedRemoveTxd) {
     PatchCallRel32(ADDR_CALL_UNLOAD_MENU_TXD, g_origRemoveTxdRel32);
     g_patchedRemoveTxd = false;
+  }
+  if (g_patchedMenuSetTex) {
+    PatchCallRel32(ADDR_CALL_LOAD_MENU_SPRITE_TEX, g_origMenuSetTexRel32);
+    g_patchedMenuSetTex = false;
   }
 }
 

@@ -2,8 +2,8 @@
  * build-menu-txd.ts
  *
  * Generates a default Eventide rounded-square badge PNG if missing,
- * and packs plugins/MenuLogo/eventidelogo128.png into a RenderWare 3.3
- * (0x0C02FFFF) 32-bit BGRA .txd (eventide_menu.txd) for GTA III.
+ * and packs plugins/MenuLogo/eventidelogo128.png (and optional gtalogo128.png)
+ * into a RenderWare 3.3 (0x0C02FFFF) 32-bit BGRA .txd (eventide_menu.txd) for GTA III.
  */
 
 const RW_VER_GTA3 = 0x0c02ffff;
@@ -346,25 +346,27 @@ function writeFixedCString(buf: Uint8Array, offset: number, str: string) {
   buf.set(enc.subarray(0, 31), offset);
 }
 
-function buildRw33Txd(
-  texName: string,
-  width: number,
-  height: number,
-  rgba: Uint8Array,
-): Uint8Array {
-  const pixelBytes = width * height * 4;
+interface TxdTextureInput {
+  name: string;
+  width: number;
+  height: number;
+  rgba: Uint8Array;
+}
+
+function buildRwTextureNative(tex: TxdTextureInput): Uint8Array {
+  const pixelBytes = tex.width * tex.height * 4;
   const structPayload = new Uint8Array(88 + 4 + pixelBytes);
   const sdv = new DataView(structPayload.buffer);
 
   // RwTextureNative D3D8 raster struct (matches GTA III PC menu.txd)
   sdv.setUint32(0, 8, true); // platformId = D3D8
   sdv.setUint32(4, 0x1102, true); // filter=LINEAR, uAddressing=WRAP, vAddressing=WRAP
-  writeFixedCString(structPayload, 8, texName);
+  writeFixedCString(structPayload, 8, tex.name);
   writeFixedCString(structPayload, 40, ""); // maskName empty -> uses RGBA alpha
   sdv.setUint32(72, 0x0500, true); // RASTER_8888
   sdv.setUint32(76, 1, true); // hasAlpha = 1
-  sdv.setUint16(80, width, true);
-  sdv.setUint16(82, height, true);
+  sdv.setUint16(80, tex.width, true);
+  sdv.setUint16(82, tex.height, true);
   structPayload[84] = 32; // bpp
   structPayload[85] = 1; // mipmapCount
   structPayload[86] = 4; // rasterType = TEXTURE
@@ -372,13 +374,13 @@ function buildRw33Txd(
   sdv.setUint32(88, pixelBytes, true);
 
   // Convert RGBA -> BGRA
-  for (let i = 0; i < width * height; i++) {
+  for (let i = 0; i < tex.width * tex.height; i++) {
     const src = i * 4;
     const dst = 92 + src;
-    structPayload[dst + 0] = rgba[src + 2]; // B
-    structPayload[dst + 1] = rgba[src + 1]; // G
-    structPayload[dst + 2] = rgba[src + 0]; // R
-    structPayload[dst + 3] = rgba[src + 3]; // A
+    structPayload[dst + 0] = tex.rgba[src + 2]; // B
+    structPayload[dst + 1] = tex.rgba[src + 1]; // G
+    structPayload[dst + 2] = tex.rgba[src + 0]; // R
+    structPayload[dst + 3] = tex.rgba[src + 3]; // A
   }
 
   const texStructChunk = rwChunk(0x01, structPayload);
@@ -388,37 +390,62 @@ function buildRw33Txd(
   );
   texNativePayload.set(texStructChunk, 0);
   texNativePayload.set(texExtChunk, texStructChunk.length);
-  const texNativeChunk = rwChunk(0x15, texNativePayload);
+  return rwChunk(0x15, texNativePayload);
+}
+
+function buildRw33Txd(textures: TxdTextureInput[]): Uint8Array {
+  const nativeChunks = textures.map(buildRwTextureNative);
 
   const dictHeader = new Uint8Array(4);
-  new DataView(dictHeader.buffer).setUint16(0, 1, true); // texture count = 1
+  new DataView(dictHeader.buffer).setUint16(0, textures.length, true);
   const dictStructChunk = rwChunk(0x01, dictHeader);
   const dictExtChunk = rwChunk(0x03, new Uint8Array(0));
 
-  const txdPayload = new Uint8Array(
-    dictStructChunk.length + texNativeChunk.length + dictExtChunk.length,
-  );
+  const totalSize =
+    dictStructChunk.length +
+    nativeChunks.reduce((sum, c) => sum + c.length, 0) +
+    dictExtChunk.length;
+  const txdPayload = new Uint8Array(totalSize);
   let off = 0;
   txdPayload.set(dictStructChunk, off);
   off += dictStructChunk.length;
-  txdPayload.set(texNativeChunk, off);
-  off += texNativeChunk.length;
+  for (const chunk of nativeChunks) {
+    txdPayload.set(chunk, off);
+    off += chunk.length;
+  }
   txdPayload.set(dictExtChunk, off);
 
   return rwChunk(0x16, txdPayload);
 }
 
-export async function buildMenuTxd(pngPath: string, txdPath: string) {
-  let pngBytes: Uint8Array;
+export async function buildMenuTxd(
+  badgePngPath: string,
+  txdPath: string,
+  titlePngPath?: string,
+) {
+  let badgePngBytes: Uint8Array;
   try {
-    pngBytes = await Deno.readFile(pngPath);
+    badgePngBytes = await Deno.readFile(badgePngPath);
   } catch {
     const defaultRgba = generateDefaultEventideLogo();
-    pngBytes = await encodePngRgba(128, 128, defaultRgba);
-    await Deno.writeFile(pngPath, pngBytes);
+    badgePngBytes = await encodePngRgba(128, 128, defaultRgba);
+    await Deno.writeFile(badgePngPath, badgePngBytes);
   }
 
-  const { width, height, rgba } = await decodePngRgba(pngBytes);
-  const txdBytes = buildRw33Txd("eventidelogo128", width, height, rgba);
+  const textures: TxdTextureInput[] = [];
+  const badge = await decodePngRgba(badgePngBytes);
+  textures.push({ name: "eventidelogo128", ...badge });
+
+  if (titlePngPath) {
+    try {
+      const titlePngBytes = await Deno.readFile(titlePngPath);
+      const title = await decodePngRgba(titlePngBytes);
+      textures.push({ name: "gtaLogo128", ...title });
+    } catch {
+      // Optional title override PNG not present
+    }
+  }
+
+  const txdBytes = buildRw33Txd(textures);
   await Deno.writeFile(txdPath, txdBytes);
 }
