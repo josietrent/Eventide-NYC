@@ -1,6 +1,6 @@
 {$CLEO .cm}
 
-{$USE CLEO}
+{$USE CLEO, AUDIO}
 
 {$INCLUDE ../utils/globals.txt}
 
