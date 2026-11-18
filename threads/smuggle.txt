@@ -14,6 +14,7 @@ Car SmugglerCar = 0
 Blip StashBlip = 0
 Blip SmugglerBlip = 0
 Blip SprayShopBlip = 0
+Pickup StashPickup = 0
 int SprayShopActive = 0
 int HasPackage = 0
 
@@ -126,7 +127,8 @@ end
 Streaming.UnloadSpecialCharacter(1)
 
 // Stage 1: Collect Contraband in Saint Mark's
-StashBlip = Blip.AddForCoord(1288.5, -314.0, 40.0)
+StashPickup = Pickup.CreateFloatingPackage(1290.30, -316.64, 39.84)
+StashBlip = Blip.AddForPickup(StashPickup)
 Text.PrintHelp('SMUG5')
 
 while HasPackage == 0
@@ -136,9 +138,10 @@ while HasPackage == 0
         jump @Smuggle_Fail
     end
 
-    if Player.LocateAnyMeans3D($player, 1288.5, -314.0, 40.0, 2.5, 2.5, 2.0, True)
+    if Pickup.HasBeenCollected(StashPickup)
     then
         Blip.Remove(StashBlip)
+        StashPickup = 0
         HasPackage = 1
         // Police heat triggered!
         Player.AlterWantedLevelNoDrop($player, 2)
@@ -197,7 +200,7 @@ while true
             Blip.Remove(SprayShopBlip)
             SprayShopActive = 0
         end
-        jump @Smuggle_MeetCutscene
+        break
     end
 end
 
@@ -260,6 +263,11 @@ terminate_this_custom_script
 $onmission = 0
 $SmuggleMissionDone = 0
 Text.ClearPrints()
+if not StashPickup == 0
+then
+    Pickup.Remove(StashPickup)
+    StashPickup = 0
+end
 if not StashBlip == 0
 then
     Blip.Remove(StashBlip)
