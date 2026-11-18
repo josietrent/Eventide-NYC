@@ -425,7 +425,7 @@ while $OnProtectionMission == 0
     then
         0@, 1@ = Clock.GetTimeOfDay()
         if and
-            0@ >= 3
+            0@ >= 1
             0@ <= 7
         then
             Blip.Remove($LuigiBlip)
@@ -438,7 +438,7 @@ while $OnProtectionMission == 0
             stream_custom_script "protection.cm"
             break
         else
-            Text.Print('FYBCLOK', 5000, 0)
+            Text.Print('MYGOD', 5000, 0)
             wait 2000
         end
     else
