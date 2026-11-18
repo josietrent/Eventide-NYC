@@ -102,22 +102,36 @@ PACKOFF Package Tracking System Disabled! Press the ~y~ P Key to re-enable it.
 PACKREW	Here's a bonus! $10000
 PAKTUT1	You have found a ~y~Hidden Package!
 PAKTUT2	Collect 6 more for a special reward!
+PAKTUT3	A ~y~Package Tracking System~w~ is available. Pressing the ~y~ P Key~w~ will turn it on.
+PAKTUT4 Pressing the ~y~Comma~w~ or ~y~Period~w~ keys will change the currently tracked package.
 PISTOL  Get a ~b~Pistol~w~ from the parking lot behind ~b~AMCo.~w~
 RADIO1	Press the ~k~~VEHICLE_CHANGE_RADIO_STATION~ key to change radio stations.
 RADIO2  You can change the radio station at any time by pressing the ~k~~VEHICLE_CHANGE_RADIO_STATION~ key.
 RADIO3  Listen to whatever station you want!
 REWARD	You've unlocked a new weapon!
+SAVE_1  This abandoned house will serve as a nice hideout.
+SAVE_2  For now, at least...
+SAVE_3  Walking into this sphere behind the bar will save the game.
+SAVE_4  When saving the game, you will lose any wanted level you may have, and time will advance by six hours.
 STARVE  Jesus, I'm starving!
 SEVEN	Go to ~b~Sex Club 7~w~ in the ~y~Red Light District~w~.
 SPRINT	Press the ~k~~PED_SPRINT~ ~w~key to sprint.
+SPRINT2 You will never tire, and can sprint for as long as you like.
 SUBWAY  Drive to the nearby Subway Station.
 TOMMY   If you need another car, Tommy's in Harwood has some inventory in stock.
+TRYTRY  Try again, yo!
 TURRET	Look around using the Mouse to aim the turret.
+UPSIDE  You rolled the royce! Run for it!
+VAGRANT	Shit! That's right, Marie isn't here right now, so the store is still closed. Godsdammit!
+VAGRONT	I guess I'll have to wait here... Like some dirty, loitering vagrant.
 VEHHEAL Vehicle Health:
 WANTED	You have a ~r~Wanted Level!~w~ The police are looking for you!
 WASTED  Wasted!
 WASTED2	You're lucky to be alive!
+WHEELS	You need some wheels for this gig!
 WHERE	Where are you going?!
+ZOEYBAD	...What have I done?!
+LANDSTK	Canyonero
 MARHEAL Marie's Health:
 SMUG1	The cops are crawling all over Saint Mark's, but business doesn't stop.
 SMUG2	I got a crate of high-grade contraband bound for Staunton Island.
