@@ -692,6 +692,9 @@ while not Player.LocateOnFootChar3D($player, Luigi, 5.0, 5.0, 0.75, False)
 end
 
 :Protection_Success
+// Move the player a few units away after the fade out so Smuggle does not trigger immediately
+Player.SetCoordinates($player, 1207.98, -325.48, 26.07)
+Player.SetHeading($player, 89.0)
 Camera.RestoreJumpcut()
 Hud.SwitchWidescreen(False)
 Camera.SetFadingColor(40, 0, 70)
