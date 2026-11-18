@@ -126,7 +126,7 @@ end
 Streaming.UnloadSpecialCharacter(1)
 
 // Stage 1: Collect Contraband in Saint Mark's
-StashBlip = Blip.AddForCoord(1288.5, -314.0, 32.0)
+StashBlip = Blip.AddForCoord(1288.5, -314.0, 40.0)
 Text.PrintHelp('SMUG5')
 
 while HasPackage == 0
@@ -136,7 +136,7 @@ while HasPackage == 0
         jump @Smuggle_Fail
     end
 
-    if Player.LocateAnyMeans3D($player, 1288.5, -314.0, 32.0, 2.5, 2.5, 2.0, True)
+    if Player.LocateAnyMeans3D($player, 1288.5, -314.0, 40.0, 2.5, 2.5, 2.0, True)
     then
         Blip.Remove(StashBlip)
         HasPackage = 1
