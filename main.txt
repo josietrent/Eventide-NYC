@@ -84,7 +84,7 @@ World.SwapNearestBuildingModel(1027.25, -933.75, 15.0, 50.0, #LOD_LAND014, #INDH
 World.SetVisibilityOfClosestObjectOfType(1027.25, -933.75, 15.0, 50.0, #INDHELIX_BARRIER, True)
 
 // All done!
-Camera.SetFadingColor(0, 0, 0)
+Camera.SetFadingColor(40, 0, 70)
 Camera.DoFade(1000, Fade.In)
 Player.SetControl($player, False)
 Player.SetNeverGetsTired($player, True)
@@ -170,6 +170,7 @@ while true
             Sphere.Remove($MissionTriggerSphere)
             Player.SetControl($player, False)
             Text.PrintBigString("Nowhere Like Home...", 5000, TextStyle.BottomRight)
+            Camera.SetFadingColor(40, 0, 70)
             Camera.DoFade(1500, Fade.Out)
             wait 1500
             stream_custom_script "INIT.cm"
@@ -234,6 +235,7 @@ while true
             Sphere.Remove($MissionTriggerSphere)
             Player.SetControl($player, False)
             Text.PrintBigString("Driving Mr. Mute...", 5000, TextStyle.BottomRight)
+            Camera.SetFadingColor(40, 0, 70)
             Camera.DoFade(1500, Fade.Out)
             wait 1500
             $OnCarMission = 1
@@ -321,6 +323,7 @@ while $OnGunMission == 0
         end
         Player.SetControl($player, False)
         Text.PrintBigString("Finding Your Bearings...", 5000, TextStyle.BottomRight)
+        Camera.SetFadingColor(40, 0, 70)
         Camera.DoFade(1500, Fade.Out)
         wait 1500
         $OnGunMission = 1
@@ -368,6 +371,7 @@ while $OnAlleyMission == 0
         Sphere.Remove($LuigiSphere)
         Player.SetControl($player, False)
         Text.PrintBigString("Meddling in Her Affairs...", 5000, TextStyle.BottomRight)
+        Camera.SetFadingColor(40, 0, 70)
         Camera.DoFade(1500, Fade.Out)
         wait 1500
         $OnAlleyMission = 1
@@ -427,6 +431,7 @@ while $OnProtectionMission == 0
             Blip.Remove($LuigiBlip)
             Player.SetControl($player, False)
             Text.PrintBigString("Pest Removal Ain't Easy...", 5000, TextStyle.BottomRight)
+            Camera.SetFadingColor(40, 0, 70)
             Camera.DoFade(1500, Fade.Out)
             wait 1500
             $OnProtectionMission = 1
@@ -485,6 +490,7 @@ while $OnSmuggleMission == 0
         Blip.Remove($LuigiBlip)
         Player.SetControl($player, False)
         Text.PrintBigString("Border Smugglers...", 5000, TextStyle.BottomRight)
+        Camera.SetFadingColor(40, 0, 70)
         Camera.DoFade(1500, Fade.Out)
         wait 1500
         $OnSmuggleMission = 1
@@ -540,6 +546,7 @@ while $OnStatueMission == 0
         Blip.Remove($KenjiBlip)
         Player.SetControl($player, False)
         Text.PrintBigString("The Living Statue...", 5000, TextStyle.BottomRight)
+        Camera.SetFadingColor(40, 0, 70)
         Camera.DoFade(1500, Fade.Out)
         wait 1500
         $OnStatueMission = 1

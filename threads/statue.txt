@@ -67,6 +67,7 @@ Player.SetHeading($player, 270.0)
 
 Camera.SetFixedPosition(1009.00, -47.00, 8.50, 0.0, 0.0, 0.0)
 Camera.PointAtChar(Kenji, CameraMode.FollowPed, SwitchType.JumpCut)
+Camera.SetFadingColor(40, 0, 70)
 Camera.DoFade(1500, Fade.In)
 wait 1500
 
@@ -269,10 +270,11 @@ while MissionStage == 2
         then
             // Close enough! Fade, warp her in as passenger
             Player.SetControl($player, False)
+            Camera.SetFadingColor(40, 0, 70)
             Camera.DoFade(800, Fade.Out)
             wait 800
             Text.Print('STAT9', 3000, 1)
-            Char.WarpIntoCarAsPassenger(Marie, MarieCar)
+            Char.SetObjEnterCarAsPassenger(Marie, MarieCar)
             wait 1000
             Camera.DoFade(800, Fade.In)
             wait 800
@@ -346,7 +348,7 @@ wait 4500
 
 Camera.RestoreJumpcut()
 Hud.SwitchWidescreen(False)
-Camera.SetFadingColor(0, 0, 0)
+Camera.SetFadingColor(40, 0, 70)
 Camera.DoFade(1000, Fade.In)
 wait 1000
 
@@ -400,6 +402,7 @@ then
 end
 Text.PrintBigString("Mission Failed!", 3000, TextStyle.Middle)
 wait 3000
+Camera.SetFadingColor(40, 0, 70)
 Camera.DoFade(1500, Fade.Out)
 wait 1500
 if not Kenji == 0

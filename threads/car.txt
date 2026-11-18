@@ -55,6 +55,7 @@ Car.SetHeading($Stallion, 270.0)
 wait 1000
 CarBlip = Blip.AddForCar($Stallion)
 Blip.ChangeColor(CarBlip, BlipColor.Yellow)
+Camera.SetFadingColor(40, 0, 70)
 Camera.DoFade(1500, Fade.In)
 wait 1500
 Player.SetControl($player, True)
@@ -202,6 +203,7 @@ while not Player.LocateAnyMeans3D($player, 1419.15, -194.40, 49.74, 3.0, 3.0, 3.
         Sphere.Remove(CarSphere)
         Sound.AddOneOffSound(1419.15, -194.40, 49.74, ScriptSound.SoundPartMissionComplete)
         wait 1500
+        Camera.SetFadingColor(40, 0, 70)
         Camera.DoFade(1500, Fade.Out)
         wait 1500
         Blip.Remove($SafeBlip)
@@ -232,6 +234,7 @@ while Player.IsPlaying($player)
 
     Camera.SetFixedPosition(1423.41, -199.77, 75.43, 0.0, 0.0, 0.0)
     Camera.PointAtPoint(1454.08, -173.18, 55.77, SwitchType.JumpCut)
+    Camera.SetFadingColor(40, 0, 70)
     Camera.DoFade(1500, Fade.In)
 
     TIMERA = 0
@@ -350,6 +353,7 @@ terminate_this_custom_script
 
 :carPass
 Text.ClearPrints()
+Camera.SetFadingColor(40, 0, 70)
 Camera.DoFade(1500, Fade.Out)
 wait 1500
 Sphere.Remove(CarSphere)

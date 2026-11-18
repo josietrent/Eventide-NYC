@@ -159,6 +159,7 @@ while not Streaming.IsCollisionInMemory(LevelName.Industrial)
 end
 
 Player.SetControl($player, False)
+Camera.SetFadingColor(40, 0, 70)
 Camera.DoFade(500, Fade.Out)
 wait 500
 

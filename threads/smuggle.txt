@@ -56,6 +56,7 @@ Player.SetHeading($player, 0.0)
 
 Camera.SetFixedPosition(1221.50, -318.00, 31.00, 0.0, 0.0, 0.0)
 Camera.PointAtChar(Luigi, CameraMode.FollowPed, SwitchType.JumpCut)
+Camera.SetFadingColor(40, 0, 70)
 Camera.DoFade(1500, Fade.In)
 wait 1500
 
@@ -214,7 +215,7 @@ wait 1000
 // Sudden barrier flare / eerie weather flicker
 play_audio_stream_1channel "audio/EC/miasma.wav", False, 1.0
 Weather.ForceNow(WeatherType.Foggy)
-Camera.SetFadingColor(80, 0, 120)
+Camera.SetFadingColor(40, 0, 70)
 Camera.DoFade(300, Fade.Out)
 wait 300
 Camera.DoFade(500, Fade.In)
@@ -229,7 +230,7 @@ wait 2000
 
 Camera.RestoreJumpcut()
 Hud.SwitchWidescreen(False)
-Camera.SetFadingColor(0, 0, 0)
+Camera.SetFadingColor(40, 0, 70)
 Camera.DoFade(1000, Fade.In)
 wait 1000
 
@@ -282,6 +283,7 @@ then
 end
 Text.PrintBigString("Mission Failed!", 3000, TextStyle.Middle)
 wait 3000
+Camera.SetFadingColor(40, 0, 70)
 Camera.DoFade(1500, Fade.Out)
 wait 1500
 if not Luigi == 0

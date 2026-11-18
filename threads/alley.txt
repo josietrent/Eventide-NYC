@@ -72,6 +72,7 @@ while TIMERA < 500
         jump @Alley_Briefing_Skip
     end
 end
+Camera.SetFadingColor(40, 0, 70)
 Camera.DoFade(1500, Fade.In)
 TIMERA = 0
 while TIMERA < 1500
@@ -258,6 +259,7 @@ while TIMERA < 2500
         jump @Alley_Briefing_Skip
     end
 end
+Camera.SetFadingColor(40, 0, 70)
 Camera.DoFade(1500, Fade.Out)
 wait 1500
 Player.SetCoordinates($player, 1330.38, -470.49, 49.75)
@@ -312,6 +314,7 @@ then
         Char.SetObjEnterCarAsPassenger(Luigi, Cheetah)
     end
 end
+Camera.SetFadingColor(40, 0, 70)
 Camera.DoFade(500, Fade.In)
 wait 500
 Player.SetControl($player, True)
@@ -423,6 +426,7 @@ while true
         Blip.Remove(Destination)
         Player.SetControl($player, False)
         Hud.SwitchWidescreen(True)
+        Camera.SetFadingColor(40, 0, 70)
         Camera.DoFade(1500, Fade.Out)
         TIMERA = 0
         while TIMERA < 1500
@@ -491,6 +495,7 @@ while true
         end
         Hud.SwitchWidescreen(False)
         Player.ClearWantedLevel($player)
+        Camera.SetFadingColor(40, 0, 70)
         Camera.DoFade(1500, Fade.In)
         wait 1500
         Char.SetObjLeaveCar(Luigi, Cheetah)
@@ -566,6 +571,7 @@ Blip.Remove(CarBlip)
 Blip.Remove(Destination)
 Text.PrintBigString("Mission Failed!", 3000, TextStyle.Middle)
 wait 3000
+Camera.SetFadingColor(40, 0, 70)
 Camera.DoFade(1500, Fade.Out)
 wait 1500
 if

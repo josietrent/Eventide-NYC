@@ -53,6 +53,7 @@ Cheetah = Car.Create(#CHEETAH, 1243.45, -129.20, 14.63)
 Blip.ChangeColor(GunBlip, BlipColor.LightBlue)
 Player.SetControl($player, True)
 wait 0
+Camera.SetFadingColor(40, 0, 70)
 Camera.DoFade(500, Fade.In)
 wait 500
 Marie = Char.Create(PedType.CivFemale, #SPECIAL01, 1119.10, -437.00, 19.97)
@@ -84,6 +85,7 @@ while not Player.LocateOnFoot3D($player, 1147.61, -95.21, 7.02, 1.0, 1.0, 0.75, 
         Blip.Remove(Destination)
         Sphere.Remove(GunSphere)
         Player.SetControl($player, False)
+        Camera.SetFadingColor(40, 0, 70)
         Camera.DoFade(1500, Fade.Out)
         TIMERA = 0
         while TIMERA < 1500
@@ -221,6 +223,7 @@ while not Player.LocateOnFoot3D($player, 1147.61, -95.21, 7.02, 1.0, 1.0, 0.75, 
         Char.SetObjGotoCoordOnFoot(Marie, 933.66, -252.64)
         Camera.RestoreJumpcut()
         Hud.SwitchWidescreen(False)
+        Camera.SetFadingColor(40, 0, 70)
         Camera.DoFade(500, Fade.In)
         wait 500
         Player.SetControl($player, True)
@@ -278,6 +281,7 @@ while not Player.LocateAnyMeans3D($player, 933.66, -252.64, 4.50, 1.0, 1.0, 1.0,
         Sphere.Remove(GunSphere)
         Blip.Remove(Destination)
         Player.SetControl($player, False)
+        Camera.SetFadingColor(40, 0, 70)
         Camera.DoFade(1000, Fade.Out)
         wait 1000
         if
@@ -1042,6 +1046,7 @@ play_audio_stream_1channel "audio/EC/miasma.wav", True, 1.0
 Camera.Shake(1.0)
 
 wait 2500
+Camera.SetFadingColor(40, 0, 70)
 Camera.DoFade(1000, Fade.Out)
 wait 1000
 
@@ -1091,6 +1096,7 @@ then
 end
 Hud.ClearTimer($TIMER)
 wait 3000
+Camera.SetFadingColor(40, 0, 70)
 Camera.DoFade(1500, Fade.Out)
 wait 1500
 if not Marie == 0
@@ -1146,6 +1152,7 @@ while not Player.LocateAnyMeans3D($player, 1419.15, -194.40, 49.74, 1.0, 1.0, 1.
         Audio.PlayMissionPassedTune(1)
         $onmission = 0
         wait 3000
+        Camera.SetFadingColor(40, 0, 70)
         Camera.DoFade(1500, Fade.Out)
         wait 1500
         if not Cheetah == 0

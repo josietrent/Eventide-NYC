@@ -63,6 +63,7 @@ while TIMERA < 500
         jump @Protection_Briefing_Skip
     end
 end
+Camera.SetFadingColor(40, 0, 70)
 Camera.DoFade(1500, Fade.In)
 TIMERA = 0
 while TIMERA < 1500
@@ -153,6 +154,7 @@ while TIMERA < 6000
 end
 
 // Transition out of the briefing scene
+Camera.SetFadingColor(40, 0, 70)
 Camera.DoFade(1500, Fade.Out)
 wait 1500
 World.ClearArea(1202.93, -426.60, 25.07, 6.0, True)
@@ -195,6 +197,7 @@ then
     DeadbeatCar = Car.Create(#PEREN, 1186.04, -464.43, 25.07)
     Car.SetHeading(DeadbeatCar, 180.0)
 end
+Camera.SetFadingColor(40, 0, 70)
 Camera.DoFade(500, Fade.In)
 wait 500
 Player.SetControl($player, True)
@@ -611,6 +614,7 @@ while not Player.LocateOnFootChar3D($player, Luigi, 5.0, 5.0, 0.75, False)
     then
         Blip.Remove(LuigiBlip)
         Player.SetControl($player, False)
+        Camera.SetFadingColor(40, 0, 70)
         Camera.DoFade(1500, Fade.Out)
         TIMERA = 0
         while TIMERA < 1500
@@ -690,6 +694,7 @@ end
 :Protection_Success
 Camera.RestoreJumpcut()
 Hud.SwitchWidescreen(False)
+Camera.SetFadingColor(40, 0, 70)
 Camera.DoFade(1500, Fade.In)
 wait 1500
 Text.PrintWithNumberBig('MISPASS', 10000, 5000, TextStyle.Middle)
@@ -733,6 +738,7 @@ $ProtectionDone = 0
 Text.ClearPrints()
 Text.PrintBigString("Mission Failed!", 3000, TextStyle.Middle)
 wait 3000
+Camera.SetFadingColor(40, 0, 70)
 Camera.DoFade(1500, Fade.Out)
 wait 1500
 Protection_Cleanup()

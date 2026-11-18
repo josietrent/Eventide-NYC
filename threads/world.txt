@@ -9,6 +9,7 @@ while not Player.IsPlaying($player)
     wait 0
 end
 
+Camera.SetFadingColor(40, 0, 70)
 World.SetCarDensityMultiplier(0.25)
 World.SetPedDensityMultiplier(0.1)
 
@@ -17,6 +18,7 @@ while Camera.GetFadingStatus()
     wait 0
 end
 
+Camera.SetFadingColor(40, 0, 70)
 World.SetCarDensityMultiplier(0.25)
 World.SetPedDensityMultiplier(0.1)
 terminate_this_custom_script
