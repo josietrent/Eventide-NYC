@@ -4,6 +4,10 @@
 
 {$INCLUDE ../utils/globals.txt}
 
+var
+    $MarieHealthBar: int
+end
+
 //-------------Mission 6 (triggered by :Kenji in main.txt)---------------
 :Statue
 script_name 'Statue'
@@ -142,7 +146,6 @@ World.ClearArea(1142.50, -848.20, 14.85, 10.0, True)
 Marie = Char.Create(PedType.Special, #SPECIAL02, 1142.50, -848.20, 14.85)
 Char.SetHeading(Marie, 180.0)
 Char.SetObjWaitOnFoot(Marie)
-Char.SetMaxHealth(Marie, 100)
 Char.SetHealth(Marie, 100)
 // Proof against knockback/fire while standing catatonic
 Char.SetProofs(Marie, False, True, True, False, False)
@@ -187,13 +190,13 @@ Char.SetCurrentWeapon(Thug1, WeaponType.BaseballBat)
 Char.SetObjKillCharOnFoot(Thug1, Marie)
 
 Thug2 = Char.Create(PedType.Gang3, #GANG03, 1152.00, -838.00, 14.85)
-Char.GiveWeapon(Thug2, WeaponType.Colt45, 100)
-Char.SetCurrentWeapon(Thug2, WeaponType.Colt45)
+Char.GiveWeapon(Thug2, WeaponType.Pistol, 100)
+Char.SetCurrentWeapon(Thug2, WeaponType.Pistol)
 Char.SetObjKillCharOnFoot(Thug2, Marie)
 
 Thug3 = Char.Create(PedType.Gang3, #GANG03, 1148.00, -838.00, 14.85)
-Char.GiveWeapon(Thug3, WeaponType.Colt45, 100)
-Char.SetCurrentWeapon(Thug3, WeaponType.Colt45)
+Char.GiveWeapon(Thug3, WeaponType.Pistol, 100)
+Char.SetCurrentWeapon(Thug3, WeaponType.Pistol)
 Char.SetObjKillCharOnFoot(Thug3, Marie)
 
 Text.PrintHelp('STAT6')
