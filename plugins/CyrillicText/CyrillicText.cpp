@@ -618,6 +618,19 @@ const wchar_t *MaybeDecodeWidenedUtf8(const wchar_t *src, size_t maxLen,
   return dst;
 }
 
+bool NeedsCustomStringWidth(const wchar_t *s) {
+  if (!s) {
+    return false;
+  }
+  for (; *s != L'\0'; ++s) {
+    const uint16_t ch = static_cast<uint16_t>(*s);
+    if (ch >= 0x00E1u || FindCyrillicGlyph(ch) != nullptr) {
+      return true;
+    }
+  }
+  return false;
+}
+
 void EnsureTextureLoaded() {
   if (g_cyrSprite.m_pTexture != nullptr || g_loadAttempted) {
     return;
@@ -779,7 +792,35 @@ void __cdecl Hook_PrintRange(float x, float y, const wchar_t *start,
 
 float __cdecl Hook_GetStringWidth(const wchar_t *str, bool sentence) {
   const wchar_t *decoded = MaybeDecodeWidenedUtf8(str, 1024);
-  return g_origGetStringWidth(decoded ? decoded : str, sentence);
+  const wchar_t *target = decoded ? decoded : str;
+  if (!target) {
+    return 0.0f;
+  }
+  if (!NeedsCustomStringWidth(target)) {
+    return g_origGetStringWidth(target, sentence);
+  }
+
+  // Vanilla CFont::GetStringWidth inlines CFont::Size[style][c] out-of-bounds
+  // for characters >= 0xE1, so compute width via Hook_GetCharSize instead.
+  float width = 0.0f;
+  for (const wchar_t *s = target; *s != L'\0' && (*s != L' ' || sentence);) {
+    if (*s == L'~') {
+      ++s;
+      while (*s != L'\0' && *s != L'~') {
+        ++s;
+      }
+      if (*s == L'~') {
+        ++s;
+      }
+      continue;
+    }
+    const uint16_t ch = static_cast<uint16_t>(*s);
+    if (ch >= 0x20u) {
+      width += Hook_GetCharSize(static_cast<uint16_t>(ch - 0x20u));
+    }
+    ++s;
+  }
+  return width;
 }
 
 void __cdecl Hook_DrawFonts() {
