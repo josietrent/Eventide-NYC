@@ -17,6 +17,7 @@ import { ensureDir } from "@std/fs/ensure-dir";
 import { includeTree } from "./includes.ts";
 import { say } from "./log.ts";
 import { buildMenuTxd, buildSingleTextureTxd } from "./build-menu-txd.ts";
+import { buildCyrillicFontAtlas } from "./build-cyrillic-font.ts";
 
 // Bisection / filtering arguments
 const args = Deno.args;
@@ -228,9 +229,14 @@ async function compileAsiIfChanged(
   outputPath: string,
   objDir: string,
   extraLibs: string[] = ["user32.lib"],
+  extraDepPaths: string[] = [],
 ) {
-  const sourceBytes = await Deno.readFile(sourcePath);
-  const hash = await sha256(sourceBytes);
+  const depParts = await Promise.all(
+    [sourcePath, ...extraDepPaths].map(
+      async (p) => `${p}\n${await sha256(await Deno.readFile(p))}`,
+    ),
+  );
+  const hash = await sha256(depParts.join("\n"));
   if (
     !forceArg &&
     (await allExist([outputPath])) &&
@@ -569,9 +575,7 @@ if (shouldRun(8, "smuggle") || shouldRun(8, "protection")) {
       smuggleOutput,
       join(cleoStagingDir, basename(smuggleOutput)),
     );
-    say.done(
-      `  Packaged modloader/${modName}/CLEO/${basename(smuggleOutput)}`,
-    );
+    say.done(`  Packaged modloader/${modName}/CLEO/${basename(smuggleOutput)}`);
   }
 }
 
@@ -589,9 +593,7 @@ if (shouldRun(8, "statue")) {
       statueOutput,
       join(cleoStagingDir, basename(statueOutput)),
     );
-    say.done(
-      `  Packaged modloader/${modName}/CLEO/${basename(statueOutput)}`,
-    );
+    say.done(`  Packaged modloader/${modName}/CLEO/${basename(statueOutput)}`);
   }
 }
 
@@ -681,7 +683,11 @@ if (shouldRun(13, "menulogo")) {
   const splash1Txd = join(cwd, "plugins", "MenuLogo", "SPLASH1.txd");
   if (await allExist([splash1Png])) {
     const splashHash = await sha256(await Deno.readFile(splash1Png));
-    if (forceArg || !(await allExist([splash1Txd])) || hashCache[splash1Txd] !== splashHash) {
+    if (
+      forceArg ||
+      !(await allExist([splash1Txd])) ||
+      hashCache[splash1Txd] !== splashHash
+    ) {
       await buildSingleTextureTxd("splash1", splash1Png, splash1Txd);
       await saveHash(splash1Txd, splashHash);
     }
@@ -694,11 +700,19 @@ if (shouldRun(13, "menulogo")) {
   const mainsc2Txd = join(cwd, "plugins", "MenuLogo", "mainsc2.txd");
   if (await allExist([mainsc1Png])) {
     const mainscHash = await sha256(await Deno.readFile(mainsc1Png));
-    if (forceArg || !(await allExist([mainsc1Txd])) || hashCache[mainsc1Txd] !== mainscHash) {
+    if (
+      forceArg ||
+      !(await allExist([mainsc1Txd])) ||
+      hashCache[mainsc1Txd] !== mainscHash
+    ) {
       await buildSingleTextureTxd("mainsc1", mainsc1Png, mainsc1Txd);
       await saveHash(mainsc1Txd, mainscHash);
     }
-    if (forceArg || !(await allExist([mainsc2Txd])) || hashCache[mainsc2Txd] !== mainscHash) {
+    if (
+      forceArg ||
+      !(await allExist([mainsc2Txd])) ||
+      hashCache[mainsc2Txd] !== mainscHash
+    ) {
       await buildSingleTextureTxd("mainsc2", mainsc1Png, mainsc2Txd);
       await saveHash(mainsc2Txd, mainscHash);
     }
@@ -718,6 +732,52 @@ if (shouldRun(14, "weaponsprint")) {
 
   await Deno.copyFile(asiOutput, join(modStagingDir, basename(asiOutput)));
   say.done(`  Packaged modloader/${modName}/${basename(asiOutput)}`);
+}
+
+// Step 15: CyrillicText ASI Plugin & Caveat-Bold Atlas TXD
+if (shouldRun(15, "cyrillic")) {
+  say.heading(
+    "Step 15 (cyrillic): Compiling CyrillicText.asi & Cyrillic TXD...",
+  );
+  const ttfInput = join(cwd, "plugins", "MenuLogo", "Caveat-Bold.ttf");
+  const genScript = join(cwd, "scripts", "build-cyrillic-font.ts");
+  const txdOutput = join(
+    cwd,
+    "plugins",
+    "CyrillicText",
+    "eventide_cyrillic.txd",
+  );
+  const headerOutput = join(cwd, "plugins", "CyrillicText", "cyrillic_atlas.h");
+  const asiInput = join(cwd, "plugins", "CyrillicText", "CyrillicText.cpp");
+  const asiOutput = join(cwd, "plugins", "CyrillicText", "CyrillicText.asi");
+
+  const atlasHash = await sha256(
+    `${await sha256(await Deno.readFile(ttfInput))}\n${await sha256(await Deno.readFile(genScript))}`,
+  );
+  if (
+    forceArg ||
+    !(await allExist([txdOutput, headerOutput])) ||
+    hashCache[txdOutput] !== atlasHash
+  ) {
+    await buildCyrillicFontAtlas(ttfInput, txdOutput, headerOutput);
+    await saveHash(txdOutput, atlasHash);
+    say.pass("Generated eventide_cyrillic.txd & cyrillic_atlas.h");
+  } else {
+    say.skip("  Up to date: eventide_cyrillic.txd");
+  }
+
+  await compileAsiIfChanged(
+    asiInput,
+    asiOutput,
+    join(stagingDir, "obj"),
+    ["user32.lib"],
+    [headerOutput],
+  );
+
+  await Deno.copyFile(asiOutput, join(modStagingDir, basename(asiOutput)));
+  await Deno.copyFile(txdOutput, join(modStagingDir, basename(txdOutput)));
+  say.done(`  Packaged modloader/${modName}/${basename(asiOutput)}`);
+  say.done(`  Packaged modloader/${modName}/${basename(txdOutput)}`);
 }
 
 // Clean compiler scratch directory before zipping
