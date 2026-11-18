@@ -780,6 +780,22 @@ if (shouldRun(15, "cyrillic")) {
   say.done(`  Packaged modloader/${modName}/${basename(txdOutput)}`);
 }
 
+// Step 16: EmergencyRadio ASI Plugin
+if (shouldRun(16, "emergencyradio")) {
+  say.heading("Step 16 (emergencyradio): Compiling EmergencyRadio.asi...");
+  const asiInput = join(cwd, "plugins", "EmergencyRadio", "EmergencyRadio.cpp");
+  const asiOutput = join(
+    cwd,
+    "plugins",
+    "EmergencyRadio",
+    "EmergencyRadio.asi",
+  );
+  await compileAsiIfChanged(asiInput, asiOutput, join(stagingDir, "obj"));
+
+  await Deno.copyFile(asiOutput, join(modStagingDir, basename(asiOutput)));
+  say.done(`  Packaged modloader/${modName}/${basename(asiOutput)}`);
+}
+
 // Clean compiler scratch directory before zipping
 try {
   await Deno.remove(join(stagingDir, "obj"), { recursive: true });
