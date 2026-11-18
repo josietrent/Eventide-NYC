@@ -353,9 +353,9 @@ while not Player.IsInCar($player, Cheetah)
     if
         Player.IsInCar($player, Cheetah)
     then
-        Text.PrintString("Drive me to Little Italy.", 5000)
+        Text.PrintString("Drive me to Callahan Bridge.", 5000)
         Blip.Remove(CarBlip)
-        Destination = Blip.AddForCoord(1123.62, -380.07, 19.28)
+        Destination = Blip.AddForCoord(1041.88, -923.84, 14.82)
         Blip.ChangeColor(Destination, BlipColor.Yellow)
         break
     end
@@ -377,12 +377,123 @@ while true
     if and
         Player.IsInCar($player, Cheetah)
         Char.IsInCar(Luigi, Cheetah)
-        Player.LocateAnyMeans3D($player, 1123.62, -380.07, 19.28, 3.0, 3.0, 3.0, True)
+        Player.LocateAnyMeans3D($player, 1041.88, -923.84, 14.82, 3.0, 3.0, 3.0, True)
     then
         Blip.Remove(Destination)
         Player.SetControl($player, False)
-        Sound.AddOneOffSound(1123.62, -380.07, 19.28, ScriptSound.SoundPartMissionComplete)
-        Text.PrintString("Take Louie home.", 5000)
+        Sound.AddOneOffSound(1041.88, -923.84, 14.82, ScriptSound.SoundPartMissionComplete)
+        Hud.SwitchWidescreen(True)
+        Camera.SetFixedPosition(1036.03, -918.96, 14.82, 0.0, 0.0, 0.0)
+        Camera.PointAtPoint(1026.0, -927.5, 16.0, SwitchType.JumpCut)
+        Text.PrintString("Callahan Bridge is closed, but we don't know why.", 4500)
+        TIMERA = 0
+        while TIMERA < 4500
+            wait 0
+            if or
+                not Player.IsPlaying($player)
+                not Char.IsStillAlive(Luigi)
+                not Car.IsStillAlive(Cheetah)
+            then
+                jump @Alley_Fail
+            end
+            if or
+                Pad.IsKeyPressed(KeyCode.LeftShift)
+                Pad.IsKeyPressed(KeyCode.Space)
+                Pad.IsKeyPressed(KeyCode.F)
+            then
+                jump @Alley_Bridge_Skip
+            end
+        end
+
+        Text.PrintString("My sources inside the police department say not even the cops know.", 5000)
+        TIMERA = 0
+        while TIMERA < 5000
+            wait 0
+            if or
+                not Player.IsPlaying($player)
+                not Char.IsStillAlive(Luigi)
+                not Car.IsStillAlive(Cheetah)
+            then
+                jump @Alley_Fail
+            end
+            if or
+                Pad.IsKeyPressed(KeyCode.LeftShift)
+                Pad.IsKeyPressed(KeyCode.Space)
+                Pad.IsKeyPressed(KeyCode.F)
+            then
+                jump @Alley_Bridge_Skip
+            end
+        end
+
+        Streaming.LoadScene(195.0, -931.5, 27.0)
+        TIMERA = 0
+        while TIMERA < 250
+            wait 0
+            if or
+                not Player.IsPlaying($player)
+                not Char.IsStillAlive(Luigi)
+                not Car.IsStillAlive(Cheetah)
+            then
+                jump @Alley_Fail
+            end
+            if or
+                Pad.IsKeyPressed(KeyCode.LeftShift)
+                Pad.IsKeyPressed(KeyCode.Space)
+                Pad.IsKeyPressed(KeyCode.F)
+            then
+                jump @Alley_Bridge_Skip
+            end
+        end
+
+        Camera.SetFixedPosition(178.0, -931.5, 28.5, 0.0, 0.0, 0.0)
+        Camera.PointAtPoint(205.0, -931.5, 26.5, SwitchType.JumpCut)
+        Text.PrintString("Something about an outbreak. I think that's a load of horse shit.", 5000)
+        TIMERA = 0
+        while TIMERA < 5000
+            wait 0
+            if or
+                not Player.IsPlaying($player)
+                not Char.IsStillAlive(Luigi)
+                not Car.IsStillAlive(Cheetah)
+            then
+                jump @Alley_Fail
+            end
+            if or
+                Pad.IsKeyPressed(KeyCode.LeftShift)
+                Pad.IsKeyPressed(KeyCode.Space)
+                Pad.IsKeyPressed(KeyCode.F)
+            then
+                jump @Alley_Bridge_Skip
+            end
+        end
+
+        Text.PrintString("Then again, whatever the reason is, it's been good for business.", 5000)
+        TIMERA = 0
+        while TIMERA < 5000
+            wait 0
+            if or
+                not Player.IsPlaying($player)
+                not Char.IsStillAlive(Luigi)
+                not Car.IsStillAlive(Cheetah)
+            then
+                jump @Alley_Fail
+            end
+            if or
+                Pad.IsKeyPressed(KeyCode.LeftShift)
+                Pad.IsKeyPressed(KeyCode.Space)
+                Pad.IsKeyPressed(KeyCode.F)
+            then
+                jump @Alley_Bridge_Skip
+            end
+        end
+
+        :Alley_Bridge_Skip
+        Text.ClearPrints()
+        Streaming.LoadScene(1041.88, -923.84, 14.82)
+        wait 0
+        Camera.RestoreJumpcut()
+        Hud.SwitchWidescreen(False)
+        Text.Print('LOUHOME', 5000, 1)
         Destination = Blip.AddForCoord(1214.89, -327.47, 26.07)
         Blip.ChangeColor(Destination, BlipColor.Yellow)
         Player.SetControl($player, True)
