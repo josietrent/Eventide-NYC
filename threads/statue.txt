@@ -1,0 +1,447 @@
+{$CLEO .cm}
+
+{$USE CLEO, AUDIO}
+
+{$INCLUDE ../utils/globals.txt}
+
+//-------------Mission 6 (triggered by :Kenji in main.txt)---------------
+:Statue
+script_name 'Statue'
+
+Char Kenji = 0
+Char Marie = 0
+Car MarieCar = 0
+Char Thug1 = 0
+Char Thug2 = 0
+Char Thug3 = 0
+Car ThugVan = 0
+Blip KenjiBlip = 0
+Blip MarieBlip = 0
+Blip BarnBlip = 0
+int MarieHealth = 100
+int TimerLimit = 180000 // 3:00 urgency timer
+int MissionStage = 0 // 0=race, 1=defend, 2=load, 3=deliver
+int InCarStatus = 0
+
+$onmission = 1
+$OnStatueMission = 1
+$StatueMissionDone = 0
+wait 100
+
+Streaming.RequestModel(#PONY)
+Streaming.RequestModel(#GANG03)
+Streaming.RequestModel(#BAT)
+Streaming.RequestModel(#COLT45)
+Streaming.LoadSpecialCharacter(1, 'KENJI')
+Streaming.LoadSpecialCharacter(2, 'MISTY') // Marie temporary base model
+wait 500
+Streaming.LoadAllModelsNow()
+wait 500
+
+while true
+    wait 0
+    if and
+        Streaming.HasModelLoaded(#PONY)
+        Streaming.HasModelLoaded(#GANG03)
+        Streaming.HasModelLoaded(#BAT)
+        Streaming.HasModelLoaded(#COLT45)
+        Streaming.HasSpecialCharacterLoaded(1)
+        Streaming.HasSpecialCharacterLoaded(2)
+    then
+        break
+    end
+end
+
+Hud.SwitchWidescreen(True)
+wait 1000
+Player.SetControl($player, False)
+
+// Create Kenji at Harwood contact point
+World.ClearArea(1004.42, -49.06, 7.44, 6.0, True)
+Kenji = Char.Create(PedType.Special, #SPECIAL01, 1004.42, -49.06, 7.44)
+Char.SetHeading(Kenji, 90.0)
+
+// Position Toni facing Kenji
+Player.SetCoordinates($player, 1007.50, -49.06, 7.44)
+Player.SetHeading($player, 270.0)
+
+Camera.SetFixedPosition(1009.00, -47.00, 8.50, 0.0, 0.0, 0.0)
+Camera.PointAtChar(Kenji, CameraMode.FollowPed, SwitchType.JumpCut)
+Camera.DoFade(1500, Fade.In)
+wait 1500
+
+// Kenji Dialogue Sequence with skip check
+Text.Print('STAT1', 4000, 1)
+TIMERA = 0
+while TIMERA < 4000
+    wait 0
+    if or
+        Pad.IsKeyPressed(KeyCode.LeftShift)
+        Pad.IsKeyPressed(KeyCode.Space)
+        Pad.IsKeyPressed(KeyCode.F)
+    then
+        jump @Statue_Briefing_Skip
+    end
+end
+
+Text.Print('STAT2', 4000, 1)
+TIMERA = 0
+while TIMERA < 4000
+    wait 0
+    if or
+        Pad.IsKeyPressed(KeyCode.LeftShift)
+        Pad.IsKeyPressed(KeyCode.Space)
+        Pad.IsKeyPressed(KeyCode.F)
+    then
+        jump @Statue_Briefing_Skip
+    end
+end
+
+Text.Print('STAT3', 4000, 1)
+TIMERA = 0
+while TIMERA < 4000
+    wait 0
+    if or
+        Pad.IsKeyPressed(KeyCode.LeftShift)
+        Pad.IsKeyPressed(KeyCode.Space)
+        Pad.IsKeyPressed(KeyCode.F)
+    then
+        jump @Statue_Briefing_Skip
+    end
+end
+
+Text.Print('STAT4', 4000, 1)
+TIMERA = 0
+while TIMERA < 4000
+    wait 0
+    if or
+        Pad.IsKeyPressed(KeyCode.LeftShift)
+        Pad.IsKeyPressed(KeyCode.Space)
+        Pad.IsKeyPressed(KeyCode.F)
+    then
+        jump @Statue_Briefing_Skip
+    end
+end
+
+:Statue_Briefing_Skip
+Text.ClearPrints()
+Camera.RestoreJumpcut()
+Hud.SwitchWidescreen(False)
+Player.SetControl($player, True)
+
+if not Kenji == 0
+then
+    Char.RemoveElegantly(Kenji)
+    Kenji = 0
+end
+Streaming.UnloadSpecialCharacter(1)
+
+// Spawn catatonic Marie in Trenton supply yard
+World.ClearArea(1142.50, -848.20, 14.85, 10.0, True)
+Marie = Char.Create(PedType.Special, #SPECIAL02, 1142.50, -848.20, 14.85)
+Char.SetHeading(Marie, 180.0)
+Char.SetObjWaitOnFoot(Marie)
+Char.SetMaxHealth(Marie, 100)
+Char.SetHealth(Marie, 100)
+// Proof against knockback/fire while standing catatonic
+Char.SetProofs(Marie, False, True, True, False, False)
+
+MarieBlip = Blip.AddForChar(Marie)
+Text.PrintHelp('STAT5')
+
+// Stage 1: Urgency Timer to reach Trenton supply yard
+Hud.DisplayTimer(TimerLimit)
+
+while MissionStage == 0
+    wait 250
+    if or
+        not Player.IsPlaying($player)
+        not Char.IsStillAlive(Marie)
+    then
+        jump @Statue_Fail
+    end
+
+    if TimerLimit <= 0
+    then
+        jump @Statue_Fail
+    end
+
+    // Player arrives near Marie
+    if Player.LocateAnyMeans3D($player, 1142.50, -848.20, 14.85, 25.0, 25.0, 10.0, False)
+    then
+        Hud.ClearTimer(TimerLimit)
+        MissionStage = 1
+        break
+    end
+end
+
+// Stage 2: Attackers ambush Marie - spawn thugs & van
+World.ClearArea(1155.00, -835.00, 14.85, 10.0, True)
+ThugVan = Car.Create(#PONY, 1155.00, -835.00, 14.85)
+Car.SetHeading(ThugVan, 220.0)
+
+Thug1 = Char.Create(PedType.Gang3, #GANG03, 1150.00, -840.00, 14.85)
+Char.GiveWeapon(Thug1, WeaponType.BaseballBat, 1)
+Char.SetCurrentWeapon(Thug1, WeaponType.BaseballBat)
+Char.SetObjKillCharOnFoot(Thug1, Marie)
+
+Thug2 = Char.Create(PedType.Gang3, #GANG03, 1152.00, -838.00, 14.85)
+Char.GiveWeapon(Thug2, WeaponType.Colt45, 100)
+Char.SetCurrentWeapon(Thug2, WeaponType.Colt45)
+Char.SetObjKillCharOnFoot(Thug2, Marie)
+
+Thug3 = Char.Create(PedType.Gang3, #GANG03, 1148.00, -838.00, 14.85)
+Char.GiveWeapon(Thug3, WeaponType.Colt45, 100)
+Char.SetCurrentWeapon(Thug3, WeaponType.Colt45)
+Char.SetObjKillCharOnFoot(Thug3, Marie)
+
+Text.PrintHelp('STAT6')
+
+// Show Marie's Health Bar
+Hud.DisplayCounterWithString($MarieHealthBar, CounterDisplay.Bar, 'MARHEAL')
+
+while MissionStage == 1
+    wait 250
+    if or
+        not Player.IsPlaying($player)
+        not Char.IsStillAlive(Marie)
+    then
+        jump @Statue_Fail
+    end
+
+    Char.GetHealth(Marie, MarieHealth)
+    $MarieHealthBar = MarieHealth
+    if MarieHealth <= 0
+    then
+        jump @Statue_Fail
+    end
+
+    // Turn thugs to attack Toni if Toni attacks them or gets close
+    if Char.IsStillAlive(Thug1)
+    then
+        if Char.LocateAnyMeans3D(Thug1, 1142.50, -848.20, 14.85, 30.0, 30.0, 10.0, False)
+        then
+            Char.SetObjKillCharAnyMeans(Thug1, $scplayer)
+        end
+    end
+    if Char.IsStillAlive(Thug2)
+    then
+        if Char.LocateAnyMeans3D(Thug2, 1142.50, -848.20, 14.85, 30.0, 30.0, 10.0, False)
+        then
+            Char.SetObjKillCharAnyMeans(Thug2, $scplayer)
+        end
+    end
+    if Char.IsStillAlive(Thug3)
+    then
+        if Char.LocateAnyMeans3D(Thug3, 1142.50, -848.20, 14.85, 30.0, 30.0, 10.0, False)
+        then
+            Char.SetObjKillCharAnyMeans(Thug3, $scplayer)
+        end
+    end
+
+    // Check if all thugs eliminated
+    if and
+        not Char.IsStillAlive(Thug1)
+        not Char.IsStillAlive(Thug2)
+        not Char.IsStillAlive(Thug3)
+    then
+        Hud.ClearCounter($MarieHealthBar)
+        Text.PrintHelp('STAT7')
+        MissionStage = 2
+        break
+    end
+end
+
+// Stage 3: Dead-weight extraction - Toni must bring a car close to load her
+while MissionStage == 2
+    wait 250
+    if or
+        not Player.IsPlaying($player)
+        not Char.IsStillAlive(Marie)
+    then
+        jump @Statue_Fail
+    end
+
+    if Player.IsInAnyCar($player)
+    then
+        Player.StoreCarIsInNoSave($player, MarieCar)
+        if Player.LocateAnyMeans3D($player, 1142.50, -848.20, 14.85, 5.0, 5.0, 3.0, False)
+        then
+            // Close enough! Fade, warp her in as passenger
+            Player.SetControl($player, False)
+            Camera.DoFade(800, Fade.Out)
+            wait 800
+            Text.Print('STAT9', 3000, 1)
+            Char.WarpIntoCarAsPassenger(Marie, MarieCar)
+            wait 1000
+            Camera.DoFade(800, Fade.In)
+            wait 800
+            Player.SetControl($player, True)
+            Blip.Remove(MarieBlip)
+
+            // Barn hideout dropoff
+            BarnBlip = Blip.AddSpriteForCoord(1453.64, -173.11, 55.77, RadarSprite.Savehouse)
+            Text.PrintHelp('STATA')
+            MissionStage = 3
+            break
+        end
+    else
+        Text.PrintHelp('STAT8')
+        wait 3000
+    end
+end
+
+// Stage 4: Deliver Marie to Barn hideout
+while MissionStage == 3
+    wait 250
+    if or
+        not Player.IsPlaying($player)
+        not Char.IsStillAlive(Marie)
+    then
+        jump @Statue_Fail
+    end
+
+    if not Car.IsStillAlive(MarieCar)
+    then
+        jump @Statue_Fail
+    end
+
+    if Player.LocateAnyMeans3D($player, 1453.64, -173.11, 55.77, 4.0, 4.0, 3.0, True)
+    then
+        Blip.Remove(BarnBlip)
+        jump @Statue_OutroCutscene
+    end
+end
+
+:Statue_OutroCutscene
+Player.SetControl($player, False)
+Hud.SwitchWidescreen(True)
+
+// Unload Marie from car
+Char.WarpFromCarToCoord(Marie, 1454.55, -187.22, 54.44)
+Char.SetHeading(Marie, 0.0)
+Player.WarpFromCarToCoord($player, 1454.55, -189.00, 54.44)
+Player.SetHeading($player, 180.0)
+
+Camera.SetFixedPosition(1456.50, -188.00, 56.00, 0.0, 0.0, 0.0)
+Camera.PointAtChar(Marie, CameraMode.FollowPed, SwitchType.JumpCut)
+wait 1000
+
+// Sudden awakening with eerie flicker & miasma audio
+play_audio_stream_1channel "audio/EC/miasma.wav", False, 1.0
+Weather.ForceNow(WeatherType.Foggy)
+Camera.SetFadingColor(40, 0, 70)
+Camera.DoFade(300, Fade.Out)
+wait 300
+Camera.DoFade(600, Fade.In)
+wait 600
+
+// Marie snaps awake
+Char.SetObjWaitOnFoot(Marie)
+Text.Print('STATB', 4000, 1)
+wait 4000
+
+Text.Print('STATC', 4500, 1)
+wait 4500
+
+Camera.RestoreJumpcut()
+Hud.SwitchWidescreen(False)
+Camera.SetFadingColor(0, 0, 0)
+Camera.DoFade(1000, Fade.In)
+wait 1000
+
+// Mission Success!
+Text.PrintWithNumberBig('MISPASS', 20000, 5000, TextStyle.Middle)
+Audio.PlayMissionPassedTune(1)
+Player.AddScore($player, 20000)
+Stat.RegisterMissionPassed('MIS6NAM')
+Mission.Finish()
+$StatueMissionDone = 1
+$onmission = 0
+
+// Cleanup
+if not Marie == 0
+then
+    Char.RemoveElegantly(Marie)
+    Marie = 0
+end
+if not MarieCar == 0
+then
+    Car.MarkAsNoLongerNeeded(MarieCar)
+    MarieCar = 0
+end
+if not ThugVan == 0
+then
+    Car.MarkAsNoLongerNeeded(ThugVan)
+    ThugVan = 0
+end
+Streaming.UnloadSpecialCharacter(2)
+Streaming.MarkModelAsNoLongerNeeded(#PONY)
+Streaming.MarkModelAsNoLongerNeeded(#GANG03)
+Streaming.MarkModelAsNoLongerNeeded(#BAT)
+Streaming.MarkModelAsNoLongerNeeded(#COLT45)
+Player.SetControl($player, True)
+$OnStatueMission = 0
+terminate_this_custom_script
+
+:Statue_Fail
+$onmission = 0
+$StatueMissionDone = 0
+Text.ClearPrints()
+Hud.ClearTimer(TimerLimit)
+Hud.ClearCounter($MarieHealthBar)
+if not MarieBlip == 0
+then
+    Blip.Remove(MarieBlip)
+end
+if not BarnBlip == 0
+then
+    Blip.Remove(BarnBlip)
+end
+Text.PrintBigString("Mission Failed!", 3000, TextStyle.Middle)
+wait 3000
+Camera.DoFade(1500, Fade.Out)
+wait 1500
+if not Kenji == 0
+then
+    Char.Delete(Kenji)
+    Kenji = 0
+end
+if not Marie == 0
+then
+    Char.Delete(Marie)
+    Marie = 0
+end
+if not Thug1 == 0
+then
+    Char.Delete(Thug1)
+    Thug1 = 0
+end
+if not Thug2 == 0
+then
+    Char.Delete(Thug2)
+    Thug2 = 0
+end
+if not Thug3 == 0
+then
+    Char.Delete(Thug3)
+    Thug3 = 0
+end
+if not ThugVan == 0
+then
+    Car.Delete(ThugVan)
+    ThugVan = 0
+end
+Streaming.UnloadSpecialCharacter(1)
+Streaming.UnloadSpecialCharacter(2)
+Streaming.MarkModelAsNoLongerNeeded(#PONY)
+Streaming.MarkModelAsNoLongerNeeded(#GANG03)
+Streaming.MarkModelAsNoLongerNeeded(#BAT)
+Streaming.MarkModelAsNoLongerNeeded(#COLT45)
+Camera.RestoreJumpcut()
+Hud.SwitchWidescreen(False)
+Camera.DoFade(1500, Fade.In)
+wait 1500
+Player.SetControl($player, True)
+$OnStatueMission = 0
+terminate_this_custom_script
