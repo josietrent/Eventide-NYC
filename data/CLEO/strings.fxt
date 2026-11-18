@@ -22,6 +22,7 @@ HEAT	Lose the ~r~heat!
 INCAR	Get back in the car!
 INSTAL	Get in the car.
 JUNKYRD	Drive to the Junkyard.
+FEA_FM5	KPSA 109.1
 FINHIDE Find a place to stay for the night.
 FINACAR	Nick a car off the street, and make it snappy!
 FINDCAR	Find your car.
@@ -50,6 +51,7 @@ LODPICK Loading Pickups and Objects...
 LODGARG Loading Garages...
 LODZONE Loading Zones...
 LODPATH Loading Restarts and Paths...
+LOUHOME	Take Louie home.
 MARKER  Drive into the Marker.
 MARKERW Walk into the marker to advance.
 MEETUP	Meet up with your ~b~girl~w~ and take her to her ~y~apartment.
