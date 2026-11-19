@@ -800,6 +800,17 @@ void __fastcall Hook_ServiceGameMode(void *self, uintptr_t) {
     } else {
       g_currentStation = VehRadioStation(veh);
     }
+
+    if (g_pendingScrollSteps != 0) {
+      *reinterpret_cast<int32_t *>(ADDR_NUM_RETUNE_PRESSES) +=
+          g_pendingScrollSteps;
+      *reinterpret_cast<int32_t *>(ADDR_RETUNE_COUNTER) = 30;
+      auto playOneShot =
+          reinterpret_cast<AudioPlayOneShotFn>(ADDR_AUDIO_PLAY_ONE_SHOT);
+      playOneShot(reinterpret_cast<void *>(ADDR_AUDIO_MANAGER), 0,
+                  SOUND_FRONTEND_RADIO_CHANGE, 1.0f);
+      g_pendingScrollSteps = 0;
+    }
   } else {
     // Player is on foot!
     g_lastPlayerVeh = nullptr;
@@ -813,11 +824,10 @@ void __fastcall Hook_ServiceGameMode(void *self, uintptr_t) {
     void *pad = padGet(0);
     const bool padRetune = pad && padChangeStation(pad);
 
-    int32_t deltaPresses = g_pendingScrollSteps;
+    // Mouse scroll wheel on foot is reserved for weapon switching in GTA III.
+    // Discard any mouse wheel steps on foot so weapon cycling is never hijacked.
     g_pendingScrollSteps = 0;
-    if (padRetune) {
-      deltaPresses += 1;
-    }
+    int32_t deltaPresses = padRetune ? 1 : 0;
 
     if (deltaPresses != 0) {
       const bool mp3Avail = IsMP3ChannelAvailable();
