@@ -30,6 +30,7 @@ constexpr uintptr_t ADDR_DISPLAY_TIMER = 0x650BA1;
 constexpr uintptr_t ADDR_FIND_PLAYER_VEHICLE = 0x4A10C0;
 constexpr uintptr_t ADDR_FIND_PLAYER_PED = 0x4A1150;
 constexpr uintptr_t ADDR_TEXT_GET = 0x52C5A0;
+constexpr uintptr_t ADDR_SAMPLE_IS_MP3_AVAILABLE = 0x566490;
 
 constexpr uintptr_t ADDR_FONT_PRINT_STRING = 0x500F50;
 constexpr uintptr_t ADDR_FONT_DRAW_FONTS = 0x501B50;
@@ -46,7 +47,9 @@ constexpr uintptr_t ADDR_MUSIC_RESET_AFTER_RELOAD = 0x57CF30;
 constexpr uintptr_t ADDR_MUSIC_INITIALISE = 0x57CF70;
 constexpr uintptr_t ADDR_MUSIC_SET_RADIO_BY_SCRIPT = 0x57D180;
 constexpr uintptr_t ADDR_MUSIC_SERVICE_GAME_MODE = 0x57D690;
-constexpr uintptr_t ADDR_MUSIC_CHANGE_RADIO_TRACK = 0x57E450;
+constexpr uintptr_t ADDR_MUSIC_SERVICE_AMBIENCE = 0x57DCB0;
+constexpr uintptr_t ADDR_MUSIC_SERVICE_VOLUME = 0x57E100;
+constexpr uintptr_t ADDR_MUSIC_SERVICE_TRACK = 0x57E130;
 constexpr uintptr_t ADDR_MUSIC_PLAYER_IN_CAR = 0x57E4B0;
 constexpr uintptr_t ADDR_MUSIC_GET_CAR_TUNING = 0x57E530;
 constexpr uintptr_t ADDR_MUSIC_GET_NEXT_CAR_TUNING = 0x57E5A0;
@@ -67,6 +70,7 @@ constexpr size_t OFF_MUSIC_RADIO_SET_BY_SCRIPT = 0x94F;
 
 constexpr size_t OFF_AUDIO_WAS_PAUSED = 0x4B0E;
 constexpr size_t OFF_CAM_WIDESCREEN = 0x70;
+constexpr size_t OFF_PAD_DISABLE_CONTROLS = 0xDF;
 
 constexpr size_t OFF_ENTITY_STATUS_BYTE = 0x50;
 constexpr size_t OFF_ENTITY_MODEL_INDEX = 0x5C;
@@ -115,8 +119,6 @@ using MusicUint8Fn = uint8_t(__thiscall *)(void *self);
 using MusicUsesPoliceRadioFn = bool(__thiscall *)(void *self, void *veh);
 using MusicSetRadioByScriptFn = void(__thiscall *)(void *self, uint8_t station,
                                                    int32_t pos);
-using MusicChangeRadioTrackFn = void(__thiscall *)(void *self, uint8_t track,
-                                                   int32_t pos);
 using SampleIsMP3AvailFn = bool(__thiscall *)(void *self);
 
 using FindPlayerVehicleFn = void *(__cdecl *)();
@@ -148,11 +150,10 @@ std::string g_logPath;
 std::vector<HookEntry> g_hooks;
 bool g_deferredInstalled = false;
 
-SampleIsMP3AvailFn g_isMP3Available = nullptr;
-
 MusicBoolFn g_origInitialise = nullptr;
 MusicVoidFn g_origResetMusicAfterReload = nullptr;
 MusicVoidFn g_origServiceGameMode = nullptr;
+MusicVoidFn g_origServiceAmbience = nullptr;
 MusicBoolFn g_origPlayerInCar = nullptr;
 MusicUint8Fn g_origGetNextCarTuning = nullptr;
 MusicUsesPoliceRadioFn g_origUsesPoliceRadio = nullptr;
@@ -520,35 +521,10 @@ void RemoveAllHooks() {
   g_hooks.clear();
 }
 
-void ResolveMP3AvailableFn() {
-  const uint8_t *p = reinterpret_cast<const uint8_t *>(ADDR_MUSIC_INITIALISE);
-  for (size_t i = 0; i < 0x200; ++i) {
-    if (p[i] == 0xB9 &&
-        *reinterpret_cast<const uint32_t *>(p + i + 1) == ADDR_SAMPLE_MANAGER) {
-      if (p[i + 5] == 0xE8) {
-        const int32_t rel = *reinterpret_cast<const int32_t *>(p + i + 6);
-        const uintptr_t target = ADDR_MUSIC_INITIALISE + i + 5 + 5 + rel;
-        g_isMP3Available = reinterpret_cast<SampleIsMP3AvailFn>(target);
-        char msg[96] = {};
-        std::snprintf(msg, sizeof(msg),
-                      "Resolved IsMP3RadioChannelAvailable at 0x%08X",
-                      static_cast<unsigned>(target));
-        WriteLog(msg);
-        return;
-      }
-    }
-  }
-  WriteLog("Fallback: using direct cSampleManager field for MP3 availability");
-}
-
 bool IsMP3ChannelAvailable() {
-  if (g_isMP3Available != nullptr) {
-    return g_isMP3Available(reinterpret_cast<void *>(ADDR_SAMPLE_MANAGER));
-  }
-  // cSampleManager::m_nMP3StationPresent offset 0x4B20 in GTA III v1.0
-  const uint8_t val =
-      *reinterpret_cast<const uint8_t *>(ADDR_SAMPLE_MANAGER + 0x4B20);
-  return val != 0;
+  auto isMP3Avail =
+      reinterpret_cast<SampleIsMP3AvailFn>(ADDR_SAMPLE_IS_MP3_AVAILABLE);
+  return isMP3Avail(reinterpret_cast<void *>(ADDR_SAMPLE_MANAGER));
 }
 
 inline uint8_t &MusicU8(void *self, size_t off) {
@@ -780,6 +756,20 @@ void __fastcall Hook_DisplayRadioStationName(void *self, uintptr_t) {
   drawFonts();
 }
 
+void __fastcall Hook_ServiceAmbience(void *self, uintptr_t) {
+  if (g_currentStation == RADIO_OFF) {
+    g_origServiceAmbience(self);
+    return;
+  }
+
+  MusicU8(self, OFF_MUSIC_NEXT_TRACK) = g_currentStation;
+  auto serviceTrack = reinterpret_cast<MusicBoolFn>(ADDR_MUSIC_SERVICE_TRACK);
+  auto serviceVolume = reinterpret_cast<MusicVoidFn>(ADDR_MUSIC_SERVICE_VOLUME);
+  if (serviceTrack(self)) {
+    serviceVolume(self);
+  }
+}
+
 void __fastcall Hook_ServiceGameMode(void *self, uintptr_t) {
   InstallWindowHook();
 
@@ -824,7 +814,7 @@ void __fastcall Hook_ServiceGameMode(void *self, uintptr_t) {
 
       // In GTA III, ADDR_NUM_RETUNE_PRESSES must be positive.
       // Scrolling down (-1) is equivalent to advancing (stationCount - 1)
-      // stations forward.
+      // forward.
       int32_t forwardSteps = g_pendingScrollSteps;
       while (forwardSteps < 0) {
         forwardSteps += stationCount;
@@ -848,10 +838,11 @@ void __fastcall Hook_ServiceGameMode(void *self, uintptr_t) {
     // Discard any mouse wheel steps on foot so weapon cycling is never hijacked
     g_pendingScrollSteps = 0;
 
-    // Check keyboard binds (R and Insert) as well as controller pad
     static bool s_wasRKeyDown = false;
-    const bool rKeyDown = (GetAsyncKeyState('R') & 0x8000) != 0 ||
-                          (GetAsyncKeyState(VK_INSERT) & 0x8000) != 0;
+    const bool focused = !g_gameHwnd || GetForegroundWindow() == g_gameHwnd;
+    const bool rKeyDown =
+        focused && ((GetAsyncKeyState('R') & 0x8000) != 0 ||
+                    (GetAsyncKeyState(VK_INSERT) & 0x8000) != 0);
     const bool rJustDown = rKeyDown && !s_wasRKeyDown;
     s_wasRKeyDown = rKeyDown;
 
@@ -864,8 +855,15 @@ void __fastcall Hook_ServiceGameMode(void *self, uintptr_t) {
     const bool paused =
         (*reinterpret_cast<const uint8_t *>(ADDR_USER_PAUSE) != 0) ||
         (*reinterpret_cast<const uint8_t *>(ADDR_CODE_PAUSE) != 0);
+    const bool wideScreen = *reinterpret_cast<const uint8_t *>(
+                                ADDR_THE_CAMERA + OFF_CAM_WIDESCREEN) != 0;
+    const bool controlsDisabled =
+        !pad ||
+        (*reinterpret_cast<const uint8_t *>(reinterpret_cast<uintptr_t>(pad) +
+                                            OFF_PAD_DISABLE_CONTROLS) != 0);
 
-    const bool retuneTriggered = !paused && (rJustDown || padRetune);
+    const bool retuneTriggered =
+        !paused && !wideScreen && !controlsDisabled && (rJustDown || padRetune);
 
     if (retuneTriggered) {
       const bool mp3Avail = IsMP3ChannelAvailable();
@@ -881,34 +879,9 @@ void __fastcall Hook_ServiceGameMode(void *self, uintptr_t) {
       playOneShot(reinterpret_cast<void *>(ADDR_AUDIO_MANAGER), 0,
                   SOUND_FRONTEND_RADIO_CHANGE, 1.0f);
     }
-
-    // Direct streaming track when on foot:
-    // If g_currentStation != RADIO_OFF, keep streaming the chosen radio station
-    if (g_currentStation != RADIO_OFF) {
-      MusicU8(self, OFF_MUSIC_NEXT_TRACK) = g_currentStation;
-      if (MusicU8(self, OFF_MUSIC_PLAYING_TRACK) != g_currentStation) {
-        auto changeTrack = reinterpret_cast<MusicChangeRadioTrackFn>(
-            ADDR_MUSIC_CHANGE_RADIO_TRACK);
-        changeTrack(self, g_currentStation, 0);
-        MusicU8(self, OFF_MUSIC_PLAYING_TRACK) = g_currentStation;
-      }
-    } else {
-      if (MusicU8(self, OFF_MUSIC_PLAYING_TRACK) !=
-          STREAMED_SOUND_CITY_AMBIENT) {
-        auto changeTrack = reinterpret_cast<MusicChangeRadioTrackFn>(
-            ADDR_MUSIC_CHANGE_RADIO_TRACK);
-        changeTrack(self, STREAMED_SOUND_CITY_AMBIENT, 0);
-        MusicU8(self, OFF_MUSIC_PLAYING_TRACK) = STREAMED_SOUND_CITY_AMBIENT;
-      }
-    }
   }
 
   g_origServiceGameMode(self);
-
-  // If on foot and radio is active, prevent next track from decaying to ambient
-  if (!inCar && g_currentStation != RADIO_OFF) {
-    MusicU8(self, OFF_MUSIC_NEXT_TRACK) = g_currentStation;
-  }
 }
 
 void __fastcall Hook_ResetMusicAfterReload(void *self, uintptr_t) {
@@ -925,7 +898,6 @@ void InstallDeferredHooks() {
   }
   g_deferredInstalled = true;
 
-  ResolveMP3AvailableFn();
   InstallWindowHook();
 
   bool ok = true;
@@ -934,6 +906,8 @@ void InstallDeferredHooks() {
                     &g_origResetMusicAfterReload);
   ok &= InstallDetour(ADDR_MUSIC_SERVICE_GAME_MODE, &Hook_ServiceGameMode,
                       &g_origServiceGameMode);
+  ok &= InstallDetour(ADDR_MUSIC_SERVICE_AMBIENCE, &Hook_ServiceAmbience,
+                      &g_origServiceAmbience);
   ok &= InstallDetour(ADDR_MUSIC_PLAYER_IN_CAR, &Hook_PlayerInCar,
                       &g_origPlayerInCar);
   ok &= InstallDetour(ADDR_MUSIC_GET_NEXT_CAR_TUNING, &Hook_GetNextCarTuning,
