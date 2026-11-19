@@ -145,7 +145,6 @@ while HasPackage == 0
     if Pickup.HasBeenCollected(StashPickup)
     then
         Blip.Remove(StashBlip)
-        StashPickup = 0
         HasPackage = 1
         // Police heat triggered!
         Player.AlterWantedLevelNoDrop($player, 2)
