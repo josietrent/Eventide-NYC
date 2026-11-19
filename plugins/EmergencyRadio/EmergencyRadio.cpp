@@ -25,6 +25,7 @@ constexpr uintptr_t ADDR_NUM_RETUNE_PRESSES = 0x650B80;
 constexpr uintptr_t ADDR_RETUNE_COUNTER = 0x650B84;
 constexpr uintptr_t ADDR_CURRENT_STATION_PTR = 0x650B9C;
 constexpr uintptr_t ADDR_DISPLAY_TIMER = 0x650BA1;
+constexpr uintptr_t ADDR_WINDOW_HANDLE = 0x726768;
 
 // Functions
 constexpr uintptr_t ADDR_FIND_PLAYER_VEHICLE = 0x4A10C0;
@@ -46,11 +47,17 @@ constexpr uintptr_t ADDR_MUSIC_RESET_AFTER_RELOAD = 0x57CF30;
 constexpr uintptr_t ADDR_MUSIC_INITIALISE = 0x57CF70;
 constexpr uintptr_t ADDR_MUSIC_SET_RADIO_BY_SCRIPT = 0x57D180;
 constexpr uintptr_t ADDR_MUSIC_SERVICE_GAME_MODE = 0x57D690;
+constexpr uintptr_t ADDR_MUSIC_CHANGE_RADIO_TRACK = 0x57E450;
 constexpr uintptr_t ADDR_MUSIC_PLAYER_IN_CAR = 0x57E4B0;
 constexpr uintptr_t ADDR_MUSIC_GET_CAR_TUNING = 0x57E530;
 constexpr uintptr_t ADDR_MUSIC_GET_NEXT_CAR_TUNING = 0x57E5A0;
 constexpr uintptr_t ADDR_MUSIC_USES_POLICE_RADIO = 0x57E6A0;
 constexpr uintptr_t ADDR_MUSIC_DISPLAY_RADIO_NAME = 0x57E6D0;
+
+constexpr uintptr_t ADDR_PAD_GET_PAD = 0x492F60;
+constexpr uintptr_t ADDR_PAD_CHANGE_STATION = 0x493870;
+constexpr uintptr_t ADDR_AUDIO_PLAY_ONE_SHOT = 0x57A500;
+constexpr uint16_t SOUND_FRONTEND_RADIO_CHANGE = 0x9F;
 
 // Struct field offsets (validated against GTA III v1.0)
 constexpr size_t OFF_MUSIC_NEXT_TRACK = 0x03;
@@ -109,6 +116,8 @@ using MusicUint8Fn = uint8_t(__thiscall *)(void *self);
 using MusicUsesPoliceRadioFn = bool(__thiscall *)(void *self, void *veh);
 using MusicSetRadioByScriptFn = void(__thiscall *)(void *self, uint8_t station,
                                                    int32_t pos);
+using MusicChangeRadioTrackFn = void(__thiscall *)(void *self, uint8_t track,
+                                                   int32_t pos);
 using SampleIsMP3AvailFn = bool(__thiscall *)(void *self);
 
 using FindPlayerVehicleFn = void *(__cdecl *)();
@@ -121,6 +130,12 @@ using FontColorFn = void(__cdecl *)(const CRGBA *color);
 using FontFloatFn = void(__cdecl *)(float val);
 using FontStyleFn = void(__cdecl *)(int16_t style);
 using FontPrintStringFn = void(__cdecl *)(float x, float y, const wchar_t *s);
+
+using PadGetFn = void *(__cdecl *)(int32_t pad);
+using PadChangeStationFn = bool(__thiscall *)(void *pad);
+using AudioPlayOneShotFn = void(__thiscall *)(void *audioMgr,
+                                              int32_t entityIndex,
+                                              uint16_t sound, float vol);
 
 struct HookEntry {
   uintptr_t addr = 0;
@@ -145,7 +160,13 @@ MusicUsesPoliceRadioFn g_origUsesPoliceRadio = nullptr;
 MusicVoidFn g_origDisplayRadioStationName = nullptr;
 
 void *g_lastPlayerVeh = nullptr;
+uint8_t g_currentStation = RADIO_OFF;
+int32_t g_pendingScrollSteps = 0;
+WNDPROC g_origWndProc = nullptr;
+HWND g_gameHwnd = nullptr;
+
 const wchar_t kPoliceScannerLabel[] = L"Police Scanner";
+const wchar_t kRadioOffLabel[] = L"Radio Off";
 
 void WriteLog(const char *line) {
   if (g_logPath.empty() || !line) {
@@ -257,21 +278,26 @@ size_t DecodeX86InsnLen(const uint8_t *p) {
   if ((op >= 0x50 && op <= 0x5F) || op == 0x90 || op == 0xC3) {
     return i;
   }
+
   if (op == 0x6A || op == 0xEB || (op >= 0x70 && op <= 0x7F)) {
     return i + 1;
   }
+
   if (op == 0x68 || op == 0xE8 || op == 0xE9) {
     return i + imm32Size;
   }
+
   if (op >= 0xB8 && op <= 0xBF) {
     return i + imm32Size;
   }
   if (op >= 0xB0 && op <= 0xB7) {
     return i + 1;
   }
+
   if (op >= 0xA0 && op <= 0xA3) {
     return i + (addrSize16 ? 2 : 4);
   }
+
   if (op == 0x04 || op == 0x0C || op == 0x14 || op == 0x1C || op == 0x24 ||
       op == 0x2C || op == 0x34 || op == 0x3C || op == 0xA8) {
     return i + 1;
@@ -280,10 +306,12 @@ size_t DecodeX86InsnLen(const uint8_t *p) {
       op == 0x2D || op == 0x35 || op == 0x3D || op == 0xA9) {
     return i + imm32Size;
   }
+
   if ((op <= 0x3B && (op & 7) <= 3) || op == 0x63 || op == 0x84 || op == 0x85 ||
       (op >= 0x88 && op <= 0x8D) || op == 0x8F || (op >= 0xD8 && op <= 0xDF)) {
     return i + modrmLen(&p[i]);
   }
+
   if (op == 0x80 || op == 0x82 || op == 0x83 || op == 0xC0 || op == 0xC1 ||
       op == 0xC6) {
     return i + modrmLen(&p[i]) + 1;
@@ -305,6 +333,7 @@ size_t DecodeX86InsnLen(const uint8_t *p) {
   if (op == 0xFE || op == 0xFF) {
     return i + modrmLen(&p[i]);
   }
+
   return 0;
 }
 
@@ -414,7 +443,45 @@ bool InstallDetour(uintptr_t addr, void *hookFn, FnPtr *outOrig) {
   return true;
 }
 
+LRESULT CALLBACK SubclassWndProc(HWND hwnd, UINT uMsg, WPARAM wParam,
+                                 LPARAM lParam) {
+  if (uMsg == WM_MOUSEWHEEL) {
+    const short delta = GET_WHEEL_DELTA_WPARAM(wParam);
+    if (delta > 0) {
+      g_pendingScrollSteps += 1;
+    } else if (delta < 0) {
+      g_pendingScrollSteps -= 1;
+    }
+  }
+  return CallWindowProcA(g_origWndProc, hwnd, uMsg, wParam, lParam);
+}
+
+void InstallWindowHook() {
+  if (g_origWndProc) {
+    return;
+  }
+  HWND hwnd = *reinterpret_cast<HWND *>(ADDR_WINDOW_HANDLE);
+  if (hwnd) {
+    g_gameHwnd = hwnd;
+    g_origWndProc = reinterpret_cast<WNDPROC>(SetWindowLongPtrA(
+        hwnd, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(SubclassWndProc)));
+    if (g_origWndProc) {
+      WriteLog("Mouse wheel WindowProc subclass installed OK");
+    }
+  }
+}
+
+void RemoveWindowHook() {
+  if (g_origWndProc && g_gameHwnd) {
+    SetWindowLongPtrA(g_gameHwnd, GWLP_WNDPROC,
+                      reinterpret_cast<LONG_PTR>(g_origWndProc));
+    g_origWndProc = nullptr;
+    g_gameHwnd = nullptr;
+  }
+}
+
 void RemoveAllHooks() {
+  RemoveWindowHook();
   for (auto it = g_hooks.rbegin(); it != g_hooks.rend(); ++it) {
     if (!it->active) {
       continue;
@@ -438,54 +505,35 @@ void RemoveAllHooks() {
   g_hooks.clear();
 }
 
-SampleIsMP3AvailFn ScanIsMP3AvailableInRange(uintptr_t start, uintptr_t end) {
-  const uint8_t *code = reinterpret_cast<const uint8_t *>(start);
-  const size_t len = end - start;
-  if (len < 10) {
-    return nullptr;
-  }
-  // Pattern: mov ecx, 0x7341E0 (B9 E0 41 73 00) followed shortly by call rel32
-  // (E8)
-  for (size_t i = 0; i + 10 <= len; ++i) {
-    if (code[i] == 0xB9 && code[i + 1] == 0xE0 && code[i + 2] == 0x41 &&
-        code[i + 3] == 0x73 && code[i + 4] == 0x00) {
-      const size_t searchLimit = (i + 20 < len) ? (i + 20) : len;
-      for (size_t j = i + 5; j + 5 <= searchLimit; ++j) {
-        if (code[j] == 0xE8) {
-          const int32_t rel = *reinterpret_cast<const int32_t *>(code + j + 1);
-          const uintptr_t target = (start + j) + 5 + rel;
-          if (target >= 0x401000 && target < 0x600000) {
-            return reinterpret_cast<SampleIsMP3AvailFn>(target);
-          }
-        }
+void ResolveMP3AvailableFn() {
+  const uint8_t *p = reinterpret_cast<const uint8_t *>(ADDR_MUSIC_INITIALISE);
+  for (size_t i = 0; i < 0x200; ++i) {
+    if (p[i] == 0xB9 &&
+        *reinterpret_cast<const uint32_t *>(p + i + 1) == ADDR_SAMPLE_MANAGER) {
+      if (p[i + 5] == 0xE8) {
+        const int32_t rel = *reinterpret_cast<const int32_t *>(p + i + 6);
+        const uintptr_t target = ADDR_MUSIC_INITIALISE + i + 5 + 5 + rel;
+        g_isMP3Available = reinterpret_cast<SampleIsMP3AvailFn>(target);
+        char msg[96] = {};
+        std::snprintf(msg, sizeof(msg),
+                      "Resolved IsMP3RadioChannelAvailable at 0x%08X",
+                      static_cast<unsigned>(target));
+        WriteLog(msg);
+        return;
       }
     }
   }
-  return nullptr;
-}
-
-void ResolveMP3AvailableFn() {
-  if (g_isMP3Available) {
-    return;
-  }
-  g_isMP3Available =
-      ScanIsMP3AvailableInRange(ADDR_MUSIC_GET_CAR_TUNING, 0x57E5A0);
-  if (!g_isMP3Available) {
-    g_isMP3Available =
-        ScanIsMP3AvailableInRange(ADDR_MUSIC_GET_NEXT_CAR_TUNING, 0x57E6A0);
-  }
-  char msg[128] = {};
-  std::snprintf(
-      msg, sizeof(msg), "SampleManager::IsMP3RadioChannelAvailable = 0x%08X",
-      static_cast<unsigned>(reinterpret_cast<uintptr_t>(g_isMP3Available)));
-  WriteLog(msg);
+  WriteLog("Fallback: using direct cSampleManager field for MP3 availability");
 }
 
 bool IsMP3ChannelAvailable() {
-  if (!g_isMP3Available) {
-    return false;
+  if (g_isMP3Available != nullptr) {
+    return g_isMP3Available(reinterpret_cast<void *>(ADDR_SAMPLE_MANAGER));
   }
-  return g_isMP3Available(reinterpret_cast<void *>(ADDR_SAMPLE_MANAGER));
+  // cSampleManager::m_nMP3StationPresent offset 0x4B20 in GTA III v1.0
+  const uint8_t val =
+      *reinterpret_cast<const uint8_t *>(ADDR_SAMPLE_MANAGER + 0x4B20);
+  return val != 0;
 }
 
 inline uint8_t &MusicU8(void *self, size_t off) {
@@ -494,8 +542,8 @@ inline uint8_t &MusicU8(void *self, size_t off) {
 
 inline uint8_t GetEntityStatus(const void *entity) {
   return static_cast<uint8_t>(
-      (*reinterpret_cast<const uint8_t *>(reinterpret_cast<uintptr_t>(entity) +
-                                          OFF_ENTITY_STATUS_BYTE)) >>
+      *reinterpret_cast<const uint8_t *>(reinterpret_cast<uintptr_t>(entity) +
+                                         OFF_ENTITY_STATUS_BYTE) >>
       3);
 }
 
@@ -595,6 +643,7 @@ uint8_t __fastcall Hook_GetNextCarTuning(void *, uintptr_t) {
         AdvanceRadioStation(station, numRetunePresses, IsMP3ChannelAvailable());
     numRetunePresses = 0;
   }
+  g_currentStation = station;
   return station;
 }
 
@@ -607,20 +656,23 @@ void __fastcall Hook_DisplayRadioStationName(void *self, uintptr_t) {
   const bool replayPlaying = *reinterpret_cast<const uint8_t *>(
                                  ADDR_REPLAY_MODE) == REPLAY_MODE_PLAYBACK;
 
-  if (paused || wideScreen || replayPlaying || !Hook_PlayerInCar(self, 0)) {
+  const bool inCar = Hook_PlayerInCar(self, 0);
+  uint8_t &displayTimer = *reinterpret_cast<uint8_t *>(ADDR_DISPLAY_TIMER);
+
+  if (paused || wideScreen || replayPlaying || (!inCar && displayTimer == 0)) {
     return;
   }
 
   const wchar_t *&currentStation =
       *reinterpret_cast<const wchar_t **>(ADDR_CURRENT_STATION_PTR);
-  uint8_t &displayTimer = *reinterpret_cast<uint8_t *>(ADDR_DISPLAY_TIMER);
 
-  if (MusicU8(self, OFF_MUSIC_PLAYER_IN_CAR) != 0 &&
+  if (inCar && MusicU8(self, OFF_MUSIC_PLAYER_IN_CAR) != 0 &&
       MusicU8(self, OFF_MUSIC_PREV_PLAYER_IN_CAR) == 0) {
     currentStation = nullptr;
   }
 
-  uint8_t curRadio = MusicU8(self, OFF_MUSIC_NEXT_TRACK);
+  uint8_t curRadio =
+      inCar ? MusicU8(self, OFF_MUSIC_NEXT_TRACK) : g_currentStation;
   if (curRadio == STREAMED_SOUND_CITY_AMBIENT ||
       curRadio == STREAMED_SOUND_WATER_AMBIENT) {
     curRadio = RADIO_OFF;
@@ -632,7 +684,8 @@ void __fastcall Hook_DisplayRadioStationName(void *self, uintptr_t) {
       *reinterpret_cast<const int32_t *>(ADDR_NUM_RETUNE_PRESSES);
   const bool mp3Avail = IsMP3ChannelAvailable();
   const uint8_t targetStation =
-      AdvanceRadioStation(curRadio, numRetunePresses, mp3Avail);
+      inCar ? AdvanceRadioStation(curRadio, numRetunePresses, mp3Avail)
+            : curRadio;
 
   static const char *const kStationTextKeys[9] = {
       "FEA_FM0", "FEA_FM1", "FEA_FM2", "FEA_FM3", "FEA_FM4",
@@ -651,6 +704,8 @@ void __fastcall Hook_DisplayRadioStationName(void *self, uintptr_t) {
     label = textGet(theText, "FEA_FM9");
   } else if (targetStation == POLICE_RADIO) {
     label = kPoliceScannerLabel;
+  } else if (targetStation == RADIO_OFF) {
+    label = kRadioOffLabel;
   } else {
     return;
   }
@@ -716,39 +771,94 @@ void __fastcall Hook_ServiceGameMode(void *self, uintptr_t) {
   void *veh = findPlayerVeh();
   const bool inCar = Hook_PlayerInCar(self, 0);
 
-  if (!inCar || !veh) {
+  if (inCar && veh) {
+    if (veh != g_lastPlayerVeh) {
+      g_lastPlayerVeh = veh;
+
+      const int16_t model = GetEntityModelIndex(veh);
+      const bool radioSetByScript =
+          MusicU8(self, OFF_MUSIC_RADIO_SET_BY_SCRIPT) != 0;
+
+      if ((model == MI_POLICE || model == MI_AMBULAN) && !radioSetByScript) {
+        auto setRadioByScript = reinterpret_cast<MusicSetRadioByScriptFn>(
+            ADDR_MUSIC_SET_RADIO_BY_SCRIPT);
+        setRadioByScript(self, GAME_FM, EMERGENCY_GAME_FM_POS_MS);
+
+        *reinterpret_cast<int32_t *>(ADDR_RETUNE_COUNTER) = 0;
+        *reinterpret_cast<int32_t *>(ADDR_NUM_RETUNE_PRESSES) = 0;
+
+        MusicU8(self, OFF_MUSIC_PLAYER_IN_CAR) = 0;
+        VehRadioStation(veh) = GAME_FM;
+        g_currentStation = GAME_FM;
+      } else if (g_currentStation != RADIO_OFF && !radioSetByScript) {
+        // Seamless transition into car: vehicle tunes to our on-foot station!
+        VehRadioStation(veh) = g_currentStation;
+        MusicU8(self, OFF_MUSIC_NEXT_TRACK) = g_currentStation;
+      } else {
+        g_currentStation = VehRadioStation(veh);
+      }
+    } else {
+      g_currentStation = VehRadioStation(veh);
+    }
+  } else {
+    // Player is on foot!
     g_lastPlayerVeh = nullptr;
-    g_origServiceGameMode(self);
-    return;
-  }
+    InstallWindowHook();
 
-  if (veh != g_lastPlayerVeh) {
-    g_lastPlayerVeh = veh;
+    // Query both the user's bound radio button/key from the Controls screen
+    // and mouse wheel scroll steps
+    auto padGet = reinterpret_cast<PadGetFn>(ADDR_PAD_GET_PAD);
+    auto padChangeStation =
+        reinterpret_cast<PadChangeStationFn>(ADDR_PAD_CHANGE_STATION);
+    void *pad = padGet(0);
+    const bool padRetune = pad && padChangeStation(pad);
 
-    const int16_t model = GetEntityModelIndex(veh);
-    const bool radioSetByScript =
-        MusicU8(self, OFF_MUSIC_RADIO_SET_BY_SCRIPT) != 0;
+    int32_t deltaPresses = g_pendingScrollSteps;
+    g_pendingScrollSteps = 0;
+    if (padRetune) {
+      deltaPresses += 1;
+    }
 
-    if ((model == MI_POLICE || model == MI_AMBULAN) && !radioSetByScript) {
-      auto setRadioByScript = reinterpret_cast<MusicSetRadioByScriptFn>(
-          ADDR_MUSIC_SET_RADIO_BY_SCRIPT);
-      setRadioByScript(self, GAME_FM, EMERGENCY_GAME_FM_POS_MS);
+    if (deltaPresses != 0) {
+      const bool mp3Avail = IsMP3ChannelAvailable();
+      g_currentStation =
+          AdvanceRadioStation(g_currentStation, deltaPresses, mp3Avail);
 
-      *reinterpret_cast<int32_t *>(ADDR_RETUNE_COUNTER) = 0;
+      *reinterpret_cast<int32_t *>(ADDR_RETUNE_COUNTER) = 30;
       *reinterpret_cast<int32_t *>(ADDR_NUM_RETUNE_PRESSES) = 0;
+      *reinterpret_cast<uint8_t *>(ADDR_DISPLAY_TIMER) = 60;
 
-      // Ensure ServiceGameMode takes the m_bRadioSetByScript entry branch even
-      // if the player warped directly from another vehicle on the same frame.
-      MusicU8(self, OFF_MUSIC_PLAYER_IN_CAR) = 0;
-      VehRadioStation(veh) = GAME_FM;
+      auto playOneShot =
+          reinterpret_cast<AudioPlayOneShotFn>(ADDR_AUDIO_PLAY_ONE_SHOT);
+      playOneShot(reinterpret_cast<void *>(ADDR_AUDIO_MANAGER), 0,
+                  SOUND_FRONTEND_RADIO_CHANGE, 1.0f);
+    }
+
+    // Direct streaming track when on foot:
+    // If g_currentStation != RADIO_OFF, keep streaming the chosen radio station
+    if (g_currentStation != RADIO_OFF) {
+      MusicU8(self, OFF_MUSIC_NEXT_TRACK) = g_currentStation;
+      if (MusicU8(self, OFF_MUSIC_PLAYING_TRACK) != g_currentStation) {
+        auto changeTrack = reinterpret_cast<MusicChangeRadioTrackFn>(
+            ADDR_MUSIC_CHANGE_RADIO_TRACK);
+        changeTrack(self, g_currentStation, 0);
+        MusicU8(self, OFF_MUSIC_PLAYING_TRACK) = g_currentStation;
+      }
     }
   }
 
   g_origServiceGameMode(self);
+
+  // If on foot and radio is active, prevent next track from decaying to ambient
+  if (!inCar && g_currentStation != RADIO_OFF) {
+    MusicU8(self, OFF_MUSIC_NEXT_TRACK) = g_currentStation;
+  }
 }
 
 void __fastcall Hook_ResetMusicAfterReload(void *self, uintptr_t) {
   g_lastPlayerVeh = nullptr;
+  g_currentStation = RADIO_OFF;
+  g_pendingScrollSteps = 0;
   *reinterpret_cast<const wchar_t **>(ADDR_CURRENT_STATION_PTR) = nullptr;
   g_origResetMusicAfterReload(self);
 }
@@ -760,6 +870,7 @@ void InstallDeferredHooks() {
   g_deferredInstalled = true;
 
   ResolveMP3AvailableFn();
+  InstallWindowHook();
 
   bool ok = true;
   ok &=
