@@ -131,7 +131,7 @@ end
 Streaming.UnloadSpecialCharacter(1)
 
 // Stage 1: Collect Contraband in Saint Mark's
-StashPickup = Pickup.CreateFloatingPackage(1288.91, -315.95, 40.0)
+StashPickup = Pickup.Create(#BRIEFCASE, PickupType.Once, 1288.91, -315.95, 40.0)
 StashBlip = Blip.AddForPickup(StashPickup)
 Text.PrintHelp('SMUG5')
 
