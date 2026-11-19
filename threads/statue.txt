@@ -152,7 +152,7 @@ Char.SetProofs(Marie, False, True, True, False, False)
 
 MarieBlip = Blip.AddForChar(Marie)
 Text.PrintHelp('STAT5')
-
+wait 0
 // Stage 1: Urgency Timer to reach Trenton supply yard
 Hud.DisplayTimer(TimerLimit)
 
