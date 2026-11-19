@@ -25,7 +25,6 @@ constexpr uintptr_t ADDR_NUM_RETUNE_PRESSES = 0x650B80;
 constexpr uintptr_t ADDR_RETUNE_COUNTER = 0x650B84;
 constexpr uintptr_t ADDR_CURRENT_STATION_PTR = 0x650B9C;
 constexpr uintptr_t ADDR_DISPLAY_TIMER = 0x650BA1;
-constexpr uintptr_t ADDR_WINDOW_HANDLE = 0x726768;
 
 // Functions
 constexpr uintptr_t ADDR_FIND_PLAYER_VEHICLE = 0x4A10C0;
@@ -456,11 +455,27 @@ LRESULT CALLBACK SubclassWndProc(HWND hwnd, UINT uMsg, WPARAM wParam,
   return CallWindowProcA(g_origWndProc, hwnd, uMsg, wParam, lParam);
 }
 
+HWND GetGameHwnd() {
+  HWND hwnd = nullptr;
+  EnumWindows(
+      [](HWND top, LPARAM lp) -> BOOL {
+        DWORD pid = 0;
+        GetWindowThreadProcessId(top, &pid);
+        if (pid == GetCurrentProcessId() && IsWindowVisible(top)) {
+          *reinterpret_cast<HWND *>(lp) = top;
+          return FALSE;
+        }
+        return TRUE;
+      },
+      reinterpret_cast<LPARAM>(&hwnd));
+  return hwnd;
+}
+
 void InstallWindowHook() {
   if (g_origWndProc) {
     return;
   }
-  HWND hwnd = *reinterpret_cast<HWND *>(ADDR_WINDOW_HANDLE);
+  HWND hwnd = GetGameHwnd();
   if (hwnd) {
     g_gameHwnd = hwnd;
     g_origWndProc = reinterpret_cast<WNDPROC>(SetWindowLongPtrA(
@@ -766,6 +781,8 @@ void __fastcall Hook_DisplayRadioStationName(void *self, uintptr_t) {
 }
 
 void __fastcall Hook_ServiceGameMode(void *self, uintptr_t) {
+  InstallWindowHook();
+
   auto findPlayerVeh =
       reinterpret_cast<FindPlayerVehicleFn>(ADDR_FIND_PLAYER_VEHICLE);
   void *veh = findPlayerVeh();
@@ -802,41 +819,62 @@ void __fastcall Hook_ServiceGameMode(void *self, uintptr_t) {
     }
 
     if (g_pendingScrollSteps != 0) {
-      *reinterpret_cast<int32_t *>(ADDR_NUM_RETUNE_PRESSES) +=
-          g_pendingScrollSteps;
-      *reinterpret_cast<int32_t *>(ADDR_RETUNE_COUNTER) = 30;
-      auto playOneShot =
-          reinterpret_cast<AudioPlayOneShotFn>(ADDR_AUDIO_PLAY_ONE_SHOT);
-      playOneShot(reinterpret_cast<void *>(ADDR_AUDIO_MANAGER), 0,
-                  SOUND_FRONTEND_RADIO_CHANGE, 1.0f);
+      const bool mp3Avail = IsMP3ChannelAvailable();
+      const int32_t stationCount = mp3Avail ? 12 : 11;
+
+      // In GTA III, ADDR_NUM_RETUNE_PRESSES must be positive.
+      // Scrolling down (-1) is equivalent to advancing (stationCount - 1)
+      // stations forward.
+      int32_t forwardSteps = g_pendingScrollSteps;
+      while (forwardSteps < 0) {
+        forwardSteps += stationCount;
+      }
+      forwardSteps %= stationCount;
+
+      if (forwardSteps != 0) {
+        *reinterpret_cast<int32_t *>(ADDR_NUM_RETUNE_PRESSES) += forwardSteps;
+        *reinterpret_cast<int32_t *>(ADDR_RETUNE_COUNTER) = 30;
+        auto playOneShot =
+            reinterpret_cast<AudioPlayOneShotFn>(ADDR_AUDIO_PLAY_ONE_SHOT);
+        playOneShot(reinterpret_cast<void *>(ADDR_AUDIO_MANAGER), 0,
+                    SOUND_FRONTEND_RADIO_CHANGE, 1.0f);
+      }
       g_pendingScrollSteps = 0;
     }
   } else {
     // Player is on foot!
     g_lastPlayerVeh = nullptr;
-    InstallWindowHook();
 
-    // Query both the user's bound radio button/key from the Controls screen
-    // and mouse wheel scroll steps
+    // Discard any mouse wheel steps on foot so weapon cycling is never hijacked
+    g_pendingScrollSteps = 0;
+
+    // Check keyboard binds (R and Insert) as well as controller pad
+    static bool s_wasRKeyDown = false;
+    const bool rKeyDown = (GetAsyncKeyState('R') & 0x8000) != 0 ||
+                          (GetAsyncKeyState(VK_INSERT) & 0x8000) != 0;
+    const bool rJustDown = rKeyDown && !s_wasRKeyDown;
+    s_wasRKeyDown = rKeyDown;
+
     auto padGet = reinterpret_cast<PadGetFn>(ADDR_PAD_GET_PAD);
     auto padChangeStation =
         reinterpret_cast<PadChangeStationFn>(ADDR_PAD_CHANGE_STATION);
     void *pad = padGet(0);
     const bool padRetune = pad && padChangeStation(pad);
 
-    // Mouse scroll wheel on foot is reserved for weapon switching in GTA III.
-    // Discard any mouse wheel steps on foot so weapon cycling is never hijacked.
-    g_pendingScrollSteps = 0;
-    int32_t deltaPresses = padRetune ? 1 : 0;
+    const bool paused =
+        (*reinterpret_cast<const uint8_t *>(ADDR_USER_PAUSE) != 0) ||
+        (*reinterpret_cast<const uint8_t *>(ADDR_CODE_PAUSE) != 0);
 
-    if (deltaPresses != 0) {
+    const bool retuneTriggered = !paused && (rJustDown || padRetune);
+
+    if (retuneTriggered) {
       const bool mp3Avail = IsMP3ChannelAvailable();
-      g_currentStation =
-          AdvanceRadioStation(g_currentStation, deltaPresses, mp3Avail);
+      g_currentStation = AdvanceRadioStation(g_currentStation, 1, mp3Avail);
 
       *reinterpret_cast<int32_t *>(ADDR_RETUNE_COUNTER) = 30;
       *reinterpret_cast<int32_t *>(ADDR_NUM_RETUNE_PRESSES) = 0;
       *reinterpret_cast<uint8_t *>(ADDR_DISPLAY_TIMER) = 60;
+      *reinterpret_cast<const wchar_t **>(ADDR_CURRENT_STATION_PTR) = nullptr;
 
       auto playOneShot =
           reinterpret_cast<AudioPlayOneShotFn>(ADDR_AUDIO_PLAY_ONE_SHOT);
@@ -853,6 +891,14 @@ void __fastcall Hook_ServiceGameMode(void *self, uintptr_t) {
             ADDR_MUSIC_CHANGE_RADIO_TRACK);
         changeTrack(self, g_currentStation, 0);
         MusicU8(self, OFF_MUSIC_PLAYING_TRACK) = g_currentStation;
+      }
+    } else {
+      if (MusicU8(self, OFF_MUSIC_PLAYING_TRACK) !=
+          STREAMED_SOUND_CITY_AMBIENT) {
+        auto changeTrack = reinterpret_cast<MusicChangeRadioTrackFn>(
+            ADDR_MUSIC_CHANGE_RADIO_TRACK);
+        changeTrack(self, STREAMED_SOUND_CITY_AMBIENT, 0);
+        MusicU8(self, OFF_MUSIC_PLAYING_TRACK) = STREAMED_SOUND_CITY_AMBIENT;
       }
     }
   }
