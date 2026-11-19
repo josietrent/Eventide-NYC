@@ -302,7 +302,7 @@ while MissionStage == 2
     end
 end
 
-// Stage 4: Deliver Marie to Barn hideout
+// Stage 4: Deliver Marie to hideout
 while MissionStage == 3
     wait 250
     if or
@@ -341,7 +341,7 @@ wait 1000
 // Sudden awakening with eerie flicker & miasma audio
 play_audio_stream_1channel "audio/EC/miasma.wav", False, 1.0
 Weather.ForceNow(WeatherType.Foggy)
-Camera.SetFadingColor(40, 0, 70)
+Camera.SetFadingColor(30, 0, 82)
 Camera.DoFade(300, Fade.Out)
 wait 300
 Camera.DoFade(600, Fade.In)
@@ -354,7 +354,8 @@ wait 4000
 
 Text.Print('STATC', 4500, 1)
 wait 4500
-
+Camera.DoFade(1000, Fade.Out)
+wait 1000
 Camera.RestoreJumpcut()
 Hud.SwitchWidescreen(False)
 Camera.SetFadingColor(40, 0, 70)
