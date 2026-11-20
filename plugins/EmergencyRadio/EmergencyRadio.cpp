@@ -31,6 +31,7 @@ constexpr uintptr_t ADDR_FIND_PLAYER_VEHICLE = 0x4A10C0;
 constexpr uintptr_t ADDR_FIND_PLAYER_PED = 0x4A1150;
 constexpr uintptr_t ADDR_TEXT_GET = 0x52C5A0;
 constexpr uintptr_t ADDR_SAMPLE_IS_MP3_AVAILABLE = 0x566490;
+constexpr uintptr_t ADDR_SAMPLE_SET_STREAMED_VOL = 0x5681D0;
 
 constexpr uintptr_t ADDR_FONT_PRINT_STRING = 0x500F50;
 constexpr uintptr_t ADDR_FONT_DRAW_FONTS = 0x501B50;
@@ -120,6 +121,10 @@ using MusicUsesPoliceRadioFn = bool(__thiscall *)(void *self, void *veh);
 using MusicSetRadioByScriptFn = void(__thiscall *)(void *self, uint8_t station,
                                                    int32_t pos);
 using SampleIsMP3AvailFn = bool(__thiscall *)(void *self);
+using SampleSetStreamedVolFn = void(__thiscall *)(void *self, uint8_t vol,
+                                                  uint8_t pan,
+                                                  uint8_t isAmbience,
+                                                  int32_t channel);
 
 using FindPlayerVehicleFn = void *(__cdecl *)();
 using FindPlayerPedFn = void *(__cdecl *)();
@@ -162,6 +167,8 @@ MusicVoidFn g_origDisplayRadioStationName = nullptr;
 void *g_lastPlayerVeh = nullptr;
 uint8_t g_currentStation = RADIO_OFF;
 bool g_emergencyStationApplied = false;
+int32_t g_onFootRadioFade = 100;
+DWORD g_lastFadeTick = 0;
 int32_t g_pendingScrollSteps = 0;
 WNDPROC g_origWndProc = nullptr;
 HWND g_gameHwnd = nullptr;
@@ -757,10 +764,49 @@ void __fastcall Hook_DisplayRadioStationName(void *self, uintptr_t) {
   drawFonts();
 }
 
+bool IsCutsceneActive() {
+  const bool wideScreen = *reinterpret_cast<const uint8_t *>(
+                              ADDR_THE_CAMERA + OFF_CAM_WIDESCREEN) != 0;
+  if (wideScreen) {
+    return true;
+  }
+  auto padGet = reinterpret_cast<PadGetFn>(ADDR_PAD_GET_PAD);
+  void *pad = padGet(0);
+  return pad && (*reinterpret_cast<const uint8_t *>(
+                     reinterpret_cast<uintptr_t>(pad) +
+                     OFF_PAD_DISABLE_CONTROLS) != 0);
+}
+
 void __fastcall Hook_ServiceAmbience(void *self, uintptr_t) {
   if (g_currentStation == RADIO_OFF) {
+    g_onFootRadioFade = 100;
+    g_lastFadeTick = 0;
     g_origServiceAmbience(self);
     return;
+  }
+
+  const DWORD now = GetTickCount();
+  uint32_t dt = g_lastFadeTick != 0 ? (now - g_lastFadeTick) : 16;
+  if (dt > 100) {
+    dt = 100;
+  }
+  g_lastFadeTick = now;
+
+  const int32_t targetVol = IsCutsceneActive() ? 0 : 100;
+  int32_t step = static_cast<int32_t>((dt * 100) / 600);
+  if (step < 1) {
+    step = 1;
+  }
+  if (g_onFootRadioFade > targetVol) {
+    g_onFootRadioFade -= step;
+    if (g_onFootRadioFade < targetVol) {
+      g_onFootRadioFade = targetVol;
+    }
+  } else if (g_onFootRadioFade < targetVol) {
+    g_onFootRadioFade += step;
+    if (g_onFootRadioFade > targetVol) {
+      g_onFootRadioFade = targetVol;
+    }
   }
 
   MusicU8(self, OFF_MUSIC_NEXT_TRACK) = g_currentStation;
@@ -769,6 +815,14 @@ void __fastcall Hook_ServiceAmbience(void *self, uintptr_t) {
   if (serviceTrack(self)) {
     serviceVolume(self);
   }
+
+  const int32_t retuneCounter = *reinterpret_cast<const int32_t *>(ADDR_RETUNE_COUNTER);
+  const uint8_t appliedVol = static_cast<uint8_t>(
+      retuneCounter > 0 ? (g_onFootRadioFade >> 2) : g_onFootRadioFade);
+  auto setStreamedVol =
+      reinterpret_cast<SampleSetStreamedVolFn>(ADDR_SAMPLE_SET_STREAMED_VOL);
+  setStreamedVol(reinterpret_cast<void *>(ADDR_SAMPLE_MANAGER), appliedVol, 63,
+                 0, 0);
 }
 
 void __fastcall Hook_ServiceGameMode(void *self, uintptr_t) {
@@ -780,6 +834,8 @@ void __fastcall Hook_ServiceGameMode(void *self, uintptr_t) {
   const bool inCar = Hook_PlayerInCar(self, 0);
 
   if (inCar && veh) {
+    g_onFootRadioFade = 100;
+    g_lastFadeTick = 0;
     if (veh != g_lastPlayerVeh) {
       g_lastPlayerVeh = veh;
 
@@ -891,6 +947,8 @@ void __fastcall Hook_ResetMusicAfterReload(void *self, uintptr_t) {
   g_lastPlayerVeh = nullptr;
   g_currentStation = RADIO_OFF;
   g_emergencyStationApplied = false;
+  g_onFootRadioFade = 100;
+  g_lastFadeTick = 0;
   g_pendingScrollSteps = 0;
   *reinterpret_cast<const wchar_t **>(ADDR_CURRENT_STATION_PTR) = nullptr;
   g_origResetMusicAfterReload(self);
