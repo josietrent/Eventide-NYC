@@ -21,7 +21,7 @@ Char Thug3 = 0
 Car ThugVan = 0
 Blip KenjiBlip = 0
 Blip MarieBlip = 0
-Blip BarnBlip = 0
+Blip HomeBlip = 0
 int MarieHealth = 100
 int TimerLimit = 180000 // 3:00 urgency timer
 int MissionStage = 0 // 0=race, 1=defend, 2=load, 3=deliver
@@ -209,7 +209,7 @@ Text.PrintHelp('STAT6')
 
 // Show Marie's Health Bar
 Hud.DisplayCounterWithString($MarieHealthBar, CounterDisplay.Bar, 'MARHEAL')
-
+wait 5000
 while MissionStage == 1
     wait 250
     if or
@@ -284,14 +284,15 @@ while MissionStage == 2
             wait 800
             Text.Print('STAT9', 3000, 1)
             Char.SetObjEnterCarAsPassenger(Marie, MarieCar)
-            wait 1000
+            wait 5000
             Camera.DoFade(800, Fade.In)
             wait 800
             Player.SetControl($player, True)
             Blip.Remove(MarieBlip)
 
-            // Barn hideout dropoff
-            BarnBlip = Blip.AddSpriteForCoord(1453.64, -173.11, 55.77, RadarSprite.Savehouse)
+            // Hideout dropoff
+            HomeBlip = Blip.AddForCoord(1420.69, -183.11, 50.33)
+            Blip.ChangeColor(HomeBlip, Yellow)
             Text.PrintHelp('STATA')
             MissionStage = 3
             break
@@ -317,15 +318,17 @@ while MissionStage == 3
         jump @Statue_Fail
     end
 
-    if Player.LocateAnyMeans3D($player, 1453.64, -173.11, 55.77, 4.0, 4.0, 3.0, True)
+    if Player.LocateAnyMeans3D($player, 1420.69, -183.11, 50.33, 4.0, 4.0, 3.0, True)
     then
-        Blip.Remove(BarnBlip)
+        Player.SetControl($player, False)
+        Blip.Remove(HomeBlip)
+        Camera.DoFade(1500, Fade.Out)
+        wait 1500
         jump @Statue_OutroCutscene
     end
 end
 
 :Statue_OutroCutscene
-Player.SetControl($player, False)
 Hud.SwitchWidescreen(True)
 
 // Unload Marie from car
@@ -337,7 +340,8 @@ Player.SetHeading($player, 180.0)
 Camera.SetFixedPosition(1456.50, -188.00, 56.00, 0.0, 0.0, 0.0)
 Camera.PointAtChar(Marie, CameraMode.FollowPed, SwitchType.JumpCut)
 wait 1000
-
+Camera.DoFade(1500, Fade.In)
+wait 1500
 // Sudden awakening with eerie flicker & miasma audio
 play_audio_stream_1channel "audio/EC/miasma.wav", False, 1.0
 Weather.ForceNow(WeatherType.Foggy)
@@ -406,9 +410,9 @@ if not MarieBlip == 0
 then
     Blip.Remove(MarieBlip)
 end
-if not BarnBlip == 0
+if not HomeBlip == 0
 then
-    Blip.Remove(BarnBlip)
+    Blip.Remove(HomeBlip)
 end
 Text.PrintBigString("Mission Failed!", 3000, TextStyle.Middle)
 wait 3000
