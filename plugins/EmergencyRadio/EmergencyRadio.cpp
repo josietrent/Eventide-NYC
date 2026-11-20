@@ -161,6 +161,7 @@ MusicVoidFn g_origDisplayRadioStationName = nullptr;
 
 void *g_lastPlayerVeh = nullptr;
 uint8_t g_currentStation = RADIO_OFF;
+bool g_emergencyStationApplied = false;
 int32_t g_pendingScrollSteps = 0;
 WNDPROC g_origWndProc = nullptr;
 HWND g_gameHwnd = nullptr;
@@ -786,7 +787,9 @@ void __fastcall Hook_ServiceGameMode(void *self, uintptr_t) {
       const bool radioSetByScript =
           MusicU8(self, OFF_MUSIC_RADIO_SET_BY_SCRIPT) != 0;
 
-      if ((model == MI_POLICE || model == MI_AMBULAN) && !radioSetByScript) {
+      if (!g_emergencyStationApplied &&
+          (model == MI_POLICE || model == MI_AMBULAN) && !radioSetByScript) {
+        g_emergencyStationApplied = true;
         auto setRadioByScript = reinterpret_cast<MusicSetRadioByScriptFn>(
             ADDR_MUSIC_SET_RADIO_BY_SCRIPT);
         setRadioByScript(self, GAME_FM, EMERGENCY_GAME_FM_POS_MS);
@@ -887,6 +890,7 @@ void __fastcall Hook_ServiceGameMode(void *self, uintptr_t) {
 void __fastcall Hook_ResetMusicAfterReload(void *self, uintptr_t) {
   g_lastPlayerVeh = nullptr;
   g_currentStation = RADIO_OFF;
+  g_emergencyStationApplied = false;
   g_pendingScrollSteps = 0;
   *reinterpret_cast<const wchar_t **>(ADDR_CURRENT_STATION_PTR) = nullptr;
   g_origResetMusicAfterReload(self);
