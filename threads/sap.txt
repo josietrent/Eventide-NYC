@@ -21,10 +21,6 @@ Pickup Sap3 = 0
 Blip SapBlip1 = 0
 Blip SapBlip2 = 0
 Blip SapBlip3 = 0
-Blip ReturnBlip = 0
-int Sap1Got = 0
-int Sap2Got = 0
-int Sap3Got = 0
 int SapCount = 0
 int TimerLimit = 240000 // 4:00 pre-dawn countdown
 
@@ -210,14 +206,14 @@ while SapCount < 3
         jump @Sap_Fail
     end
 
-    if Sap1Got == 0
+    if not SapBlip1 == 0
     then
         if Pickup.HasBeenCollected(Sap1)
         then
-            Sap1Got = 1
             SapCount += 1
             Blip.Remove(SapBlip1)
             SapBlip1 = 0
+            Sap1 = 0
             if SapCount == 1
             then
                 Text.PrintHelp('SAP6')
@@ -229,14 +225,14 @@ while SapCount < 3
         end
     end
 
-    if Sap2Got == 0
+    if not SapBlip2 == 0
     then
         if Pickup.HasBeenCollected(Sap2)
         then
-            Sap2Got = 1
             SapCount += 1
             Blip.Remove(SapBlip2)
             SapBlip2 = 0
+            Sap2 = 0
             if SapCount == 1
             then
                 Text.PrintHelp('SAP6')
@@ -248,14 +244,14 @@ while SapCount < 3
         end
     end
 
-    if Sap3Got == 0
+    if not SapBlip3 == 0
     then
         if Pickup.HasBeenCollected(Sap3)
         then
-            Sap3Got = 1
             SapCount += 1
             Blip.Remove(SapBlip3)
             SapBlip3 = 0
+            Sap3 = 0
             if SapCount == 1
             then
                 Text.PrintHelp('SAP6')
@@ -288,8 +284,9 @@ Kenji = Char.Create(PedType.Special, #SPECIAL01, 1004.42, -49.06, 7.44)
 Char.SetHeading(Kenji, 90.0)
 Char.SetObjWaitOnFoot(Kenji)
 
-ReturnBlip = Blip.AddForCoord(1004.42, -49.06, 7.44)
-Blip.ChangeColor(ReturnBlip, Yellow)
+// Reuse SapBlip1 as the return blip
+SapBlip1 = Blip.AddForCoord(1004.42, -49.06, 7.44)
+Blip.ChangeColor(SapBlip1, BlipColor.Yellow)
 Text.PrintHelp('SAP8')
 
 while true
@@ -303,8 +300,8 @@ while true
 
     if Player.LocateAnyMeans3D($player, 1004.42, -49.06, 7.44, 4.0, 4.0, 3.0, True)
     then
-        Blip.Remove(ReturnBlip)
-        ReturnBlip = 0
+        Blip.Remove(SapBlip1)
+        SapBlip1 = 0
         break
     end
 end
@@ -419,11 +416,6 @@ if not SapBlip3 == 0
 then
     Blip.Remove(SapBlip3)
     SapBlip3 = 0
-end
-if not ReturnBlip == 0
-then
-    Blip.Remove(ReturnBlip)
-    ReturnBlip = 0
 end
 if not Sap1 == 0
 then
