@@ -36,6 +36,8 @@ var
     $OnProtectionMission: int
     $ProtectionDone: int
     $DeadbeatHealthBar: int
+    $OnSapMission: int
+    $SapMissionDone: int
 end
 
 //=============
@@ -572,9 +574,73 @@ end
 if
     $StatueMissionDone == 1
 then
+    $KenjiBlip = Blip.AddSpriteForContactPoint(1004.42, -49.06, 7.44, RadarSprite.Kenji)
+    start_new_script @Sap
     terminate_this_script
 else
     $OnStatueMission = 0
     $KenjiBlip = Blip.AddSpriteForContactPoint(1004.42, -49.06, 7.44, RadarSprite.Kenji)
     goto @Kenji_Loop
+end
+
+/// Trigger mission 7: "Digging for Sap..."
+:Sap
+script_name 'Sap'
+
+:Sap_Loop
+while $OnSapMission == 0
+    wait 250
+    if or
+        not Player.IsPlaying($player)
+        Camera.GetFadingStatus()
+    then
+        continue
+    end
+
+    if and
+        Player.CanStartMission($player)
+        $onmission == 0
+        Player.LocateOnFoot3D($player, 1004.42, -49.06, 7.44, 2.0, 2.0, 2.0, False)
+    then
+        0@, 1@ = Clock.GetTimeOfDay()
+        if or
+            0@ >= 22
+            0@ < 4
+        then
+            Blip.Remove($KenjiBlip)
+            Player.SetControl($player, False)
+            Text.PrintBigString("Digging for Sap...", 5000, TextStyle.BottomRight)
+            Camera.SetFadingColor(40, 0, 70)
+            Camera.DoFade(1500, Fade.Out)
+            wait 1500
+            $OnSapMission = 1
+            stream_custom_script "sap.cm"
+            break
+        else
+            Text.Print('SAPTIME', 4000, 0)
+            wait 2000
+        end
+    else
+        if and
+            $onmission == 1
+            Player.LocateOnFoot3D($player, 1004.42, -49.06, 7.44, 3.0, 3.0, 3.0, False)
+        then
+            Text.PrintHelp('FUCKOFF')
+            wait 5000
+        end
+    end
+end
+
+while $OnSapMission == 1
+    wait 250
+end
+
+if
+    $SapMissionDone == 1
+then
+    terminate_this_script
+else
+    $OnSapMission = 0
+    $KenjiBlip = Blip.AddSpriteForContactPoint(1004.42, -49.06, 7.44, RadarSprite.Kenji)
+    goto @Sap_Loop
 end
