@@ -229,7 +229,9 @@ while true
         $onmission == false
         $Intro_Passed == true
     then
-        if Player.LocateAnyMeans3D($player, 1025.755, -471.541, 14.927, 2.0, 2.0, 2.0, False)
+        if and
+            Player.CanStartMission($player)
+            Player.LocateOnFoot3D($player, 1025.755, -471.541, 14.927, 2.0, 2.0, 2.0, False)
         then
             Blip.Remove($MissionTriggerBlip)
             Sphere.Remove($MissionTriggerSphere)
@@ -312,7 +314,7 @@ while $OnGunMission == 0
         Player.CanStartMission($player)
         $onmission == 0
         not Player.IsWantedLevelGreater($player, 0)
-        Player.LocateAnyMeans3D($player, 1120.63, 27.91, 2.12, 3.0, 3.0, 2.0, False)
+        Player.LocateOnFoot3D($player, 1120.63, 27.91, 2.12, 3.0, 3.0, 2.0, False)
     then
         Blip.Remove($MissionTriggerBlip)
         Sphere.Remove($MissionTriggerSphere)
@@ -365,7 +367,7 @@ while $OnAlleyMission == 0
     if and
         Player.CanStartMission($player)
         $onmission == 0
-        Player.LocateAnyMeans3D($player, 1329.72, -465.71, 49.76, 1.5, 1.5, 2.0, False)
+        Player.LocateOnFoot3D($player, 1329.72, -465.71, 49.76, 1.5, 1.5, 2.0, False)
     then
         Blip.Remove($LuigiBlip)
         Sphere.Remove($LuigiSphere)
@@ -421,7 +423,7 @@ while $OnProtectionMission == 0
     if and
         Player.CanStartMission($player)
         $onmission == 0
-        Player.LocateAnyMeans3D($player, 1214.89, -327.47, 26.07, 1.5, 1.5, 2.0, False)
+        Player.LocateOnFoot3D($player, 1214.89, -327.47, 26.07, 1.5, 1.5, 2.0, False)
     then
         0@, 1@ = Clock.GetTimeOfDay()
         if and
@@ -485,7 +487,7 @@ while $OnSmuggleMission == 0
     if and
         Player.CanStartMission($player)
         $onmission == 0
-        Player.LocateAnyMeans3D($player, 1214.89, -327.47, 26.07, 1.5, 1.5, 2.0, False)
+        Player.LocateOnFoot3D($player, 1214.89, -327.47, 26.07, 1.5, 1.5, 2.0, False)
     then
         Blip.Remove($LuigiBlip)
         Player.SetControl($player, False)
@@ -541,7 +543,7 @@ while $OnStatueMission == 0
     if and
         Player.CanStartMission($player)
         $onmission == 0
-        Player.LocateAnyMeans3D($player, 1004.42, -49.06, 7.44, 2.0, 2.0, 2.0, False)
+        Player.LocateOnFoot3D($player, 1004.42, -49.06, 7.44, 2.0, 2.0, 2.0, False)
     then
         Blip.Remove($KenjiBlip)
         Player.SetControl($player, False)
