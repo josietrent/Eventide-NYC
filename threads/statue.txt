@@ -63,11 +63,15 @@ Player.SetControl($player, False)
 // Create Kenji at Harwood contact point
 World.ClearArea(1004.42, -49.06, 7.44, 6.0, True)
 Kenji = Char.Create(PedType.Special, #SPECIAL01, 1004.42, -49.06, 7.44)
-Char.SetHeading(Kenji, 90.0)
+Char.SetObjNoObj(Kenji)
+Char.SetHeading(Kenji, 270.0)
 
 // Position Toni facing Kenji
 Player.SetCoordinates($player, 1007.50, -49.06, 7.44)
-Player.SetHeading($player, 270.0)
+Player.SetHeading($player, 90.0)
+wait 0
+Char.SetHeading(Kenji, 270.0)
+Char.SetObjWaitOnFoot(Kenji)
 
 Camera.SetFixedPosition(1009.00, -47.00, 8.50, 0.0, 0.0, 0.0)
 Camera.PointAtChar(Kenji, CameraMode.FollowPed, SwitchType.JumpCut)
@@ -331,11 +335,15 @@ end
 :Statue_OutroCutscene
 Hud.SwitchWidescreen(True)
 
-// Unload Marie from car
+// Unload Marie from car facing Toni
 Char.WarpFromCarToCoord(Marie, 1454.55, -187.22, 54.44)
-Char.SetHeading(Marie, 0.0)
+Char.SetObjNoObj(Marie)
+Char.SetHeading(Marie, 180.0)
 Player.WarpFromCarToCoord($player, 1454.55, -189.00, 54.44)
-Player.SetHeading($player, 180.0)
+Player.SetHeading($player, 0.0)
+wait 0
+Char.SetHeading(Marie, 180.0)
+Char.SetObjWaitOnFoot(Marie)
 
 Camera.SetFixedPosition(1456.50, -188.00, 56.00, 0.0, 0.0, 0.0)
 Camera.PointAtChar(Marie, CameraMode.FollowPed, SwitchType.JumpCut)

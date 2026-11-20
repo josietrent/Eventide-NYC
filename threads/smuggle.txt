@@ -48,7 +48,7 @@ Player.SetControl($player, False)
 // Create Louie at Marco's Bistro
 World.ClearArea(1219.74, -313.32, 29.95, 6.0, True)
 Luigi = Char.Create(PedType.Special, #SPECIAL01, 1219.74, -313.32, 29.95)
-Char.SetObjWaitOnFoot(Luigi)
+Char.SetObjNoObj(Luigi)
 Char.SetHeading(Luigi, 180.0)
 
 // Position player
@@ -56,6 +56,7 @@ Player.SetCoordinates($player, 1219.74, -316.50, 29.95)
 Player.SetHeading($player, 0.0)
 wait 0
 Char.SetHeading(Luigi, 180.0)
+Char.SetObjWaitOnFoot(Luigi)
 
 Camera.SetFixedPosition(1221.50, -318.00, 31.00, 0.0, 0.0, 0.0)
 Camera.PointAtChar(Luigi, CameraMode.FollowPed, SwitchType.JumpCut)
