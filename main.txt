@@ -65,6 +65,7 @@ wait 0
 // Global state
 declare_mission_flag $onmission
 $onmission = false
+Audio.SetMusicDoesFade(True)
 //
 World.SetVisibilityOfClosestObjectOfType(1027.25, -933.6875, 15.0, 50.0, #INDHELIX_BARRIER, False)
 World.SwapNearestBuildingModel(1027.25, -933.6875, 15.0, 50.0, #INDHELIX_BARRIER, #LOD_LAND014)
