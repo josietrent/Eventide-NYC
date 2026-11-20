@@ -161,3 +161,17 @@ STAT9	You haul her dead weight into the passenger seat...
 STATA	Take Marie back to the ~y~home~w~.
 STATB	...What happened? Why are we in the barn?
 STATC	...Everything went cold and then black. Toni, what's happening to me?
+MIS7NAM	Digging for Sap...
+SAPTIME	Come back between 22:00 and 04:00.
+SAP1	Marie's episodes are getting worse, and the barrier's cutting us off.
+SAP2	There's an old inscription on the other side: The blood begins where the Sap ends.
+SAP3	We need three raw Sap caches buried along Portland's outskirts before dawn.
+SAP4	Scavengers are sniffing around the coast. Grab all three and get back here fast.
+SAP5	Collect the three ~g~Sap caches~w~ along Portland's coast before dawn!
+SAP6	Sap cache 1 of 3 recovered. Keep moving!
+SAP7	Sap cache 2 of 3 recovered. One left!
+SAP8	Something in the fog just shifted... Return to ~y~Kenji~w~ in Harwood!
+SAP9	Dawn broke before you finished. You ran out of time!
+SAPA	You got all three? Jesus, I felt that flare-up from here.
+SAPB	This might be enough to destabilize the Callahan barrier... almost.
+SAPC	Lay low until nightfall. Next time, we hit the bridge directly.
