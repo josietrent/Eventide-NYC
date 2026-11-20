@@ -597,6 +597,24 @@ if (shouldRun(8, "statue")) {
   }
 }
 
+// Step 8d: Sap Mission
+if (shouldRun(8, 'sap')) {
+  const sapInput = join(cwd, 'threads', 'sap.txt');
+  const sapOutput = join(cwd, 'threads', 'sap.cm');
+  if (await allExist([sapInput])) {
+    say.heading('Step 8d (sap): Compiling sap mission...');
+    await compileIfChanged(sapInput, sapOutput);
+
+    const cleoStagingDir = join(modStagingDir, 'CLEO');
+    await ensureDir(cleoStagingDir);
+    await Deno.copyFile(
+      sapOutput,
+      join(cleoStagingDir, basename(sapOutput)),
+    );
+    say.done('  Packaged modloader/' + modName + '/CLEO/' + basename(sapOutput));
+  }
+}
+
 // Step 9: World Thread
 if (shouldRun(9, "world")) {
   say.heading("Step 9 (world): Compiling world thread...");
