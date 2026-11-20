@@ -292,7 +292,7 @@ while MissionStage == 2
 
             // Hideout dropoff
             HomeBlip = Blip.AddForCoord(1420.69, -183.11, 50.33)
-            Blip.ChangeColor(HomeBlip, Yellow)
+            Blip.ChangeColor(HomeBlip, BlipColor.Yellow)
             Text.PrintHelp('STATA')
             MissionStage = 3
             break
