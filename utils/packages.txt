@@ -25,6 +25,7 @@ Game.CreateCollectable(931.62, -718.41, 14.67)
 Game.CreateCollectable(272.77, -787.53, 28.08)
 Game.CreateCollectable(222.70, -543.62, 25.98)
 Game.CreateCollectable(1478.33, -198.51, 67.18)
+Game.CreateCollectable(1253.18, -316.42, 34.39)
 // Staunton Island
 Game.CreateCollectable(103.20, -484.36, 15.92)
 Game.CreateCollectable(285.76, -258.10, 17.70)
