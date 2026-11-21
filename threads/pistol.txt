@@ -65,17 +65,6 @@ Destination = Blip.AddForCoord(1147.61, -95.21, 7.02)
 Blip.ChangeColor(Destination, BlipColor.Yellow)
 GunSphere = Sphere.Create(1147.61, -95.21, 7.02, 1.0)
 
-:NearGasStation
-while not Player.LocateOnFoot3D($player, 1147.61, -95.21, 7.02, 15.0, 15.0, 15.0, False)
-    wait 0
-    if
-        Player.LocateAnyMeans3D($player, 1147.61, -95.21, 7.02, 15.0, 15.0, 15.0, False)
-    then
-        Text.Print('MARKERW', 3000, 0) // Walk into the blue marker to continue.
-        break
-    end
-end
-
 :AtGasStation
 while not Player.LocateOnFoot3D($player, 1147.61, -95.21, 7.02, 1.0, 1.0, 0.75, False)
     wait 0
