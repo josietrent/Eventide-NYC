@@ -320,7 +320,7 @@ Blip.ChangeColor(TargetBlip, BlipColor.Green)
 // Set initial driving settings and kick off Route State 1
 Car.SetChangeLane(DeadbeatCar, True)
 Car.SetDrivingStyle(DeadbeatCar, DrivingMode.PloughThrough)
-Car.SetCruiseSpeed(DeadbeatCar, 95)
+Car.SetCruiseSpeed(DeadbeatCar, 95.0)
 Car.GotoCoordinates(DeadbeatCar, 1193.61, -491.55, 24.41)
 wait 500
 Hud.SwitchWidescreen(False)
