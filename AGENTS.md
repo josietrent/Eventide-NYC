@@ -10,3 +10,5 @@ Build, install, and run tasks for this repo. Paths for Sanny Builder and the gam
 ## Rules
 
 - **Always use the vanilla `gta3.exe`:** Never create, rename, hard-link, or launch alternate executables (such as `gta3-game.exe`) in the game directory or scripts. Direct3D wrappers, ASI loaders, and ModLoader depend on the exact `gta3.exe` executable name.
+- **Persistent Spheres Only:** Never use `Player.LocateAnyMeans3D(..., True)` (or other `Locate*` opcodes) to spawn mission spheres, as they flicker whenever the loop has a non-zero `wait` or conditional checks. Always pass `False` for the sphere flag, spawn a persistent sphere with `Sphere.Create(...)`, and delete it with `Sphere.Remove(...)` on trigger, completion, and failure cleanup.
+- **Verify World Geometry Against IDE/IPL/COL Files:** Always verify world placement coordinates, ground `Z` elevations, cliff/water boundaries, and object footprints against GTA III's `data/maps/*.ide`, `*.ipl`, and `*.col` files (using `GTA3` from `.env`) rather than guessing.
