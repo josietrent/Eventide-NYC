@@ -21,4 +21,13 @@ end
 Camera.SetFadingColor(40, 0, 70)
 World.SetCarDensityMultiplier(0.25)
 World.SetPedDensityMultiplier(0.1)
-terminate_this_custom_script
+
+// Keep density multipliers enforced across missions, wasted/busted, and engine resets
+while true
+    wait 1000
+    if Player.IsPlaying($player)
+    then
+        World.SetCarDensityMultiplier(0.25)
+        World.SetPedDensityMultiplier(0.1)
+    end
+end
