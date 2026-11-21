@@ -20,7 +20,7 @@ $OnProtectionMission = 1
 $ProtectionDone = 0
 wait 100
 
-Streaming.RequestModel(#PEREN)
+Streaming.RequestModel(#KURUMA)
 Streaming.RequestModel(#B_MAN1)
 Streaming.LoadSpecialCharacter(1, 'LUIGI')
 wait 500
@@ -30,7 +30,7 @@ wait 500
 while true
     wait 0
     if and
-        Streaming.HasModelLoaded(#PEREN)
+        Streaming.HasModelLoaded(#KURUMA)
         Streaming.HasModelLoaded(#B_MAN1)
         Streaming.HasSpecialCharacterLoaded(1)
     then
@@ -161,7 +161,7 @@ World.ClearArea(1202.93, -426.60, 25.07, 6.0, True)
 World.ClearArea(1186.04, -464.43, 25.07, 6.0, True)
 Deadbeat = Char.Create(PedType.CivMale, #B_MAN1, 1202.93, -426.60, 25.07)
 Char.SetObjWaitOnFoot(Deadbeat)
-DeadbeatCar = Car.Create(#PEREN, 1186.04, -464.43, 25.07)
+DeadbeatCar = Car.Create(#KURUMA, 1186.04, -464.43, 25.07)
 Car.SetHeading(DeadbeatCar, 180.0)
 Camera.RestoreJumpcut()
 Hud.SwitchWidescreen(False)
@@ -194,7 +194,7 @@ then
     World.ClearArea(1186.04, -464.43, 25.07, 6.0, True)
     Deadbeat = Char.Create(PedType.CivMale, #B_MAN1, 1202.93, -426.60, 25.07)
     Char.SetObjWaitOnFoot(Deadbeat)
-    DeadbeatCar = Car.Create(#PEREN, 1186.04, -464.43, 25.07)
+    DeadbeatCar = Car.Create(#KURUMA, 1186.04, -464.43, 25.07)
     Car.SetHeading(DeadbeatCar, 180.0)
 end
 Camera.SetFadingColor(40, 0, 70)
@@ -239,9 +239,6 @@ Text.PrintString("Look, tell Louie I don't have his cash this week!", 4000)
 wait 4000
 
 // Spooked target runs to his car first, then enters once nearby
-Hud.SwitchWidescreen(False)
-Camera.RestoreJumpcut()
-Player.SetControl($player, True)
 Char.SetObjNoObj(Deadbeat)
 Char.SetObjGotoCoordOnFoot(Deadbeat, 1188.50, -464.43)
 Char.SetRunning(Deadbeat, True)
@@ -323,8 +320,13 @@ Blip.ChangeColor(TargetBlip, BlipColor.Green)
 // Set initial driving settings and kick off Route State 1
 Car.SetChangeLane(DeadbeatCar, True)
 Car.SetDrivingStyle(DeadbeatCar, DrivingMode.PloughThrough)
-Car.SetCruiseSpeed(DeadbeatCar, 60)
+Car.SetCruiseSpeed(DeadbeatCar, 95)
 Car.GotoCoordinates(DeadbeatCar, 1193.61, -491.55, 24.41)
+wait 500
+Hud.SwitchWidescreen(False)
+Camera.RestoreJumpcut()
+Player.SetControl($player, True)
+Text.PrintString("Stop him before he gets away!", 4000)
 RouteState = 1
 TIMERA = 0
 TIMERB = 0
@@ -790,6 +792,6 @@ terminate_this_custom_script
 Hud.ClearCounter($DeadbeatHealthBar)
 Blip.Remove(TargetBlip)
 Blip.Remove(LuigiBlip)
-Streaming.MarkModelAsNoLongerNeeded(#PEREN)
+Streaming.MarkModelAsNoLongerNeeded(#KURUMA)
 Streaming.MarkModelAsNoLongerNeeded(#B_MAN1)
 return
