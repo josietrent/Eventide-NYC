@@ -22,7 +22,6 @@ Blip SapBlip1 = 0
 Blip SapBlip2 = 0
 Blip SapBlip3 = 0
 int SapCount = 0
-int TimerLimit = 240000 // 4:00 pre-dawn countdown
 
 $onmission = 1
 $OnSapMission = 1
@@ -194,7 +193,8 @@ Char.SetObjKillCharAnyMeans(Guard6, $scplayer)
 
 Text.PrintHelp('SAP5')
 wait 0
-Hud.DisplayTimer(TimerLimit)
+$TIMER = 240000 // 4:00 pre-dawn countdown
+Hud.DisplayTimer($TIMER)
 
 while SapCount < 3
     wait 250
@@ -203,7 +203,7 @@ while SapCount < 3
         jump @Sap_Fail
     end
 
-    if TimerLimit <= 0
+    if $TIMER <= 0
     then
         Text.Print('SAP9', 4000, 1)
         jump @Sap_Fail
@@ -268,7 +268,7 @@ while SapCount < 3
 end
 
 // All 3 collected! Clear timer, trigger atmospheric shift & return to Kenji
-Hud.ClearTimer(TimerLimit)
+Hud.ClearTimer($TIMER)
 play_audio_stream_1channel "audio/EC/miasma.wav", False, 1.0
 Weather.ForceNow(WeatherType.Rainy)
 Camera.SetFadingColor(30, 0, 82)
@@ -408,7 +408,7 @@ terminate_this_custom_script
 $onmission = 0
 $SapMissionDone = 0
 Text.ClearPrints()
-Hud.ClearTimer(TimerLimit)
+Hud.ClearTimer($TIMER)
 if not SapBlip1 == 0
 then
     Blip.Remove(SapBlip1)

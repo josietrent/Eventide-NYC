@@ -23,7 +23,6 @@ Blip KenjiBlip = 0
 Blip MarieBlip = 0
 Blip HomeBlip = 0
 int MarieHealth = 100
-int TimerLimit = 180000 // 3:00 urgency timer
 int MissionStage = 0 // 0=race, 1=defend, 2=load, 3=deliver
 int InCarStatus = 0
 
@@ -158,7 +157,8 @@ MarieBlip = Blip.AddForChar(Marie)
 Text.PrintHelp('STAT5')
 wait 0
 // Stage 1: Urgency Timer to reach Trenton supply yard
-Hud.DisplayTimer(TimerLimit)
+$TIMER = 180000 // 3:00 urgency timer
+Hud.DisplayTimer($TIMER)
 
 while MissionStage == 0
     wait 250
@@ -169,7 +169,7 @@ while MissionStage == 0
         jump @Statue_Fail
     end
 
-    if TimerLimit <= 0
+    if $TIMER <= 0
     then
         jump @Statue_Fail
     end
@@ -177,7 +177,7 @@ while MissionStage == 0
     // Player arrives near Marie
     if Player.LocateAnyMeans3D($player, 1142.50, -848.20, 14.85, 25.0, 25.0, 10.0, False)
     then
-        Hud.ClearTimer(TimerLimit)
+        Hud.ClearTimer($TIMER)
         Player.SetControl($player, False)
         Camera.DoFade(1000, Fade.Out)
         wait 1000
@@ -412,7 +412,7 @@ terminate_this_custom_script
 $onmission = 0
 $StatueMissionDone = 0
 Text.ClearPrints()
-Hud.ClearTimer(TimerLimit)
+Hud.ClearTimer($TIMER)
 Hud.ClearCounter($MarieHealthBar)
 if not MarieBlip == 0
 then
