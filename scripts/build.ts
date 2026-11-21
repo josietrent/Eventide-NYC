@@ -851,6 +851,19 @@ if (shouldRun(16, "emergencyradio")) {
   say.done(`  Packaged modloader/${modName}/${basename(asiOutput)}`);
 }
 
+// Step 17: Custom Map Overrides (IPL/IDE)
+if (shouldRun(17, "map")) {
+  const mapsSrcDir = join(cwd, "data", "maps");
+  if (await allExist([mapsSrcDir])) {
+    say.heading("Step 17 (map): Packaging custom map overrides...");
+    await copyFollowingSymlinks(
+      mapsSrcDir,
+      join(modStagingDir, "data", "maps"),
+    );
+    say.done(`  Packaged modloader/${modName}/data/maps`);
+  }
+}
+
 // Clean compiler scratch directory before zipping
 try {
   await Deno.remove(join(stagingDir, "obj"), { recursive: true });
