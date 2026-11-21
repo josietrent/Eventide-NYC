@@ -371,17 +371,28 @@ wait 4000
 
 Text.Print('STATC', 4500, 1)
 wait 4500
+
+// Marie walks into the Mansion toward the savepoint
+Char.SetObjGotoCoordOnFoot(Marie, 1453.64, -173.11)
+TIMERA = 0
+while TIMERA < 4000
+    wait 0
+    if Char.LocateAnyMeans2D(Marie, 1453.64, -173.11, 2.0, 2.0, False)
+    then
+        break
+    end
+end
+
 Camera.DoFade(1000, Fade.Out)
 wait 1000
 Camera.RestoreJumpcut()
-Char.RemoveElegantly(Marie)
 Hud.SwitchWidescreen(False)
 Camera.SetFadingColor(40, 0, 70)
 Camera.DoFade(1000, Fade.In)
 wait 1000
 
 // Mission Success!
-Text.PrintWithNumberBig('MISPASS', 20000, 5000, TextStyle.Middle)
+Text.PrintBigString("Mission Passed! $20000", 5000, TextStyle.Middle)
 Audio.PlayMissionPassedTune(1)
 Player.AddScore($player, 20000)
 Stat.RegisterMissionPassed('MIS6NAM')
@@ -390,6 +401,11 @@ $StatueMissionDone = 1
 $onmission = 0
 
 // Cleanup
+if not Marie == 0
+then
+    Char.RemoveElegantly(Marie)
+    Marie = 0
+end
 if not MarieCar == 0
 then
     Car.MarkAsNoLongerNeeded(MarieCar)
