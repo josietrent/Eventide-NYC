@@ -535,19 +535,6 @@ if (shouldRun(5, "pistol")) {
   say.done(`  Packaged modloader/${modName}/CLEO/${basename(pistolOutput)}`);
 }
 
-// Step 6: Car Mission
-if (shouldRun(6, "car")) {
-  say.heading("Step 6 (car): Compiling car mission...");
-  const carInput = join(cwd, "threads", "car.txt");
-  const carOutput = join(cwd, "threads", "car.cm");
-  await compileIfChanged(carInput, carOutput);
-
-  const cleoStagingDir = join(modStagingDir, "CLEO");
-  await ensureDir(cleoStagingDir);
-  await Deno.copyFile(carOutput, join(cleoStagingDir, basename(carOutput)));
-  say.done(`  Packaged modloader/${modName}/CLEO/${basename(carOutput)}`);
-}
-
 // Step 7: Alley Mission
 if (shouldRun(7, "alley")) {
   say.heading("Step 7 (alley): Compiling alley mission...");

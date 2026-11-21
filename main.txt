@@ -152,12 +152,13 @@ return
 {$INCLUDE_ONCE threads/savep.txt}
 {$INCLUDE_ONCE threads/barriers.txt}
 
-// Trigger mission 0: Driving Tutorial
+// Trigger mission 0 (merged with Car): "Nowhere Like Home..."
 :Driving
 script_name 'Driving'
 0@ = 0
 
-while true
+:Driving_Loop
+while $OnCarMission == 0
     wait 250
     if or
         not Player.IsPlaying($player)
@@ -181,6 +182,7 @@ while true
             Camera.SetFadingColor(40, 0, 70)
             Camera.DoFade(1500, Fade.Out)
             wait 1500
+            $OnCarMission = 1
             stream_custom_script "INIT.cm"
             break
         end
@@ -202,67 +204,6 @@ while true
     end
 end
 
-while true
-    wait 250
-    if and
-        $onmission == true
-        $Intro_Passed == false
-    then
-        continue
-    end
-
-    if and
-        $onmission == false
-        $Intro_Passed == true
-    then
-        start_new_script @Vehicle
-        terminate_this_script
-    end
-end
-
-/// Trigger mission 1: "Driving Mr. Mute"
-:Vehicle
-script_name 'Vehicle'
-
-while true
-    wait 250
-    if or
-        not Player.IsPlaying($player)
-        Camera.GetFadingStatus()
-    then
-        continue
-    end
-
-    if and
-        $onmission == false
-        $Intro_Passed == true
-    then
-        if and
-            Player.CanStartMission($player)
-            Player.LocateOnFoot3D($player, 1025.755, -471.541, 14.927, 2.0, 2.0, 2.0, False)
-        then
-            Blip.Remove($MissionTriggerBlip)
-            Sphere.Remove($MissionTriggerSphere)
-            Player.SetControl($player, False)
-            Text.PrintBigString("Driving Mr. Mute...", 5000, TextStyle.BottomRight)
-            Camera.SetFadingColor(40, 0, 70)
-            Camera.DoFade(1500, Fade.Out)
-            wait 1500
-            $OnCarMission = 1
-            stream_custom_script "car.cm"
-            break
-        end
-    else
-        if and
-            $onmission == 1
-            Player.LocateOnFoot3D($player, 1025.755, -471.541, 14.927, 3.0, 3.0, 3.0, False)
-        then
-            Text.Print('FUCKOFF', 4000, 1)
-            wait 5000
-        end
-    end
-end
-
 while $OnCarMission == 1
     wait 250
 end
@@ -275,7 +216,10 @@ then
     terminate_this_script
 else
     $OnCarMission = 0
-    goto @Vehicle
+    $Intro_Passed = 0
+    $MissionTriggerBlip = Blip.AddForCoord(774.45, -880.88, 14.74)
+    $MissionTriggerSphere = Sphere.Create(774.45, -880.88, 14.74, 3.0)
+    goto @Driving_Loop
 end
 
 /// Trigger mission 2: "Finding Your Bearings..."
