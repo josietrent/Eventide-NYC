@@ -615,6 +615,24 @@ if (shouldRun(8, 'sap')) {
   }
 }
 
+// Step 8e: Ashes Mission
+if (shouldRun(8, 'ashes')) {
+  const ashesInput = join(cwd, 'threads', 'ashes.txt');
+  const ashesOutput = join(cwd, 'threads', 'ashes.cm');
+  if (await allExist([ashesInput])) {
+    say.heading('Step 8e (ashes): Compiling ashes mission...');
+    await compileIfChanged(ashesInput, ashesOutput);
+
+    const cleoStagingDir = join(modStagingDir, 'CLEO');
+    await ensureDir(cleoStagingDir);
+    await Deno.copyFile(
+      ashesOutput,
+      join(cleoStagingDir, basename(ashesOutput)),
+    );
+    say.done('  Packaged modloader/' + modName + '/CLEO/' + basename(ashesOutput));
+  }
+}
+
 // Step 9: World Thread
 if (shouldRun(9, "world")) {
   say.heading("Step 9 (world): Compiling world thread...");
