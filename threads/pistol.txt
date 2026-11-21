@@ -241,17 +241,14 @@ while not Player.LocateAnyMeans3D($player, 933.66, -252.64, 4.50, 1.0, 1.0, 1.0,
             NeedsCar == 1
         then
             Hud.ClearTimer($TIMER)
+            Text.ClearPrints()
+            Text.Print('MEETUP', 4000, 0)
             NeedsCar = 0
         end
     else
         if and
-            not NeedsCar == 1
-            not Player.LocateAnyMeans3D($player, 1147.61, -95.21, 7.02, 20.0, 20.0, 10.0, False)
-        then
-            NeedsCar = 0
-        end
-        if
             NeedsCar == 0
+            not Player.LocateAnyMeans3D($player, 1147.61, -95.21, 7.02, 20.0, 20.0, 10.0, False)
         then
             $TIMER = 20000
             Text.Print('WHEELS', 3000, 0)
