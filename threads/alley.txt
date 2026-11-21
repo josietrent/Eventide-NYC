@@ -15,8 +15,10 @@ Blip Destination = 0
 Blip SprayBlip = 0
 int InVehTimer = 0
 int CheetahHealth = 1000
+int LastValidHealth = 1000
 int Warn800Printed = 0
 int NeedsSpray = 0
+int FreebieWarned = 0
 int MissionStage = 0
 
 $onmission = 1
@@ -700,6 +702,43 @@ then
     jump @Alley_Fail
 end
 
+if CheetahHealth < LastValidHealth
+then
+    LastValidHealth = CheetahHealth
+end
+
+if Car.Locate3D(Cheetah, 1435.625, -183.4375, 52.1875, 8.0, 4.5, 3.5, False)
+then
+    if or
+        NeedsSpray == 1
+        LastValidHealth < 800
+    then
+        if FreebieWarned == 0
+        then
+            Text.PrintBigString("Hey! No Freebies!", 3000, TextStyle.MiddleSmaller)
+            FreebieWarned = 1
+        end
+        if CheetahHealth > LastValidHealth
+        then
+            Car.SetHealth(Cheetah, LastValidHealth)
+            CheetahHealth = LastValidHealth
+            Text.PrintBigString("Hey! No Freebies!", 3000, TextStyle.MiddleSmaller)
+        end
+    end
+else
+    FreebieWarned = 0
+    if and
+        Car.Locate3D(Cheetah, 924.0, -361.0, 10.0, 15.0, 15.0, 6.0, False)
+        CheetahHealth > LastValidHealth
+    then
+        LastValidHealth = CheetahHealth
+        if CheetahHealth >= 900
+        then
+            Warn800Printed = 0
+        end
+    end
+end
+
 if and
     CheetahHealth < 500
     NeedsSpray == 0
@@ -724,9 +763,11 @@ end
 if and
     NeedsSpray == 1
     CheetahHealth >= 900
+    Car.Locate3D(Cheetah, 924.0, -361.0, 10.0, 15.0, 15.0, 6.0, False)
 then
     NeedsSpray = 0
     Warn800Printed = 0
+    LastValidHealth = CheetahHealth
     if not SprayBlip == 0
     then
         Blip.Remove(SprayBlip)
