@@ -864,6 +864,18 @@ if (shouldRun(17, "map")) {
   }
 }
 
+// Step 18: Custom Handling Overrides (handling.cfg)
+if (shouldRun(18, "handling")) {
+  const handlingSrc = join(cwd, "data", "handling.cfg");
+  if (await allExist([handlingSrc])) {
+    say.heading("Step 18 (handling): Packaging custom handling.cfg...");
+    const dataStagingDir = join(modStagingDir, "data");
+    await ensureDir(dataStagingDir);
+    await Deno.copyFile(handlingSrc, join(dataStagingDir, "handling.cfg"));
+    say.done(`  Packaged modloader/${modName}/data/handling.cfg`);
+  }
+}
+
 // Clean compiler scratch directory before zipping
 try {
   await Deno.remove(join(stagingDir, "obj"), { recursive: true });
