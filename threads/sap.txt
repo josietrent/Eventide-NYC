@@ -141,9 +141,9 @@ end
 Streaming.UnloadSpecialCharacter(1)
 
 // Stage 1: Spawn 3 guarded Sap caches at verified Portland outskirts sites (IDE/IPL & packages.txt)
-// Site 1: Harwood North Coast path (ind_land052 COL ground Z=2.51, clear of hidden package at 761.59, 137.26)
-World.ClearArea(754.50, 116.00, 3.10, 10.0, True)
-Sap1 = Pickup.Create(#BRIEFCASE, PickupType.Once, 754.50, 116.00, 3.10)
+// Site 1: Harwood North Coast path (ind_land150 COL ground Z=2.51, clear of hidden package at 761.59, 137.26)
+World.ClearArea(755.53, 140.56, 3.55, 10.0, True)
+Sap1 = Pickup.Create(#BRIEFCASE, PickupType.Once, 755.53, 140.56, 3.55)
 SapBlip1 = Blip.AddForPickup(Sap1)
 
 Guard1 = Char.Create(PedType.Gang3, #GANG03, 756.00, 125.00, 3.50)
