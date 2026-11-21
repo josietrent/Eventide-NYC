@@ -282,8 +282,9 @@ while not Player.LocateAnyMeans3D($player, 933.66, -252.64, 4.50, 1.0, 1.0, 1.0,
         break
     end
 
-    if
-        $TIMER == 0
+    if and
+        NeedsCar == 1
+        $TIMER <= 0
     then
         jump @Marie_Fail
     end
