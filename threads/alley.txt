@@ -12,7 +12,12 @@ Char Luigi = 0
 Car Cheetah = 0
 Blip CarBlip = 0
 Blip Destination = 0
+Blip SprayBlip = 0
 int InVehTimer = 0
+int CheetahHealth = 1000
+int Warn800Printed = 0
+int NeedsSpray = 0
+int MissionStage = 0
 
 $onmission = 1
 $OnAlleyMission = 1
@@ -341,7 +346,8 @@ while true
 end
 
 :Alley_104
-while not Player.IsInCar($player, Cheetah)
+MissionStage = 0
+while true
     wait 0
     if or
         not Player.IsPlaying($player)
@@ -350,11 +356,17 @@ while not Player.IsInCar($player, Cheetah)
     then
         jump @Alley_Fail
     end
-    if
+    Alley_CheckCarHealth()
+    if and
         Player.IsInCar($player, Cheetah)
+        NeedsSpray == 0
     then
         Text.PrintString("Drive me to Callahan Bridge.", 5000)
-        Blip.Remove(CarBlip)
+        if not CarBlip == 0
+        then
+            Blip.Remove(CarBlip)
+            CarBlip = 0
+        end
         Destination = Blip.AddForCoord(1041.88, -923.84, 14.82)
         Blip.ChangeColor(Destination, BlipColor.Yellow)
         break
@@ -362,6 +374,7 @@ while not Player.IsInCar($player, Cheetah)
 end
 
 :Alley_105
+MissionStage = 1
 InVehTimer = 0
 TIMERA = 0
 while true
@@ -373,13 +386,16 @@ while true
     then
         jump @Alley_Fail
     end
+    Alley_CheckCarHealth()
 
     if and
+        NeedsSpray == 0
         Player.IsInCar($player, Cheetah)
         Char.IsInCar(Luigi, Cheetah)
         Player.LocateAnyMeans3D($player, 1041.88, -923.84, 14.82, 3.0, 3.0, 3.0, True)
     then
         Blip.Remove(Destination)
+        Destination = 0
         Player.SetControl($player, False)
         Sound.AddOneOffSound(1041.88, -923.84, 14.82, ScriptSound.SoundPartMissionComplete)
         Hud.SwitchWidescreen(True)
@@ -517,6 +533,7 @@ while true
 end
 
 :Alley_106
+MissionStage = 2
 InVehTimer = 0
 TIMERA = 0
 while true
@@ -528,13 +545,16 @@ while true
     then
         jump @Alley_Fail
     end
+    Alley_CheckCarHealth()
 
     if and
+        NeedsSpray == 0
         Player.IsInCar($player, Cheetah)
         Char.IsInCar(Luigi, Cheetah)
         Player.LocateAnyMeans3D($player, 1214.89, -327.47, 26.07, 3.0, 3.0, 3.0, True)
     then
         Blip.Remove(Destination)
+        Destination = 0
         Player.SetControl($player, False)
         Hud.SwitchWidescreen(True)
         Camera.SetFadingColor(40, 0, 70)
@@ -673,13 +693,97 @@ Streaming.MarkModelAsNoLongerNeeded(#UZI)
 $OnAlleyMission = 0
 terminate_this_custom_script
 
+:Alley_CheckCarHealth
+Car.GetHealth(Cheetah, CheetahHealth)
+if CheetahHealth < 300
+then
+    jump @Alley_Fail
+end
+
+if and
+    CheetahHealth < 500
+    NeedsSpray == 0
+then
+    NeedsSpray = 1
+    Warn800Printed = 1
+    if not CarBlip == 0
+    then
+        Blip.Remove(CarBlip)
+        CarBlip = 0
+    end
+    if not Destination == 0
+    then
+        Blip.Remove(Destination)
+        Destination = 0
+    end
+    SprayBlip = Blip.AddSpriteForCoord(924.0, -361.0, 10.0, RadarSprite.Spray)
+    Text.PrintString("Get this vehicle resprayed before you wreck it!", 5000)
+    return
+end
+
+if and
+    NeedsSpray == 1
+    CheetahHealth >= 900
+then
+    NeedsSpray = 0
+    Warn800Printed = 0
+    if not SprayBlip == 0
+    then
+        Blip.Remove(SprayBlip)
+        SprayBlip = 0
+    end
+    if MissionStage == 0
+    then
+        if not Player.IsInCar($player, Cheetah)
+        then
+            CarBlip = Blip.AddForCar(Cheetah)
+            Text.PrintString("Get into Louie's car.", 5000)
+        end
+    end
+    if MissionStage == 1
+    then
+        Destination = Blip.AddForCoord(1041.88, -923.84, 14.82)
+        Blip.ChangeColor(Destination, BlipColor.Yellow)
+        Text.PrintString("Drive me to Callahan Bridge.", 5000)
+    end
+    if MissionStage == 2
+    then
+        Destination = Blip.AddForCoord(1214.89, -327.47, 26.07)
+        Blip.ChangeColor(Destination, BlipColor.Yellow)
+        Text.Print('LOUHOME', 5000, 1)
+    end
+    return
+end
+
+if and
+    CheetahHealth < 800
+    Warn800Printed == 0
+then
+    Text.PrintString("Watch it! I just detailed this!", 4000)
+    Warn800Printed = 1
+end
+return
+
 :Alley_Fail
 //Mission.Fail()
 $onmission = 0
 $AlleyMissionDone = 0
 Text.ClearPrints()
-Blip.Remove(CarBlip)
-Blip.Remove(Destination)
+if not CarBlip == 0
+then
+    Blip.Remove(CarBlip)
+    CarBlip = 0
+end
+if not Destination == 0
+then
+    Blip.Remove(Destination)
+    Destination = 0
+end
+if not SprayBlip == 0
+then
+    Blip.Remove(SprayBlip)
+    SprayBlip = 0
+end
 Text.PrintBigString("Mission Failed!", 3000, TextStyle.Middle)
 wait 3000
 Camera.SetFadingColor(40, 0, 70)
