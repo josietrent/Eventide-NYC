@@ -41,6 +41,7 @@ var
     $OnAshesMission: int
     $AshesMissionDone: int
     $ReinhardtHealthBar: int
+    $RadioHelpPlayed: int
 end
 
 //=============
@@ -102,6 +103,8 @@ $CarMissionDone = false
 $BarrierIND = true
 $BarrierCOM = true
 $DriveHelpPlayed = 0
+$ReinhardtHealthBar = 0
+$RadioHelpPlayed = 0
 
 // Spawn BG threads
 start_new_script @Driving
