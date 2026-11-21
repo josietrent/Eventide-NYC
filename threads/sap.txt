@@ -55,19 +55,19 @@ wait 1000
 Player.SetControl($player, False)
 
 // Create Kenji at Harwood contact point (1004.42, -49.06, 7.44)
-World.ClearArea(1004.42, -49.06, 7.44, 6.0, True)
-Kenji = Char.Create(PedType.Special, #SPECIAL01, 1004.42, -49.06, 7.44)
+World.ClearArea(994.25, -52.00, 7.15, 8.0, True)
+Kenji = Char.Create(PedType.Special, #SPECIAL01, 996.00, -52.00, 7.20)
 Char.SetObjNoObj(Kenji)
-Char.SetHeading(Kenji, 270.0)
+Char.SetHeading(Kenji, 90.0)
 
-// Position Toni facing Kenji
-Player.SetCoordinates($player, 1007.50, -49.06, 7.44)
-Player.SetHeading($player, 90.0)
+// Position Toni in the Head Radio parking lot facing Kenji
+Player.SetCoordinates($player, 992.50, -52.00, 7.10)
+Player.SetHeading($player, 270.0)
 wait 0
-Char.SetHeading(Kenji, 270.0)
+Char.SetHeading(Kenji, 90.0)
 Char.SetObjWaitOnFoot(Kenji)
 
-Camera.SetFixedPosition(1009.00, -47.00, 8.50, 0.0, 0.0, 0.0)
+Camera.SetFixedPosition(990.50, -50.00, 8.30, 0.0, 0.0, 0.0)
 Camera.PointAtChar(Kenji, CameraMode.FollowPed, SwitchType.JumpCut)
 Camera.SetFadingColor(40, 0, 70)
 Camera.DoFade(1500, Fade.In)
@@ -318,19 +318,19 @@ wait 800
 
 if Player.IsInAnyCar($player)
 then
-    Player.WarpFromCarToCoord($player, 1007.50, -49.06, 7.44)
+    Player.WarpFromCarToCoord($player, 992.50, -52.00, 7.10)
 else
-    Player.SetCoordinates($player, 1007.50, -49.06, 7.44)
+    Player.SetCoordinates($player, 992.50, -52.00, 7.10)
 end
-Player.SetHeading($player, 90.0)
-Char.SetCoordinates(Kenji, 1004.42, -49.06, 7.44)
+Player.SetHeading($player, 270.0)
+Char.SetCoordinates(Kenji, 996.00, -52.00, 7.20)
 Char.SetObjNoObj(Kenji)
-Char.SetHeading(Kenji, 270.0)
+Char.SetHeading(Kenji, 90.0)
 wait 0
-Char.SetHeading(Kenji, 270.0)
+Char.SetHeading(Kenji, 90.0)
 Char.SetObjWaitOnFoot(Kenji)
 
-Camera.SetFixedPosition(1009.00, -47.00, 8.50, 0.0, 0.0, 0.0)
+Camera.SetFixedPosition(990.50, -50.00, 8.30, 0.0, 0.0, 0.0)
 Camera.PointAtChar(Kenji, CameraMode.FollowPed, SwitchType.JumpCut)
 Camera.DoFade(800, Fade.In)
 wait 800
