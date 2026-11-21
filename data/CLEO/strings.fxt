@@ -177,12 +177,12 @@ SAPB	This might be enough to destabilize the Callahan barrier... almost.
 SAPC	Lay low until nightfall. Next time, we hit the bridge directly.
 MIS8NAM	Ashes to Ashes, Dust to Dust...
 REINHEA	Reinhardt:
-ASH1	Reinhardt just torched Chinatown Square!
+ASH1	Reinhardt just torched Chinatown!
 ASH2	Nobody around here's lifting a finger, and the smoke is starting to draw police attention.
 ASH3	Find a ~b~Firetruck~w~ and extinguish the flames before the block burns.
-ASH4	Once the square's clear, find Reinhardt and make him talk. We need answers before we hit the bridge.
-ASH5	Grab the ~b~Firetruck~w~ from Harwood Fire Station and douse the fires in ~y~Chinatown Square~w~!
-ASH6	Use the water cannon to extinguish all three fires in ~y~Chinatown Square~w~!
+ASH4	Once Chinatown's clear, find Reinhardt and make him talk. We need answers before we hit the bridge.
+ASH5	Grab the ~b~Firetruck~w~ from Harwood Fire Station and douse the fires in ~y~Chinatown~w~!
+ASH6	Use the water cannon to extinguish all three fires in ~y~Chinatown~w~!
 ASH7	Fire 1 of 3 extinguished.
 ASH8	Fire 2 of 3 extinguished.
 ASH9	An arsonist spilled it - Reinhardt's holed up at ~y~Portland Harbor~w~!
@@ -190,6 +190,6 @@ ASHA	Scatter his crew and beat ~g~Reinhardt~w~ down, but don't kill him!
 ASHB	Alright, alright! Call off the beating!
 ASHC	They're paying us to keep Portland burning while they lock down the rest of the city!
 ASHD	You won't make it past the barricade!
-ASHE    Meran has crews guarding every way off Portland!
+ASHE    Reinhardt has crews guarding every way off Portland!
 ASHTIM	Chinatown burned down before you put the fires out!
 ASHF	You killed Reinhardt before he could talk!

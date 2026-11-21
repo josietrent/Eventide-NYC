@@ -1,0 +1,105 @@
+{$CLEO .cm}
+
+{$USE CLEO}
+
+{$INCLUDE ../utils/globals.txt}
+
+//-------------Porter Tunnel Guard (launched from :PrintBridgeHelp in help.txt)---------------
+:Tunnel
+script_name 'TUNNEL'
+
+Char MafiaThug = 0
+Char TriadThug = 0
+
+while $BarrierIND == 1
+    wait 250
+
+    if not Player.IsPlaying($player)
+    then
+        continue
+    end
+
+    if Player.LocateAnyMeans3D($player, 756.7936, 176.8842, -20.4789, 15.0, 15.0, 8.0, False)
+    then
+        Streaming.RequestModel(#GANG01)
+        Streaming.RequestModel(#GANG03)
+        Streaming.RequestModel(#AK47)
+        Streaming.LoadAllModelsNow()
+
+        while true
+            wait 0
+            if and
+                Streaming.HasModelLoaded(#GANG01)
+                Streaming.HasModelLoaded(#GANG03)
+                Streaming.HasModelLoaded(#AK47)
+            then
+                break
+            end
+        end
+
+        // Re-check barrier state in case Staunton unlocked while models streamed
+        if $BarrierIND == 0
+        then
+            Streaming.MarkModelAsNoLongerNeeded(#GANG01)
+            Streaming.MarkModelAsNoLongerNeeded(#GANG03)
+            Streaming.MarkModelAsNoLongerNeeded(#AK47)
+            break
+        end
+
+        Text.Print('ASHE', 4500, 1)
+
+        MafiaThug = Char.Create(PedType.Gang1, #GANG01, 756.00, 171.50, -20.30)
+        Char.SetHeading(MafiaThug, 270.0)
+        Char.SetAccuracy(MafiaThug, 85)
+        Char.GiveWeapon(MafiaThug, WeaponType.Chaingun, 999)
+        Char.SetCurrentWeapon(MafiaThug, WeaponType.Chaingun)
+        Char.SetObjKillCharAnyMeans(MafiaThug, $scplayer)
+
+        TriadThug = Char.Create(PedType.Gang2, #GANG03, 756.00, 178.50, -20.30)
+        Char.SetHeading(TriadThug, 270.0)
+        Char.SetAccuracy(TriadThug, 85)
+        Char.GiveWeapon(TriadThug, WeaponType.Chaingun, 999)
+        Char.SetCurrentWeapon(TriadThug, WeaponType.Chaingun)
+        Char.SetObjKillCharAnyMeans(TriadThug, $scplayer)
+
+        Streaming.MarkModelAsNoLongerNeeded(#GANG01)
+        Streaming.MarkModelAsNoLongerNeeded(#GANG03)
+        Streaming.MarkModelAsNoLongerNeeded(#AK47)
+
+        // Debounce until the player leaves the tunnel approach, dies, or unlocks Staunton
+        while $BarrierIND == 1
+            wait 250
+            if not Player.IsPlaying($player)
+            then
+                break
+            end
+            if not Player.LocateAnyMeans3D($player, 756.7936, 176.8842, -20.4789, 25.0, 25.0, 10.0, False)
+            then
+                break
+            end
+        end
+
+        if not MafiaThug == 0
+        then
+            Char.MarkAsNoLongerNeeded(MafiaThug)
+            MafiaThug = 0
+        end
+        if not TriadThug == 0
+        then
+            Char.MarkAsNoLongerNeeded(TriadThug)
+            TriadThug = 0
+        end
+    end
+end
+
+if not MafiaThug == 0
+then
+    Char.MarkAsNoLongerNeeded(MafiaThug)
+    MafiaThug = 0
+end
+if not TriadThug == 0
+then
+    Char.MarkAsNoLongerNeeded(TriadThug)
+    TriadThug = 0
+end
+terminate_this_custom_script
