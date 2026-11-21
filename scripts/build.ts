@@ -472,6 +472,24 @@ if (shouldRun(2, "help")) {
   say.done(`  Packaged modloader/${modName}/CLEO/${basename(helpOutput)}`);
 }
 
+// Step 2b: Porter Tunnel Guard Thread (launched by help.cs)
+if (shouldRun(2, "tunnel") || shouldRun(2, "help")) {
+  const tunnelInput = join(cwd, "threads", "tunnel.txt");
+  const tunnelOutput = join(cwd, "threads", "tunnel.cm");
+  if (await allExist([tunnelInput])) {
+    say.heading("Step 2b (tunnel): Compiling tunnel guard thread...");
+    await compileIfChanged(tunnelInput, tunnelOutput);
+
+    const cleoStagingDir = join(modStagingDir, "CLEO");
+    await ensureDir(cleoStagingDir);
+    await Deno.copyFile(
+      tunnelOutput,
+      join(cleoStagingDir, basename(tunnelOutput)),
+    );
+    say.done(`  Packaged modloader/${modName}/CLEO/${basename(tunnelOutput)}`);
+  }
+}
+
 // Step 3: INIT Thread
 if (shouldRun(3, "init")) {
   say.heading("Step 3 (init): Compiling INIT thread...");
@@ -598,38 +616,39 @@ if (shouldRun(8, "statue")) {
 }
 
 // Step 8d: Sap Mission
-if (shouldRun(8, 'sap')) {
-  const sapInput = join(cwd, 'threads', 'sap.txt');
-  const sapOutput = join(cwd, 'threads', 'sap.cm');
+if (shouldRun(8, "sap")) {
+  const sapInput = join(cwd, "threads", "sap.txt");
+  const sapOutput = join(cwd, "threads", "sap.cm");
   if (await allExist([sapInput])) {
-    say.heading('Step 8d (sap): Compiling sap mission...');
+    say.heading("Step 8d (sap): Compiling sap mission...");
     await compileIfChanged(sapInput, sapOutput);
 
-    const cleoStagingDir = join(modStagingDir, 'CLEO');
+    const cleoStagingDir = join(modStagingDir, "CLEO");
     await ensureDir(cleoStagingDir);
-    await Deno.copyFile(
-      sapOutput,
-      join(cleoStagingDir, basename(sapOutput)),
+    await Deno.copyFile(sapOutput, join(cleoStagingDir, basename(sapOutput)));
+    say.done(
+      "  Packaged modloader/" + modName + "/CLEO/" + basename(sapOutput),
     );
-    say.done('  Packaged modloader/' + modName + '/CLEO/' + basename(sapOutput));
   }
 }
 
 // Step 8e: Ashes Mission
-if (shouldRun(8, 'ashes')) {
-  const ashesInput = join(cwd, 'threads', 'ashes.txt');
-  const ashesOutput = join(cwd, 'threads', 'ashes.cm');
+if (shouldRun(8, "ashes")) {
+  const ashesInput = join(cwd, "threads", "ashes.txt");
+  const ashesOutput = join(cwd, "threads", "ashes.cm");
   if (await allExist([ashesInput])) {
-    say.heading('Step 8e (ashes): Compiling ashes mission...');
+    say.heading("Step 8e (ashes): Compiling ashes mission...");
     await compileIfChanged(ashesInput, ashesOutput);
 
-    const cleoStagingDir = join(modStagingDir, 'CLEO');
+    const cleoStagingDir = join(modStagingDir, "CLEO");
     await ensureDir(cleoStagingDir);
     await Deno.copyFile(
       ashesOutput,
       join(cleoStagingDir, basename(ashesOutput)),
     );
-    say.done('  Packaged modloader/' + modName + '/CLEO/' + basename(ashesOutput));
+    say.done(
+      "  Packaged modloader/" + modName + "/CLEO/" + basename(ashesOutput),
+    );
   }
 }
 
