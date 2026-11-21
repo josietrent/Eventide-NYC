@@ -22,6 +22,7 @@ Car ThugVan = 0
 Blip KenjiBlip = 0
 Blip MarieBlip = 0
 Blip HomeBlip = 0
+Sphere HomeSphere = 0
 int MarieHealth = 100
 int MissionStage = 0 // 0=race, 1=defend, 2=load, 3=deliver
 int InCarStatus = 0
@@ -60,19 +61,19 @@ wait 1000
 Player.SetControl($player, False)
 
 // Create Kenji at Harwood contact point
-World.ClearArea(994.25, -52.00, 7.15, 8.0, True)
-Kenji = Char.Create(PedType.Special, #SPECIAL01, 996.00, -52.00, 7.20)
+World.ClearArea(978.25, -51.00, 7.35, 8.0, True)
+Kenji = Char.Create(PedType.Special, #SPECIAL01, 980.00, -51.00, 7.35)
 Char.SetObjNoObj(Kenji)
 Char.SetHeading(Kenji, 90.0)
 
 // Position Toni in the Head Radio parking lot facing Kenji
-Player.SetCoordinates($player, 992.50, -52.00, 7.10)
+Player.SetCoordinates($player, 976.50, -51.00, 7.35)
 Player.SetHeading($player, 270.0)
 wait 0
 Char.SetHeading(Kenji, 90.0)
 Char.SetObjWaitOnFoot(Kenji)
 
-Camera.SetFixedPosition(990.50, -50.00, 8.30, 0.0, 0.0, 0.0)
+Camera.SetFixedPosition(974.50, -49.00, 8.45, 0.0, 0.0, 0.0)
 Camera.PointAtChar(Kenji, CameraMode.FollowPed, SwitchType.JumpCut)
 Camera.SetFadingColor(40, 0, 70)
 Camera.DoFade(1500, Fade.In)
@@ -297,6 +298,7 @@ while MissionStage == 2
             // Hideout dropoff
             HomeBlip = Blip.AddForCoord(1420.69, -183.11, 50.33)
             Blip.ChangeColor(HomeBlip, BlipColor.Yellow)
+            HomeSphere = Sphere.Create(1420.69, -183.11, 50.33, 4.0)
             Text.Print('STATA', 5000, 1)
             MissionStage = 3
             break
@@ -322,10 +324,13 @@ while MissionStage == 3
         jump @Statue_Fail
     end
 
-    if Player.LocateAnyMeans3D($player, 1420.69, -183.11, 50.33, 4.0, 4.0, 3.0, True)
+    if Player.LocateAnyMeans3D($player, 1420.69, -183.11, 50.33, 4.0, 4.0, 3.0, False)
     then
         Player.SetControl($player, False)
         Blip.Remove(HomeBlip)
+        HomeBlip = 0
+        Sphere.Remove(HomeSphere)
+        HomeSphere = 0
         Camera.DoFade(1500, Fade.Out)
         wait 1500
         jump @Statue_OutroCutscene
@@ -369,6 +374,7 @@ wait 4500
 Camera.DoFade(1000, Fade.Out)
 wait 1000
 Camera.RestoreJumpcut()
+Char.RemoveElegantly(Marie)
 Hud.SwitchWidescreen(False)
 Camera.SetFadingColor(40, 0, 70)
 Camera.DoFade(1000, Fade.In)
@@ -384,11 +390,6 @@ $StatueMissionDone = 1
 $onmission = 0
 
 // Cleanup
-if not Marie == 0
-then
-    Char.RemoveElegantly(Marie)
-    Marie = 0
-end
 if not MarieCar == 0
 then
     Car.MarkAsNoLongerNeeded(MarieCar)
@@ -421,6 +422,12 @@ end
 if not HomeBlip == 0
 then
     Blip.Remove(HomeBlip)
+    HomeBlip = 0
+end
+if not HomeSphere == 0
+then
+    Sphere.Remove(HomeSphere)
+    HomeSphere = 0
 end
 Text.PrintBigString("Mission Failed!", 3000, TextStyle.Middle)
 wait 3000

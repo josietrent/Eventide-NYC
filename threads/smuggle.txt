@@ -15,6 +15,7 @@ Blip StashBlip = 0
 Blip SmugglerBlip = 0
 Blip SprayShopBlip = 0
 Pickup StashPickup = 0
+Sphere SmugglerSphere = 0
 int SprayShopActive = 0
 int HasPackage = 0
 
@@ -162,7 +163,8 @@ Smuggler = Char.Create(PedType.CivMale, #B_MAN1, 900.0, -45.0, 5.5)
 Char.SetHeading(Smuggler, 90.0)
 Char.SetObjWaitOnFoot(Smuggler)
 
-SmugglerBlip = Blip.AddForCoord(900.0, -45.0, 5.5)
+SmugglerBlip = Blip.AddForCoord(904.38, -42.95, 7.47)
+SmugglerSphere = Sphere.Create(904.38, -42.95, 7.47, 2.5)
 
 while true
     wait 250
@@ -174,7 +176,7 @@ while true
     end
 
     // Check if player has heat near smuggler
-    if Player.LocateAnyMeans3D($player, 900.0, -45.0, 5.5, 25.0, 25.0, 10.0, False)
+    if Player.LocateAnyMeans3D($player, 904.38, -42.95, 7.47, 25.0, 25.0, 10.0, False)
     then
         if Player.IsWantedLevelGreater($player, 0)
         then
@@ -196,9 +198,12 @@ while true
     // Meet smuggler on foot or in car when NOT wanted
     if and
         not Player.IsWantedLevelGreater($player, 0)
-        Player.LocateAnyMeans3D($player, 900.0, -45.0, 5.5, 4.0, 4.0, 3.0, True)
+        Player.LocateAnyMeans3D($player, 904.38, -42.95, 7.47, 2.5, 2.5, 3.0, False)
     then
         Blip.Remove(SmugglerBlip)
+        SmugglerBlip = 0
+        Sphere.Remove(SmugglerSphere)
+        SmugglerSphere = 0
         if SprayShopActive == 1
         then
             Blip.Remove(SprayShopBlip)
@@ -279,6 +284,11 @@ end
 if not SmugglerBlip == 0
 then
     Blip.Remove(SmugglerBlip)
+end
+if not SmugglerSphere == 0
+then
+    Sphere.Remove(SmugglerSphere)
+    SmugglerSphere = 0
 end
 if not SprayShopBlip == 0
 then
