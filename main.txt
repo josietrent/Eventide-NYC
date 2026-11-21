@@ -38,6 +38,9 @@ var
     $DeadbeatHealthBar: int
     $OnSapMission: int
     $SapMissionDone: int
+    $OnAshesMission: int
+    $AshesMissionDone: int
+    $ReinhardtHealthBar: int
 end
 
 //=============
@@ -639,9 +642,64 @@ end
 if
     $SapMissionDone == 1
 then
+    $KenjiBlip = Blip.AddSpriteForContactPoint(1004.42, -49.06, 7.44, RadarSprite.Kenji)
+    start_new_script @Ashes
     terminate_this_script
 else
     $OnSapMission = 0
     $KenjiBlip = Blip.AddSpriteForContactPoint(1004.42, -49.06, 7.44, RadarSprite.Kenji)
     goto @Sap_Loop
+end
+
+/// Trigger mission 8: "Ashes to Ashes, Dust to Dust..."
+:Ashes
+script_name 'Ashes'
+
+:Ashes_Loop
+while $OnAshesMission == 0
+    wait 250
+    if or
+        not Player.IsPlaying($player)
+        Camera.GetFadingStatus()
+    then
+        continue
+    end
+
+    if and
+        Player.CanStartMission($player)
+        $onmission == 0
+        Player.LocateOnFoot3D($player, 1004.42, -49.06, 7.44, 2.0, 2.0, 2.0, False)
+    then
+        Blip.Remove($KenjiBlip)
+        Player.SetControl($player, False)
+        Text.PrintBigString("Ashes to Ashes, Dust to Dust...", 5000, TextStyle.BottomRight)
+        Camera.SetFadingColor(40, 0, 70)
+        Camera.DoFade(1500, Fade.Out)
+        wait 1500
+        $OnAshesMission = 1
+        stream_custom_script "ashes.cm"
+        break
+    else
+        if and
+            $onmission == 1
+            Player.LocateOnFoot3D($player, 1004.42, -49.06, 7.44, 3.0, 3.0, 3.0, False)
+        then
+            Text.PrintHelp('FUCKOFF')
+            wait 5000
+        end
+    end
+end
+
+while $OnAshesMission == 1
+    wait 250
+end
+
+if
+    $AshesMissionDone == 1
+then
+    terminate_this_script
+else
+    $OnAshesMission = 0
+    $KenjiBlip = Blip.AddSpriteForContactPoint(1004.42, -49.06, 7.44, RadarSprite.Kenji)
+    goto @Ashes_Loop
 end
