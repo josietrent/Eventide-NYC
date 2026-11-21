@@ -109,7 +109,6 @@ start_new_script @CarHealth
 start_new_script @Packing // fudge 😏😈
 start_new_script @Barrier
 
-// FIXME: Text doesn't appear.
 Text.PrintHelp('BEACH')
 Player.SetControl($player, True)
 play_audio_stream_1channel "audio/EC/miasma.wav", True, 1.0
