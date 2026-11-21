@@ -62,7 +62,7 @@ while $BarrierIND == true
         0@ == false
     then
         $BarrierTimer = 15000
-        Text.PrintHelp('BARPORT')
+        Text.Print('BARPORT', 5000, 1)
         0@ = true
         Hud.DisplayTimer($BarrierTimer)
     else
@@ -174,7 +174,7 @@ end
 wait 500
 Camera.DoFade(500, Fade.In)
 wait 500
-Text.PrintHelp('BARTELP') // Do not set foot on our lands again!
+Text.Print('BARTELP', 5000, 1) // Do not set foot on our lands again!
 Player.SetControl($player, True)
 Player.SetHealth($player, 0)
 goto @BarrierSniffer

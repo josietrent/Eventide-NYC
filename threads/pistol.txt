@@ -175,7 +175,7 @@ while not Player.LocateOnFoot3D($player, 1147.61, -95.21, 7.02, 1.0, 1.0, 0.75, 
                 jump @Marie_Gas_Skip
             end
         end
-        Text.PrintHelp('LIQUOR')
+        Text.Print('LIQUOR', 5000, 1)
         TIMERA = 0
         while TIMERA < 5000
             wait 0
@@ -255,7 +255,7 @@ while not Player.LocateAnyMeans3D($player, 933.66, -252.64, 4.50, 1.0, 1.0, 1.0,
         then
             $TIMER = 20000
             Text.Print('WHEELS', 3000, 0)
-            Text.PrintHelp('FINACAR')
+            Text.PrintSoon('FINACAR', 5000, 1)
             Hud.DisplayTimer($TIMER)
             NeedsCar = 1
         end
@@ -1002,7 +1002,7 @@ while true
 
         Char.RemoveElegantly(Marie)
         Player.SetControl($player, True)
-        Text.PrintHelp('HIDEOUT')
+        Text.Print('HIDEOUT', 5000, 1)
         Destination = Blip.AddForCoord(1419.15, -194.40, 49.74)
         Blip.ChangeColor(Destination, BlipColor.Yellow)
         GunSphere = Sphere.Create(1419.15, -194.40, 49.74, 3.0)
@@ -1020,7 +1020,7 @@ while true
             Char.RemoveElegantly(Marie)
         end
         Player.SetControl($player, True)
-        Text.PrintHelp('HIDEOUT')
+        Text.Print('HIDEOUT', 5000, 1)
         Destination = Blip.AddForCoord(1419.15, -194.40, 49.74)
         Blip.ChangeColor(Destination, BlipColor.Yellow)
         GunSphere = Sphere.Create(1419.15, -194.40, 49.74, 3.0)

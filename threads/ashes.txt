@@ -181,7 +181,7 @@ Char.GiveWeapon(Thug2, WeaponType.Pistol, 100)
 Char.SetCurrentWeapon(Thug2, WeaponType.Pistol)
 Char.SetObjKillCharAnyMeans(Thug2, $scplayer)
 
-Text.PrintHelp('ASH5')
+Text.Print('ASH5', 5000, 1)
 wait 0
 $TIMER = 210000 // 3:30 to extinguish Chinatown fires
 Hud.DisplayTimer($TIMER)
@@ -208,7 +208,7 @@ while FireCount < 3
                 Blip.Remove(TruckBlip)
                 TruckBlip = 0
             end
-            Text.PrintHelp('ASH6')
+            Text.Print('ASH6', 5000, 1)
             InTruckHelp = 1
         end
     end
@@ -225,11 +225,11 @@ while FireCount < 3
             FireCount += 1
             if FireCount == 1
             then
-                Text.PrintHelp('ASH7')
+                Text.Print('ASH7', 4000, 1)
             end
             if FireCount == 2
             then
-                Text.PrintHelp('ASH8')
+                Text.Print('ASH8', 4000, 1)
             end
         end
     end
@@ -246,11 +246,11 @@ while FireCount < 3
             FireCount += 1
             if FireCount == 1
             then
-                Text.PrintHelp('ASH7')
+                Text.Print('ASH7', 4000, 1)
             end
             if FireCount == 2
             then
-                Text.PrintHelp('ASH8')
+                Text.Print('ASH8', 4000, 1)
             end
         end
     end
@@ -267,11 +267,11 @@ while FireCount < 3
             FireCount += 1
             if FireCount == 1
             then
-                Text.PrintHelp('ASH7')
+                Text.Print('ASH7', 4000, 1)
             end
             if FireCount == 2
             then
-                Text.PrintHelp('ASH8')
+                Text.Print('ASH8', 4000, 1)
             end
         end
     end
@@ -334,7 +334,7 @@ Char.SetObjWaitOnFoot(Thug2)
 
 Blip1 = Blip.AddForCoord(1198.00, -974.00, 14.85)
 Blip.ChangeColor(Blip1, BlipColor.Yellow)
-Text.PrintHelp('ASH9')
+Text.Print('ASH9', 5000, 1)
 MissionStage = 1
 
 while MissionStage == 1
@@ -364,7 +364,7 @@ while MissionStage == 1
 
         Char.GetHealth(Reinhardt, $ReinhardtHealthBar)
         Hud.DisplayCounterWithString($ReinhardtHealthBar, CounterDisplay.Bar, 'REINHEA')
-        Text.PrintHelp('ASHA')
+        Text.Print('ASHA', 5000, 1)
         MissionStage = 2
         break
     end

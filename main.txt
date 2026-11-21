@@ -109,7 +109,7 @@ start_new_script @CarHealth
 start_new_script @Packing // fudge 😏😈
 start_new_script @Barrier
 
-Text.PrintHelp('BEACH')
+Text.Print('BEACH', 5000, 1)
 Player.SetControl($player, True)
 play_audio_stream_1channel "audio/EC/miasma.wav", True, 1.0
 // Terminate the main initialization thread cleanly now that setup is complete
@@ -193,7 +193,7 @@ while true
             $onmission == 1
             Player.LocateOnFoot3D($player, 774.45, -880.88, 14.74, 3.0, 3.0, 3.0, False)
         then
-            Text.PrintHelp('FUCKOFF')
+            Text.Print('FUCKOFF', 4000, 1)
             wait 5000
         end
     end
@@ -254,7 +254,7 @@ while true
             $onmission == 1
             Player.LocateOnFoot3D($player, 1025.755, -471.541, 14.927, 3.0, 3.0, 3.0, False)
         then
-            Text.PrintHelp('FUCKOFF')
+            Text.Print('FUCKOFF', 4000, 1)
             wait 5000
         end
     end
@@ -301,7 +301,7 @@ while $OnGunMission == 0
         if
             $SprayShop_Active == 0
         then
-            Text.PrintHelp('HEAT')
+            Text.Print('HEAT', 4000, 1)
             $SprayShopIND = Blip.AddSpriteForCoord(924.0, -361.0, 10.0, RadarSprite.Spray)
             $SprayShop_Active = 1
         end
@@ -389,7 +389,7 @@ while $OnAlleyMission == 0
             $onmission == 1
             Player.LocateOnFoot3D($player, 1329.72, -465.71, 49.76, 3.0, 3.0, 3.0, False)
         then
-            Text.PrintHelp('FUCKOFF')
+            Text.Print('FUCKOFF', 4000, 1)
             wait 5000
         end
     end
@@ -453,7 +453,7 @@ while $OnProtectionMission == 0
             $onmission == 1
             Player.LocateOnFoot3D($player, 1214.89, -327.47, 26.07, 3.0, 3.0, 3.0, False)
         then
-            Text.PrintHelp('FUCKOFF')
+            Text.Print('FUCKOFF', 4000, 1)
             wait 5000
         end
     end
@@ -508,7 +508,7 @@ while $OnSmuggleMission == 0
             $onmission == 1
             Player.LocateOnFoot3D($player, 1214.89, -327.47, 26.07, 3.0, 3.0, 3.0, False)
         then
-            Text.PrintHelp('FUCKOFF')
+            Text.Print('FUCKOFF', 4000, 1)
             wait 5000
         end
     end
@@ -522,7 +522,7 @@ if
     $SmuggleMissionDone == 1
 then
     $KenjiBlip = Blip.AddSpriteForContactPoint(1004.42, -49.06, 7.44, RadarSprite.Kenji)
-    Text.PrintHelpString("A new Point of Contact is available.")
+    Text.PrintString("A new Point of Contact is available.", 5000)
     start_new_script @Kenji
     terminate_this_script
 else
@@ -564,7 +564,7 @@ while $OnStatueMission == 0
             $onmission == 1
             Player.LocateOnFoot3D($player, 1004.42, -49.06, 7.44, 3.0, 3.0, 3.0, False)
         then
-            Text.PrintHelp('FUCKOFF')
+            Text.Print('FUCKOFF', 4000, 1)
             wait 5000
         end
     end
@@ -628,7 +628,7 @@ while $OnSapMission == 0
             $onmission == 1
             Player.LocateOnFoot3D($player, 1004.42, -49.06, 7.44, 3.0, 3.0, 3.0, False)
         then
-            Text.PrintHelp('FUCKOFF')
+            Text.Print('FUCKOFF', 4000, 1)
             wait 5000
         end
     end
@@ -683,7 +683,7 @@ while $OnAshesMission == 0
             $onmission == 1
             Player.LocateOnFoot3D($player, 1004.42, -49.06, 7.44, 3.0, 3.0, 3.0, False)
         then
-            Text.PrintHelp('FUCKOFF')
+            Text.Print('FUCKOFF', 4000, 1)
             wait 5000
         end
     end

@@ -66,7 +66,7 @@ CarBlipRemoved = 0
 jump @Car_Enter
 
 :Car_Dead
-Text.PrintHelp('CARDIE') // The vehicle has been destroyed!
+Text.Print('CARDIE', 4000, 1) // The vehicle has been destroyed!
 Blip.Remove(CarBlip)
 Blip.Remove(Destination)
 Sphere.Remove(CarSphere)
@@ -113,7 +113,7 @@ CarBlipRemoved = 1
 Blip.Remove(CarBlip)
 Destination = Blip.AddForCoord(1419.15, -194.40, 49.74)
 CarSphere = Sphere.Create(1419.15, -194.40, 49.74, 3.0)
-Text.PrintHelp('FINHIDE') // Find a place to stay for the night.
+Text.Print('FINHIDE', 5000, 1) // Find a place to stay for the night.
 
 :Car_101
 while not Player.LocateAnyMeans3D($player, 1419.15, -194.40, 49.74, 3.0, 3.0, 3.0, False)
@@ -170,7 +170,7 @@ while not Player.LocateAnyMeans3D($player, 1419.15, -194.40, 49.74, 3.0, 3.0, 3.
                 Blip.Remove($SprayShopIND)
                 Destination = Blip.AddForCoord(1419.15, -194.40, 49.74)
                 CarSphere = Sphere.Create(1419.15, -194.40, 49.74, 3.0)
-                Text.PrintHelp('FINHIDE') // Find a place to stay for the night.
+                Text.Print('FINHIDE', 5000, 1) // Find a place to stay for the night.
                 $SprayShop_Active = 0
             end
         end
@@ -249,7 +249,7 @@ while Player.IsPlaying($player)
         end
     end
 
-    Text.PrintHelp('SAVE_1') // This abandoned house will serve as a nice hideout.
+    Text.Print('SAVE_1', 5000, 1) // This abandoned house will serve as a nice hideout.
     TIMERA = 0
     while TIMERA < 5000
         wait 0
@@ -262,7 +262,7 @@ while Player.IsPlaying($player)
         end
     end
 
-    Text.PrintHelp('SAVE_2') // For now, at least...
+    Text.Print('SAVE_2', 3000, 1) // For now, at least...
     TIMERA = 0
     while TIMERA < 3000
         wait 0
@@ -278,7 +278,7 @@ while Player.IsPlaying($player)
     Camera.SetFixedPosition(1461.19, -177.64, 55.77, 0.0, 0.0, 0.0)
     Camera.PointAtPoint(1453.64, -173.11, 55.77, SwitchType.JumpCut)
     CarSphere = Sphere.Create(1453.64, -173.11, 55.77, 3.0)
-    Text.PrintHelp('SAVE_3') // Walking into this sphere behind the bar will save the game.
+    Text.Print('SAVE_3', 6000, 1) // Walking into this sphere behind the bar will save the game.
     TIMERA = 0
     while TIMERA < 6000
         wait 0
@@ -291,7 +291,7 @@ while Player.IsPlaying($player)
         end
     end
 
-    Text.PrintHelp('SAVE_4') // When saving the game, you will lose any wanted level you may have, and time will advance by six hours.
+    Text.Print('SAVE_4', 6000, 1) // When saving the game, you will lose any wanted level you may have, and time will advance by six hours.
     TIMERA = 0
     while TIMERA < 6000
         wait 0

@@ -47,38 +47,16 @@ script_name 'Help'
 while true
     wait 250
 
-    if not Player.IsPlaying($player)
-    then
-        continue
-    end
-
-    if
-        not Player.CanStartMission($player)
+    if or
+        not Player.IsPlaying($player)
+        Camera.GetFadingStatus()
     then
         continue
     end
 
     //====================================================
-    // Mega-switch on player state for specific tutorials
+    // Tutorials allowed both on and off missions
     //====================================================
-
-    // 0. Enter/Exit Vehicle Check near $Canyonero at startup
-    if and
-        $DriveHelpPlayed == 0
-        $Intro_Passed == 0
-        not Player.IsInAnyCar($player)
-    then
-        if Car.IsStillAlive($Canyonero)
-        then
-            if Char.LocateAnyMeansCar3D($scplayer, $Canyonero, 10.0, 10.0, 8.0, False)
-            then
-                $DriveHelpPlayed = 1
-                Text.PrintHelp('DRIVE')
-                Car.MarkAsNoLongerNeeded($Canyonero)
-                continue
-            end
-        end
-    end
 
     // 1. Car Tutorial Check
     if and
@@ -98,11 +76,38 @@ while true
     if and
         $CarTutorialPlayed == 1
         $RadioHelpPlayed == 0
-        $onmission == false
         not Player.IsInAnyCar($player)
     then
         PrintRadioHelp()
         continue
+    end
+
+    if
+        not Player.CanStartMission($player)
+    then
+        continue
+    end
+
+    //====================================================
+    // Mega-switch on freeroam player state for tutorials
+    //====================================================
+
+    // 0. Enter/Exit Vehicle Check near $Canyonero at startup
+    if and
+        $DriveHelpPlayed == 0
+        $Intro_Passed == 0
+        not Player.IsInAnyCar($player)
+    then
+        if Car.IsStillAlive($Canyonero)
+        then
+            if Char.LocateAnyMeansCar3D($scplayer, $Canyonero, 10.0, 10.0, 8.0, False)
+            then
+                $DriveHelpPlayed = 1
+                Text.PrintHelp('DRIVE')
+                Car.MarkAsNoLongerNeeded($Canyonero)
+                continue
+            end
+        end
     end
 
     // 2. Wasted / Death Tutorial Check (Hospital Location Check)
@@ -212,8 +217,18 @@ return
     wait 100
     Text.PrintHelp('DRIVE2')
     wait 5000
+    if not Player.IsInAnyCar($player)
+    then
+        Text.ClearHelp()
+        return
+    end
     Text.PrintHelp('DRIVE3')
     wait 5000
+    if not Player.IsInAnyCar($player)
+    then
+        Text.ClearHelp()
+        return
+    end
     Text.PrintHelp('DRIVE4')
     wait 5000
     Text.ClearHelp()
@@ -223,8 +238,6 @@ return
     wait 1000
     if and
         Player.IsPlaying($player)
-        Player.CanStartMission($player)
-        $onmission == false
         not Player.IsInAnyCar($player)
         not Camera.GetFadingStatus()
     then

@@ -73,17 +73,10 @@ while true
     end
 end
 
-if
-    $DriveHelpPlayed == 0
-then
-    $DriveHelpPlayed = 1
-    Text.PrintHelp('DRIVE')
-    wait 5000
-end
 jump @Car_Enter
 
 :Car_Dead
-Text.PrintHelp('CARDIE')
+Text.Print('CARDIE', 4000, 1)
 Blip.Remove(CarBlip)
 wait 500
 jump @INIT_Car
@@ -123,27 +116,13 @@ Blip.Remove(CarBlip)
 Player.SetControl($player, False)
 Text.Print('STARVE', 3000, 0)
 wait 3000
-if
-    $CarTutorialPlayed == 0
-then
-    Player.SetControl($player, True)
-    Text.PrintHelp('DRIVE2')
-    wait 5000
-    Text.PrintHelp('DRIVE3')
-    wait 5000
-    Text.PrintHelp('DRIVE4')
-    $CarTutorialPlayed = 1
-    wait 5000
-    jump @INIT_Noodle
-else
-    Player.SetControl($player, True)
-    jump @INIT_Noodle
-end
+Player.SetControl($player, True)
+jump @INIT_Noodle
 
 :INIT_Noodle
 PunkNoodles = Blip.AddSpriteForCoord(1041.73, -653.05, 14.82, RadarSprite.Love)
 NoodleSphere = Sphere.Create(1041.73, -653.05, 14.82, 3.0)
-Text.PrintHelp('NOODLE')
+Text.Print('NOODLE', 5000, 1)
 
 :INIT_Near
 while not Player.LocateAnyMeans3D($player, 1041.73, -653.05, 14.82, 15.0, 15.0, 5.0, False)
@@ -243,7 +222,7 @@ while PlayerNotInIdaho == 1
         Blip.Remove(CarBlip)
         PunkNoodles = Blip.AddSpriteForCoord(1041.73, -653.05, 14.82, RadarSprite.Love)
         NoodleSphere = Sphere.Create(1041.73, -653.05, 14.82, 3.0)
-        Text.PrintHelp('NOODLE')
+        Text.Print('NOODLE', 5000, 1)
         CarBlipRemoved = 1
         PlayerNotInIdaho = 0
         jump @INIT_Near
@@ -333,13 +312,13 @@ Mission.Finish()
 $APOC_LEVEL = 1
 wait 2000
 //start_new_script @Fires
-Text.PrintHelp('SUBWAY')
+Text.Print('SUBWAY', 5000, 1)
 $MissionTriggerBlip = Blip.AddSpriteForContactPoint(1025.755, -471.541, 14.927, RadarSprite.Salvatore)
 $MissionTriggerSphere = Sphere.Create(1025.755, -471.541, 14.927, 3.0)
 $Intro_Passed = 1
 $onmission = 0
 Player.SetControl($player, True)
 wait 5000
-Text.PrintHelp('TOMMY')
+Text.Print('TOMMY', 5000, 1)
 $CarDealerBlip = Blip.AddSpriteForContactPoint(1233.78, -129.02, 15.05, RadarSprite.Tony)
 terminate_this_custom_script

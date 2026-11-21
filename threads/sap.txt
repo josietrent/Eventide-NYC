@@ -191,7 +191,7 @@ Char.GiveWeapon(Guard6, WeaponType.Shotgun, 40)
 Char.SetCurrentWeapon(Guard6, WeaponType.Shotgun)
 Char.SetObjKillCharAnyMeans(Guard6, $scplayer)
 
-Text.PrintHelp('SAP5')
+Text.Print('SAP5', 5000, 1)
 wait 0
 $TIMER = 240000 // 4:00 pre-dawn countdown
 Hud.DisplayTimer($TIMER)
@@ -219,11 +219,11 @@ while SapCount < 3
             Sap1 = 0
             if SapCount == 1
             then
-                Text.PrintHelp('SAP6')
+                Text.Print('SAP6', 4000, 1)
             end
             if SapCount == 2
             then
-                Text.PrintHelp('SAP7')
+                Text.Print('SAP7', 4000, 1)
             end
         end
     end
@@ -238,11 +238,11 @@ while SapCount < 3
             Sap2 = 0
             if SapCount == 1
             then
-                Text.PrintHelp('SAP6')
+                Text.Print('SAP6', 4000, 1)
             end
             if SapCount == 2
             then
-                Text.PrintHelp('SAP7')
+                Text.Print('SAP7', 4000, 1)
             end
         end
     end
@@ -257,11 +257,11 @@ while SapCount < 3
             Sap3 = 0
             if SapCount == 1
             then
-                Text.PrintHelp('SAP6')
+                Text.Print('SAP6', 4000, 1)
             end
             if SapCount == 2
             then
-                Text.PrintHelp('SAP7')
+                Text.Print('SAP7', 4000, 1)
             end
         end
     end
@@ -290,7 +290,7 @@ Char.SetObjWaitOnFoot(Kenji)
 // Reuse SapBlip1 as the return blip
 SapBlip1 = Blip.AddForCoord(1004.42, -49.06, 7.44)
 Blip.ChangeColor(SapBlip1, BlipColor.Yellow)
-Text.PrintHelp('SAP8')
+Text.Print('SAP8', 5000, 1)
 
 while true
     wait 250

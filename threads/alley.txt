@@ -643,7 +643,7 @@ end
 
 :Alley_Pass
 $LuigiBlip = Blip.AddSpriteForContactPoint(1214.89, -327.47, 26.07, RadarSprite.Luigi)
-Text.PrintHelpString("A new Point of Contact is available.")
+Text.PrintString("A new Point of Contact is available.", 5000)
 while true
     wait 250
     if or

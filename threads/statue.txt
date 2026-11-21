@@ -154,7 +154,7 @@ Char.SetHealth(Marie, 100)
 Char.SetProofs(Marie, False, True, True, False, False)
 
 MarieBlip = Blip.AddForChar(Marie)
-Text.PrintHelp('STAT5')
+Text.Print('STAT5', 5000, 1)
 wait 0
 // Stage 1: Urgency Timer to reach Trenton supply yard
 $TIMER = 180000 // 3:00 urgency timer
@@ -209,7 +209,7 @@ wait 250
 Camera.DoFade(1000, Fade.In)
 wait 1000
 Player.SetControl($player, True)
-Text.PrintHelp('STAT6')
+Text.Print('STAT6', 5000, 1)
 
 // Show Marie's Health Bar
 Hud.DisplayCounterWithString($MarieHealthBar, CounterDisplay.Bar, 'MARHEAL')
@@ -260,7 +260,7 @@ while MissionStage == 1
         not Char.IsStillAlive(Thug3)
     then
         Hud.ClearCounter($MarieHealthBar)
-        Text.PrintHelp('STAT7')
+        Text.Print('STAT7', 5000, 1)
         MissionStage = 2
         break
     end
@@ -297,12 +297,12 @@ while MissionStage == 2
             // Hideout dropoff
             HomeBlip = Blip.AddForCoord(1420.69, -183.11, 50.33)
             Blip.ChangeColor(HomeBlip, BlipColor.Yellow)
-            Text.PrintHelp('STATA')
+            Text.Print('STATA', 5000, 1)
             MissionStage = 3
             break
         end
     else
-        Text.PrintHelp('STAT8')
+        Text.Print('STAT8', 3000, 1)
         wait 3000
     end
 end
