@@ -94,6 +94,17 @@ while true
         continue
     end
 
+    // 1b. On-Foot Portable Radio Help Check
+    if and
+        $CarTutorialPlayed == 1
+        $RadioHelpPlayed == 0
+        $onmission == false
+        not Player.IsInAnyCar($player)
+    then
+        PrintRadioHelp()
+        continue
+    end
+
     // 2. Wasted / Death Tutorial Check (Hospital Location Check)
     if and
         Player.LocateAnyMeans3D($player, 1148.41, -585.33, 15.00, 2.0, 2.0, 2.0, False)
@@ -162,6 +173,7 @@ while true
         $DeathHelpPlayed == 1
         $SprintHelpPlayed == 1
         $BridgeHelpPlayed == 1
+        $RadioHelpPlayed == 1
     then
         terminate_this_custom_script
     end
@@ -205,6 +217,20 @@ return
     Text.PrintHelp('DRIVE4')
     wait 5000
     Text.ClearHelp()
+return
+
+:PrintRadioHelp
+    wait 1000
+    if and
+        Player.IsPlaying($player)
+        Player.CanStartMission($player)
+        $onmission == false
+        not Player.IsInAnyCar($player)
+        not Camera.GetFadingStatus()
+    then
+        $RadioHelpPlayed = 1
+        Text.PrintHelp('RADIOH')
+    end
 return
 
 :PrintHowToBoat

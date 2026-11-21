@@ -112,6 +112,7 @@ PISTOL  Get a ~b~Pistol~w~ from the parking lot behind ~b~AMCo.~w~
 RADIO1	Press the ~k~~VEHICLE_CHANGE_RADIO_STATION~ key to change radio stations.
 RADIO2  You can change the radio station at any time by pressing the ~k~~VEHICLE_CHANGE_RADIO_STATION~ key.
 RADIO3  Listen to whatever station you want!
+RADIOH	Your portable radio stays on when you exit a vehicle. Press ~y~R~w~ or ~y~Insert~w~ on foot to change stations or turn it off.
 REWARD	You've unlocked a new weapon!
 SAVE_1  This abandoned house will serve as a nice hideout.
 SAVE_2  For now, at least...
