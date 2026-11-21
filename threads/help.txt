@@ -4,6 +4,7 @@
 nop
 
 Blip PorterTunnel = 0
+int TunnelLaunched = 0
 
 // Startup Gate: Wait until the game and player are fully active before spawning anything
 while not Player.IsPlaying($player)
@@ -11,6 +12,15 @@ while not Player.IsPlaying($player)
 end
 
 wait 1000 // Brief buffer to ensure world streaming is settled
+
+// Relaunch Porter Tunnel guard after save reload if bridge help already ran and Staunton is still locked
+if and
+    $BridgeHelpPlayed == 1
+    $BarrierIND == 1
+then
+    TunnelLaunched = 1
+    stream_custom_script "tunnel.cm"
+end
 
 if
     $HelpPickupsSpawned == 0
@@ -60,7 +70,7 @@ while true
     then
         if Car.IsStillAlive($Canyonero)
         then
-            if Char.LocateAnyMeansCar3D($scplayer, $Canyonero, 20.0, 20.0, 8.0, False)
+            if Char.LocateAnyMeansCar3D($scplayer, $Canyonero, 10.0, 10.0, 8.0, False)
             then
                 $DriveHelpPlayed = 1
                 Text.PrintHelp('DRIVE')
@@ -175,6 +185,13 @@ end
     end
 
     Blip.Remove(PorterTunnel)
+    if and
+        TunnelLaunched == 0
+        $BarrierIND == 1
+    then
+        TunnelLaunched = 1
+        stream_custom_script "tunnel.cm"
+    end
 return
 
 :PrintHowToDrive
