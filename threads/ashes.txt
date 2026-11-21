@@ -440,9 +440,11 @@ Text.Print('ASHB', 4000, 1)
 wait 4000
 Text.Print('ASHC', 4500, 1)
 wait 4500
-Text.Print('ASHD', 4500, 1)
+Text.Print('ASHD', 3500, 1)
+wait 3500
+Text.Print('ASHE', 4500, 1)
 Char.SetObjFleeOnFootTillSafe(Reinhardt)
-wait 2000
+wait 3000
 
 Camera.DoFade(1000, Fade.Out)
 wait 1000
