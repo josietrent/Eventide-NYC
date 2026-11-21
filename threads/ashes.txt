@@ -1,0 +1,557 @@
+{$CLEO .cm}
+
+{$USE CLEO, AUDIO}
+
+{$INCLUDE ../utils/globals.txt}
+
+var
+    $ReinhardtHealthBar: int
+end
+
+//-------------Mission 8 (triggered by :Ashes in main.txt)---------------
+:Ashes
+script_name 'Ashes'
+
+Char Kenji = 0
+Car FireTruck = 0
+Blip TruckBlip = 0
+ScriptFire Fire1 = 0
+ScriptFire Fire2 = 0
+ScriptFire Fire3 = 0
+Blip Blip1 = 0
+Blip Blip2 = 0
+Blip Blip3 = 0
+Char Thug1 = 0
+Char Thug2 = 0
+Char Reinhardt = 0
+int FireCount = 0
+int MissionStage = 0 // 0=fires, 1=travel_warehouse, 2=corner_reinhardt
+int InTruckHelp = 0
+
+$onmission = 1
+$OnAshesMission = 1
+$AshesMissionDone = 0
+wait 100
+
+Streaming.RequestModel(#FIRETRUK)
+Streaming.RequestModel(#GANG05)
+Streaming.RequestModel(#GANG06)
+Streaming.RequestModel(#BAT)
+Streaming.RequestModel(#COLT45)
+Streaming.LoadSpecialCharacter(1, 'KENJI')
+wait 500
+Streaming.LoadAllModelsNow()
+wait 500
+
+while true
+    wait 0
+    if and
+        Streaming.HasModelLoaded(#FIRETRUK)
+        Streaming.HasModelLoaded(#GANG05)
+        Streaming.HasModelLoaded(#GANG06)
+        Streaming.HasModelLoaded(#BAT)
+        Streaming.HasModelLoaded(#COLT45)
+        Streaming.HasSpecialCharacterLoaded(1)
+    then
+        break
+    end
+end
+
+Hud.SwitchWidescreen(True)
+wait 1000
+Player.SetControl($player, False)
+
+// Create Kenji at Harwood contact point (1004.42, -49.06, 7.44)
+World.ClearArea(994.25, -52.00, 7.15, 8.0, True)
+Kenji = Char.Create(PedType.Special, #SPECIAL01, 996.00, -52.00, 7.20)
+Char.SetObjNoObj(Kenji)
+Char.SetHeading(Kenji, 90.0)
+
+// Position Toni in the Head Radio parking lot facing Kenji
+Player.SetCoordinates($player, 992.50, -52.00, 7.10)
+Player.SetHeading($player, 270.0)
+wait 0
+Char.SetHeading(Kenji, 90.0)
+Char.SetObjWaitOnFoot(Kenji)
+
+Camera.SetFixedPosition(990.50, -50.00, 8.30, 0.0, 0.0, 0.0)
+Camera.PointAtChar(Kenji, CameraMode.FollowPed, SwitchType.JumpCut)
+Camera.SetFadingColor(40, 0, 70)
+Camera.DoFade(1500, Fade.In)
+wait 1500
+
+// Kenji Dialogue Sequence with skip check
+Text.Print('ASH1', 4500, 1)
+TIMERA = 0
+while TIMERA < 4500
+    wait 0
+    if or
+        Pad.IsKeyPressed(KeyCode.LeftShift)
+        Pad.IsKeyPressed(KeyCode.Space)
+        Pad.IsKeyPressed(KeyCode.F)
+    then
+        jump @Ashes_Briefing_Skip
+    end
+end
+
+Text.Print('ASH2', 4500, 1)
+TIMERA = 0
+while TIMERA < 4500
+    wait 0
+    if or
+        Pad.IsKeyPressed(KeyCode.LeftShift)
+        Pad.IsKeyPressed(KeyCode.Space)
+        Pad.IsKeyPressed(KeyCode.F)
+    then
+        jump @Ashes_Briefing_Skip
+    end
+end
+
+Text.Print('ASH3', 4500, 1)
+TIMERA = 0
+while TIMERA < 4500
+    wait 0
+    if or
+        Pad.IsKeyPressed(KeyCode.LeftShift)
+        Pad.IsKeyPressed(KeyCode.Space)
+        Pad.IsKeyPressed(KeyCode.F)
+    then
+        jump @Ashes_Briefing_Skip
+    end
+end
+
+Text.Print('ASH4', 4500, 1)
+TIMERA = 0
+while TIMERA < 4500
+    wait 0
+    if or
+        Pad.IsKeyPressed(KeyCode.LeftShift)
+        Pad.IsKeyPressed(KeyCode.Space)
+        Pad.IsKeyPressed(KeyCode.F)
+    then
+        jump @Ashes_Briefing_Skip
+    end
+end
+
+:Ashes_Briefing_Skip
+Text.ClearPrints()
+Camera.RestoreJumpcut()
+Hud.SwitchWidescreen(False)
+Player.SetControl($player, True)
+
+if not Kenji == 0
+then
+    Char.RemoveElegantly(Kenji)
+    Kenji = 0
+end
+Streaming.UnloadSpecialCharacter(1)
+
+// Stage 1: Harwood Fire Station Firetruck + 3 Chinatown Market Square fires (IDE/IPL verified)
+// Harwood Fire Station apron (INDUSTNE.IPL: fire_platform 1090.8,-69.02,6.55 -> rd_Road1A25 1125.77,-71.32,6.28)
+World.ClearArea(1107.50, -69.50, 7.00, 10.0, True)
+FireTruck = Car.Create(#FIRETRUK, 1107.50, -69.50, 7.00)
+Car.SetHeading(FireTruck, 270.0)
+TruckBlip = Blip.AddForCar(FireTruck)
+Blip.ChangeColor(TruckBlip, BlipColor.LightBlue)
+
+// Chinatown Market Square (industSW.ipl: streetlamps/bollards/fishstalls at Z ~ 13.8-14.0)
+World.ClearArea(955.00, -684.00, 14.00, 35.0, True)
+Fire1 = ScriptFire.Create(933.00, -682.00, 13.95)
+ScriptFire.SetAudio(Fire1, True)
+Blip1 = Blip.AddForCoord(933.00, -682.00, 13.95)
+
+Fire2 = ScriptFire.Create(955.00, -681.50, 13.95)
+ScriptFire.SetAudio(Fire2, True)
+Blip2 = Blip.AddForCoord(955.00, -681.50, 13.95)
+
+Fire3 = ScriptFire.Create(978.00, -689.00, 13.95)
+ScriptFire.SetAudio(Fire3, True)
+Blip3 = Blip.AddForCoord(978.00, -689.00, 13.95)
+
+// Two arsonist crew members harassing Chinatown Square
+Thug1 = Char.Create(PedType.Gang3, #GANG06, 946.00, -687.00, 14.00)
+Char.SetHeading(Thug1, 90.0)
+Char.GiveWeapon(Thug1, WeaponType.BaseballBat, 1)
+Char.SetCurrentWeapon(Thug1, WeaponType.BaseballBat)
+Char.SetObjKillCharAnyMeans(Thug1, $scplayer)
+
+Thug2 = Char.Create(PedType.Gang3, #GANG06, 972.00, -694.00, 14.00)
+Char.SetHeading(Thug2, 90.0)
+Char.GiveWeapon(Thug2, WeaponType.Pistol, 100)
+Char.SetCurrentWeapon(Thug2, WeaponType.Pistol)
+Char.SetObjKillCharAnyMeans(Thug2, $scplayer)
+
+Text.PrintHelp('ASH5')
+wait 0
+$TIMER = 210000 // 3:30 to extinguish Chinatown fires
+Hud.DisplayTimer($TIMER)
+
+while FireCount < 3
+    wait 250
+    if not Player.IsPlaying($player)
+    then
+        jump @Ashes_Fail
+    end
+
+    if $TIMER <= 0
+    then
+        Text.Print('ASHTIM', 4000, 1)
+        jump @Ashes_Fail
+    end
+
+    if InTruckHelp == 0
+    then
+        if Player.IsInModel($player, #FIRETRUK)
+        then
+            if not TruckBlip == 0
+            then
+                Blip.Remove(TruckBlip)
+                TruckBlip = 0
+            end
+            Text.PrintHelp('ASH6')
+            InTruckHelp = 1
+        end
+    end
+
+    if not Blip1 == 0
+    then
+        if ScriptFire.IsExtinguished(Fire1)
+        then
+            ScriptFire.Remove(Fire1)
+            Fire1 = 0
+            Blip.Remove(Blip1)
+            Blip1 = 0
+            Stat.RegisterFireExtinguished()
+            FireCount += 1
+            if FireCount == 1
+            then
+                Text.PrintHelp('ASH7')
+            end
+            if FireCount == 2
+            then
+                Text.PrintHelp('ASH8')
+            end
+        end
+    end
+
+    if not Blip2 == 0
+    then
+        if ScriptFire.IsExtinguished(Fire2)
+        then
+            ScriptFire.Remove(Fire2)
+            Fire2 = 0
+            Blip.Remove(Blip2)
+            Blip2 = 0
+            Stat.RegisterFireExtinguished()
+            FireCount += 1
+            if FireCount == 1
+            then
+                Text.PrintHelp('ASH7')
+            end
+            if FireCount == 2
+            then
+                Text.PrintHelp('ASH8')
+            end
+        end
+    end
+
+    if not Blip3 == 0
+    then
+        if ScriptFire.IsExtinguished(Fire3)
+        then
+            ScriptFire.Remove(Fire3)
+            Fire3 = 0
+            Blip.Remove(Blip3)
+            Blip3 = 0
+            Stat.RegisterFireExtinguished()
+            FireCount += 1
+            if FireCount == 1
+            then
+                Text.PrintHelp('ASH7')
+            end
+            if FireCount == 2
+            then
+                Text.PrintHelp('ASH8')
+            end
+        end
+    end
+end
+
+// All 3 fires extinguished! Release Stage 1 entities cleanly
+Hud.ClearTimer($TIMER)
+if not TruckBlip == 0
+then
+    Blip.Remove(TruckBlip)
+    TruckBlip = 0
+end
+if not FireTruck == 0
+then
+    Car.MarkAsNoLongerNeeded(FireTruck)
+    FireTruck = 0
+end
+if not Thug1 == 0
+then
+    Char.MarkAsNoLongerNeeded(Thug1)
+    Thug1 = 0
+end
+if not Thug2 == 0
+then
+    Char.MarkAsNoLongerNeeded(Thug2)
+    Thug2 = 0
+end
+Streaming.MarkModelAsNoLongerNeeded(#FIRETRUK)
+
+// Atmospheric shift as the arson trail leads to Reinhardt
+play_audio_stream_1channel "audio/EC/miasma.wav", False, 1.0
+Weather.ForceNow(WeatherType.Foggy)
+Camera.SetFadingColor(30, 0, 82)
+Camera.DoFade(300, Fade.Out)
+wait 300
+Camera.DoFade(600, Fade.In)
+wait 600
+
+// Stage 2: Corner Reinhardt at Portland Harbor Warehouse Yard (industSE.ipl: warehouse1z / turnr5x50 / fire_hydrant at Z=14.86)
+World.ClearArea(1198.00, -972.00, 14.85, 18.0, True)
+Reinhardt = Char.Create(PedType.Gang3, #GANG05, 1198.00, -966.00, 14.85)
+Char.SetHeading(Reinhardt, 180.0)
+Char.SetHealth(Reinhardt, 100)
+Char.SetOnlyDamagedByPlayer(Reinhardt, True)
+Char.GiveWeapon(Reinhardt, WeaponType.BaseballBat, 1)
+Char.SetCurrentWeapon(Reinhardt, WeaponType.BaseballBat)
+Char.SetObjWaitOnFoot(Reinhardt)
+
+Thug1 = Char.Create(PedType.Gang3, #GANG06, 1192.00, -972.00, 14.85)
+Char.SetHeading(Thug1, 180.0)
+Char.GiveWeapon(Thug1, WeaponType.Pistol, 100)
+Char.SetCurrentWeapon(Thug1, WeaponType.Pistol)
+Char.SetObjWaitOnFoot(Thug1)
+
+Thug2 = Char.Create(PedType.Gang3, #GANG06, 1204.00, -972.00, 14.85)
+Char.SetHeading(Thug2, 180.0)
+Char.GiveWeapon(Thug2, WeaponType.BaseballBat, 1)
+Char.SetCurrentWeapon(Thug2, WeaponType.BaseballBat)
+Char.SetObjWaitOnFoot(Thug2)
+
+Blip1 = Blip.AddForCoord(1198.00, -974.00, 14.85)
+Blip.ChangeColor(Blip1, BlipColor.Yellow)
+Text.PrintHelp('ASH9')
+MissionStage = 1
+
+while MissionStage == 1
+    wait 250
+    if or
+        not Player.IsPlaying($player)
+        not Char.IsStillAlive(Reinhardt)
+    then
+        jump @Ashes_Fail
+    end
+
+    if Player.LocateAnyMeans3D($player, 1198.00, -974.00, 14.85, 35.0, 35.0, 12.0, False)
+    then
+        Blip.Remove(Blip1)
+        Blip1 = Blip.AddForChar(Reinhardt)
+        Blip.ChangeColor(Blip1, BlipColor.Green)
+
+        Char.SetObjKillCharAnyMeans(Reinhardt, $scplayer)
+        if Char.IsStillAlive(Thug1)
+        then
+            Char.SetObjKillCharAnyMeans(Thug1, $scplayer)
+        end
+        if Char.IsStillAlive(Thug2)
+        then
+            Char.SetObjKillCharAnyMeans(Thug2, $scplayer)
+        end
+
+        Char.GetHealth(Reinhardt, $ReinhardtHealthBar)
+        Hud.DisplayCounterWithString($ReinhardtHealthBar, CounterDisplay.Bar, 'REINHEA')
+        Text.PrintHelp('ASHA')
+        MissionStage = 2
+        break
+    end
+end
+
+while MissionStage == 2
+    wait 50
+    if not Player.IsPlaying($player)
+    then
+        jump @Ashes_Fail
+    end
+
+    if not Char.IsStillAlive(Reinhardt)
+    then
+        Text.Print('ASHF', 4000, 1)
+        jump @Ashes_Fail
+    end
+
+    Char.GetHealth(Reinhardt, $ReinhardtHealthBar)
+    if $ReinhardtHealthBar <= 25
+    then
+        Hud.ClearCounter($ReinhardtHealthBar)
+        Blip.Remove(Blip1)
+        Blip1 = 0
+        break
+    end
+end
+
+:Ashes_OutroCutscene
+Player.SetControl($player, False)
+Hud.SwitchWidescreen(True)
+Camera.SetFadingColor(40, 0, 70)
+Camera.DoFade(600, Fade.Out)
+wait 600
+
+// Scatter any surviving lackeys before the interrogation
+if not Thug1 == 0
+then
+    if Char.IsStillAlive(Thug1)
+    then
+        Char.SetObjFleeOnFootTillSafe(Thug1)
+    end
+end
+if not Thug2 == 0
+then
+    if Char.IsStillAlive(Thug2)
+    then
+        Char.SetObjFleeOnFootTillSafe(Thug2)
+    end
+end
+
+if Player.IsInAnyCar($player)
+then
+    Player.WarpFromCarToCoord($player, 1198.00, -973.00, 14.85)
+else
+    Player.SetCoordinates($player, 1198.00, -973.00, 14.85)
+end
+Player.SetHeading($player, 0.0)
+
+Char.SetCoordinates(Reinhardt, 1198.00, -970.50, 14.85)
+Char.SetObjNoObj(Reinhardt)
+Char.SetHeading(Reinhardt, 180.0)
+wait 0
+Char.SetHeading(Reinhardt, 180.0)
+Char.SetObjWaitOnFoot(Reinhardt)
+
+Camera.SetFixedPosition(1200.50, -974.50, 16.00, 0.0, 0.0, 0.0)
+Camera.PointAtChar(Reinhardt, CameraMode.FollowPed, SwitchType.JumpCut)
+Camera.DoFade(800, Fade.In)
+wait 800
+
+Text.Print('ASHB', 4000, 1)
+wait 4000
+Text.Print('ASHC', 4500, 1)
+wait 4500
+Text.Print('ASHD', 4500, 1)
+Char.SetObjFleeOnFootTillSafe(Reinhardt)
+wait 2000
+
+Camera.DoFade(1000, Fade.Out)
+wait 1000
+Camera.RestoreJumpcut()
+Hud.SwitchWidescreen(False)
+Camera.SetFadingColor(40, 0, 70)
+Camera.DoFade(1000, Fade.In)
+wait 1000
+
+// Mission Success!
+Text.PrintWithNumberBig('MISPASS', 30000, 5000, TextStyle.Middle)
+Audio.PlayMissionPassedTune(1)
+Player.AddScore($player, 30000)
+Stat.RegisterMissionPassed('MIS8NAM')
+Mission.Finish()
+$AshesMissionDone = 1
+$onmission = 0
+
+// Cleanup
+if not Reinhardt == 0
+then
+    Char.RemoveElegantly(Reinhardt)
+    Reinhardt = 0
+end
+if not Thug1 == 0
+then
+    Char.RemoveElegantly(Thug1)
+    Thug1 = 0
+end
+if not Thug2 == 0
+then
+    Char.RemoveElegantly(Thug2)
+    Thug2 = 0
+end
+Streaming.MarkModelAsNoLongerNeeded(#GANG05)
+Streaming.MarkModelAsNoLongerNeeded(#GANG06)
+Streaming.MarkModelAsNoLongerNeeded(#BAT)
+Streaming.MarkModelAsNoLongerNeeded(#COLT45)
+Player.SetControl($player, True)
+$OnAshesMission = 0
+terminate_this_custom_script
+
+:Ashes_Fail
+$onmission = 0
+$AshesMissionDone = 0
+Text.ClearPrints()
+Hud.ClearTimer($TIMER)
+Hud.ClearCounter($ReinhardtHealthBar)
+World.RemoveAllScriptFires()
+if not TruckBlip == 0
+then
+    Blip.Remove(TruckBlip)
+    TruckBlip = 0
+end
+if not Blip1 == 0
+then
+    Blip.Remove(Blip1)
+    Blip1 = 0
+end
+if not Blip2 == 0
+then
+    Blip.Remove(Blip2)
+    Blip2 = 0
+end
+if not Blip3 == 0
+then
+    Blip.Remove(Blip3)
+    Blip3 = 0
+end
+Text.PrintBigString("Mission Failed!", 3000, TextStyle.Middle)
+wait 3000
+Camera.SetFadingColor(40, 0, 70)
+Camera.DoFade(1500, Fade.Out)
+wait 1500
+if not Kenji == 0
+then
+    Char.Delete(Kenji)
+    Kenji = 0
+end
+if not FireTruck == 0
+then
+    Car.Delete(FireTruck)
+    FireTruck = 0
+end
+if not Thug1 == 0
+then
+    Char.Delete(Thug1)
+    Thug1 = 0
+end
+if not Thug2 == 0
+then
+    Char.Delete(Thug2)
+    Thug2 = 0
+end
+if not Reinhardt == 0
+then
+    Char.Delete(Reinhardt)
+    Reinhardt = 0
+end
+Streaming.UnloadSpecialCharacter(1)
+Streaming.MarkModelAsNoLongerNeeded(#FIRETRUK)
+Streaming.MarkModelAsNoLongerNeeded(#GANG05)
+Streaming.MarkModelAsNoLongerNeeded(#GANG06)
+Streaming.MarkModelAsNoLongerNeeded(#BAT)
+Streaming.MarkModelAsNoLongerNeeded(#COLT45)
+Camera.RestoreJumpcut()
+Hud.SwitchWidescreen(False)
+Camera.DoFade(1500, Fade.In)
+wait 1500
+Player.SetControl($player, True)
+$OnAshesMission = 0
+terminate_this_custom_script
