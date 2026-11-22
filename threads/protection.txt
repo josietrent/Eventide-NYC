@@ -158,11 +158,12 @@ Camera.SetFadingColor(40, 0, 70)
 Camera.DoFade(1500, Fade.Out)
 wait 1500
 World.ClearArea(1202.93, -426.60, 25.07, 6.0, True)
-World.ClearArea(1186.04, -464.43, 25.07, 6.0, True)
+World.ClearArea(1199.00, -440.00, 24.20, 6.0, True)
 Deadbeat = Char.Create(PedType.CivMale, #B_MAN1, 1202.93, -426.60, 25.07)
 Char.SetObjWaitOnFoot(Deadbeat)
-DeadbeatCar = Car.Create(#KURUMA, 1186.04, -464.43, 25.07)
+DeadbeatCar = Car.Create(#KURUMA, 1199.00, -440.00, 24.20)
 Car.SetHeading(DeadbeatCar, 180.0)
+Car.SetDoorStatus(DeadbeatCar, CarLock.LockoutPlayerOnly)
 Camera.RestoreJumpcut()
 Hud.SwitchWidescreen(False)
 Camera.DoFade(1500, Fade.In)
@@ -191,11 +192,12 @@ end
 if Deadbeat == 0
 then
     World.ClearArea(1202.93, -426.60, 25.07, 6.0, True)
-    World.ClearArea(1186.04, -464.43, 25.07, 6.0, True)
+    World.ClearArea(1199.00, -440.00, 24.20, 6.0, True)
     Deadbeat = Char.Create(PedType.CivMale, #B_MAN1, 1202.93, -426.60, 25.07)
     Char.SetObjWaitOnFoot(Deadbeat)
-    DeadbeatCar = Car.Create(#KURUMA, 1186.04, -464.43, 25.07)
+    DeadbeatCar = Car.Create(#KURUMA, 1199.00, -440.00, 24.20)
     Car.SetHeading(DeadbeatCar, 180.0)
+    Car.SetDoorStatus(DeadbeatCar, CarLock.LockoutPlayerOnly)
 end
 Camera.SetFadingColor(40, 0, 70)
 Camera.DoFade(500, Fade.In)
@@ -238,13 +240,16 @@ wait 1000
 Text.PrintString("Look, tell Louie I don't have his cash this week!", 4000)
 wait 4000
 
-// Spooked target runs to his car first, then enters once nearby
+// Spooked target runs to his nearby car while player gets control immediately
 Char.SetObjNoObj(Deadbeat)
-Char.SetObjGotoCoordOnFoot(Deadbeat, 1188.50, -464.43)
+Char.SetObjGotoCoordOnFoot(Deadbeat, 1199.00, -438.00)
 Char.SetRunning(Deadbeat, True)
+Hud.SwitchWidescreen(False)
+Camera.RestoreJumpcut()
+Player.SetControl($player, True)
 Text.PrintString("He's running for it!", 5000)
 
-while not Char.LocateAnyMeans2D(Deadbeat, 1188.50, -464.43, 4.0, 4.0, False)
+while not Char.LocateAnyMeans2D(Deadbeat, 1199.00, -438.00, 4.0, 4.0, False)
     wait 0
     if
         not Player.IsPlaying($player)
@@ -322,10 +327,6 @@ Car.SetChangeLane(DeadbeatCar, True)
 Car.SetDrivingStyle(DeadbeatCar, DrivingMode.PloughThrough)
 Car.SetCruiseSpeed(DeadbeatCar, 95.0)
 Car.GotoCoordinates(DeadbeatCar, 1193.61, -491.55, 24.41)
-wait 500
-Hud.SwitchWidescreen(False)
-Camera.RestoreJumpcut()
-Player.SetControl($player, True)
 Text.PrintString("Stop him before he gets away!", 4000)
 RouteState = 1
 TIMERA = 0
@@ -532,6 +533,13 @@ while true
 end
 
 :Protection_FleeOnFoot
+if not DeadbeatCar == 0
+then
+    if Car.IsStillAlive(DeadbeatCar)
+    then
+        Car.SetDoorStatus(DeadbeatCar, CarLock.Unlocked)
+    end
+end
 if
     Char.IsInCar(Deadbeat, DeadbeatCar)
 then
@@ -777,7 +785,7 @@ then
     Luigi = 0
 end
 World.ClearArea(1202.93, -426.60, 25.07, 6.0, True)
-World.ClearArea(1186.04, -464.43, 25.07, 6.0, True)
+World.ClearArea(1199.00, -440.00, 24.20, 6.0, True)
 World.ClearArea(1219.74, -313.32, 29.95, 6.0, True)
 Streaming.UnloadSpecialCharacter(1)
 Camera.RestoreJumpcut()
