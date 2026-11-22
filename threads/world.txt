@@ -46,7 +46,23 @@ then
     $AK47Spawn = Pickup.CreateWithAmmo(#AK47, PickupType.OnStreet, 150, 85.13, -986.52, 26.17)
 end
 
-// Keep density multipliers enforced across missions, wasted/busted, and engine resets
+// Ensure Staunton Newport Pay 'n' Spray exists on older savegames too
+if $SprayGarageCOMCreated == 0
+then
+    $SprayGarageCOM = Garage.Create(376.25, -496.5, 24.8, 385.6, -490.8, 29.0, GarageType.Respray)
+    Garage.SetRotatingDoor($SprayGarageCOM)
+    $SprayGarageCOMCreated = 1
+    if $BarrierIND == 0
+    then
+        Garage.Activate($SprayGarageCOM)
+        $SprayCOMActive = 1
+    else
+        Garage.Deactivate($SprayGarageCOM)
+        $SprayCOMActive = 0
+    end
+end
+
+// Keep density multipliers and Staunton Pay 'n' Spray state enforced across missions, wasted/busted, and engine resets
 while true
     wait 1000
     if Player.IsPlaying($player)
@@ -55,9 +71,19 @@ while true
         then
             World.SetCarDensityMultiplier(0.5)
             World.SetPedDensityMultiplier(0.25)
+            if $SprayCOMActive == 0
+            then
+                Garage.Activate($SprayGarageCOM)
+                $SprayCOMActive = 1
+            end
         else
             World.SetCarDensityMultiplier(0.25)
             World.SetPedDensityMultiplier(0.1)
+            if $SprayCOMActive == 1
+            then
+                Garage.Deactivate($SprayGarageCOM)
+                $SprayCOMActive = 0
+            end
         end
     end
 end

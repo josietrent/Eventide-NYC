@@ -17,7 +17,7 @@ Gang.SetWeapons(GangType.Triad, WeaponType.BaseballBat, WeaponType.Pistol)
 // FIXME: Kill all redundant/unused globals! 🔥
 $BRIBE = Pickup.Create(#BRIBE, PickupType.OnStreet, 163.88, -801.43, 26.17)
 $BRIBE = Pickup.Create(#BRIBE, PickupType.OnStreet, 157.46, -93.54, 20.17)
-$BRIBE = Pickup.Create(#BRIBE, PickupType.OnStreet, 185.97, -620.82, 26.01)
+$BRIBE = Pickup.Create(#BRIBE, PickupType.OnStreet, 186.17, -621.62, 26.02)
 $BRIBE = Pickup.Create(#BRIBE, PickupType.OnStreet, 378.78, -1069.47, 16.04)
 // Near Lift Bridge
 $BRIBE = Pickup.Create(#BRIBE, PickupType.OnStreet, -73.22, -754.04, 26.16)
@@ -37,6 +37,7 @@ $HEAL_IND9 = Pickup.Create(#BODYARMOUR, PickupType.OnStreet, 1289.77, -855.71, 1
 $HEAL_COM1 = Pickup.Create(#HEALTH, PickupType.OnStreet, 515.85, -624.16, 16.65)
 $HEAL_COM2 = Pickup.Create(#HEALTH, PickupType.OnStreet, 178.76, -300.27, 16.46)
 $HEAL_COM3 = Pickup.Create(#HEALTH, PickupType.OnStreet, -222.43, -315.29, 1.45)
+$HEAL_COM4 = Pickup.Create(#HEALTH, PickupType.OnStreet, 24.27, -581.40, 26.18)
 $HEAL_RES1 = Pickup.Create(#HEALTH, PickupType.OnStreet, -1242.60, -81.18, 59.24)
 $HEAL_RES2 = Pickup.Create(#HEALTH, PickupType.OnStreet, -1095.05, -1028.18, 3.48)
 
