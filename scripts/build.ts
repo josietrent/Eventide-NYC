@@ -949,10 +949,11 @@ if (shouldRun(19, "handling")) {
   }
 }
 
-// Step 20: Custom Models & Ped Skin TXDs (models/gta3.img)
+// Step 20: Custom Models, Ped Skin TXDs & Collision Archives (models/gta3.img & models/coll)
 if (shouldRun(20, "models")) {
   const modelsSrcRoot = join(cwd, "data", "models", "src");
   const modelsImgDir = join(cwd, "data", "models", "gta3.img");
+  const modelsCollDir = join(cwd, "data", "models", "coll");
 
   const srcModelDirs: string[] = [];
   try {
@@ -1031,6 +1032,37 @@ if (shouldRun(20, "models")) {
         join(imgStagingDir, fileName),
       );
       say.done(`  Packaged modloader/${modName}/models/gta3.img/${fileName}`);
+    }
+  }
+
+  const collFiles: string[] = [];
+  try {
+    for await (const entry of Deno.readDir(modelsCollDir)) {
+      if (entry.isFile) collFiles.push(entry.name);
+    }
+  } catch {
+    // No data/models/coll overrides yet
+  }
+  collFiles.sort((a, b) => a.localeCompare(b));
+
+  if (collFiles.length > 0) {
+    if (srcModelDirs.length === 0 && imgFiles.length === 0) {
+      say.heading("Step 20 (models): Packaging model overrides...");
+    }
+    const collStagingDir = join(modStagingDir, "models", "coll");
+    await ensureDir(collStagingDir);
+    for (const fileName of collFiles) {
+      const ext = extname(fileName).toLowerCase().slice(1);
+      const modelName = basename(fileName, extname(fileName));
+      if (ext === "col" && !shouldPackageAsset(modelName, "col")) {
+        say.skip(`  Skipped asset: ${fileName}`);
+        continue;
+      }
+      await Deno.copyFile(
+        join(modelsCollDir, fileName),
+        join(collStagingDir, fileName),
+      );
+      say.done(`  Packaged modloader/${modName}/models/coll/${fileName}`);
     }
   }
 }
