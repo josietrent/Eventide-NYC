@@ -351,6 +351,7 @@ export interface TxdTextureInput {
   width: number;
   height: number;
   rgba: Uint8Array;
+  opaque?: boolean;
 }
 
 function buildRwTextureNative(tex: TxdTextureInput): Uint8Array {
@@ -364,7 +365,7 @@ function buildRwTextureNative(tex: TxdTextureInput): Uint8Array {
   writeFixedCString(structPayload, 8, tex.name);
   writeFixedCString(structPayload, 40, ""); // maskName empty -> uses RGBA alpha
   sdv.setUint32(72, 0x0500, true); // RASTER_8888
-  sdv.setUint32(76, 1, true); // hasAlpha = 1
+  sdv.setUint32(76, tex.opaque ? 0 : 1, true); // hasAlpha
   sdv.setUint16(80, tex.width, true);
   sdv.setUint16(82, tex.height, true);
   structPayload[84] = 32; // bpp
@@ -380,7 +381,7 @@ function buildRwTextureNative(tex: TxdTextureInput): Uint8Array {
     structPayload[dst + 0] = tex.rgba[src + 2]; // B
     structPayload[dst + 1] = tex.rgba[src + 1]; // G
     structPayload[dst + 2] = tex.rgba[src + 0]; // R
-    structPayload[dst + 3] = tex.rgba[src + 3]; // A
+    structPayload[dst + 3] = tex.opaque ? 255 : tex.rgba[src + 3]; // A
   }
 
   const texStructChunk = rwChunk(0x01, structPayload);
