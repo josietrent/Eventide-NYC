@@ -20,6 +20,7 @@ while true
         not Player.IsPlaying($player)
         Camera.GetFadingStatus()
         not Game.HasSaveGameFinished()
+        $Intro_Passed == 0
     then
         continue
     end
