@@ -38,6 +38,7 @@ while true
         if
             Game.HasSaveGameFinished()
         then
+            wait 250
             Player.SetControl($player, True)
         else
             jump @WAIT_FOR_SAVE
