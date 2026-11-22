@@ -18,6 +18,7 @@ import { includeTree } from "./includes.ts";
 import { say } from "./log.ts";
 import { buildMenuTxd, buildSingleTextureTxd } from "./build-menu-txd.ts";
 import { buildCyrillicFontAtlas } from "./build-cyrillic-font.ts";
+import { buildTxdFromPngDir } from "./build-ped-txds.ts";
 
 // Bisection / filtering arguments
 const args = Deno.args;
@@ -898,6 +899,90 @@ if (shouldRun(18, "handling")) {
     await ensureDir(dataStagingDir);
     await Deno.copyFile(handlingSrc, join(dataStagingDir, "handling.cfg"));
     say.done(`  Packaged modloader/${modName}/data/handling.cfg`);
+  }
+}
+
+// Step 19: Custom Models & Ped Skin TXDs (models/gta3.img)
+if (shouldRun(19, "models")) {
+  const modelsSrcRoot = join(cwd, "data", "models", "src");
+  const modelsImgDir = join(cwd, "data", "models", "gta3.img");
+
+  const srcModelDirs: string[] = [];
+  try {
+    for await (const entry of Deno.readDir(modelsSrcRoot)) {
+      if (entry.isDirectory) srcModelDirs.push(entry.name);
+    }
+  } catch {
+    // No data/models/src directory yet
+  }
+  srcModelDirs.sort((a, b) => a.localeCompare(b));
+
+  if (srcModelDirs.length > 0) {
+    say.heading("Step 19 (models): Building & packaging model overrides...");
+    await ensureDir(modelsImgDir);
+    for (const modelName of srcModelDirs) {
+      const pngDir = join(modelsSrcRoot, modelName);
+      const txdOut = join(modelsImgDir, `${modelName}.txd`);
+      const pngNames: string[] = [];
+      for await (const entry of Deno.readDir(pngDir)) {
+        if (entry.isFile && extname(entry.name).toLowerCase() === ".png") {
+          pngNames.push(entry.name);
+        }
+      }
+      pngNames.sort((a, b) => a.localeCompare(b));
+      if (pngNames.length === 0) continue;
+
+      const hashes: string[] = [];
+      for (const pngName of pngNames) {
+        hashes.push(`${pngName}:${await sha256(await Deno.readFile(join(pngDir, pngName)))}`);
+      }
+      const combinedHash = await sha256(hashes.join("\n"));
+      if (
+        forceArg ||
+        !(await allExist([txdOut])) ||
+        hashCache[txdOut] !== combinedHash
+      ) {
+        const texNames = await buildTxdFromPngDir(pngDir, txdOut, true);
+        await saveHash(txdOut, combinedHash);
+        say.pass(`Built ${modelName}.txd (${texNames.join(", ")})`);
+      } else {
+        say.skip(`  Up to date: ${modelName}.txd`);
+      }
+    }
+  }
+
+  const imgFiles: string[] = [];
+  try {
+    for await (const entry of Deno.readDir(modelsImgDir)) {
+      if (entry.isFile) imgFiles.push(entry.name);
+    }
+  } catch {
+    // No data/models/gta3.img overrides yet
+  }
+  imgFiles.sort((a, b) => a.localeCompare(b));
+
+  if (imgFiles.length > 0) {
+    if (srcModelDirs.length === 0) {
+      say.heading("Step 19 (models): Packaging model overrides...");
+    }
+    const imgStagingDir = join(modStagingDir, "models", "gta3.img");
+    await ensureDir(imgStagingDir);
+    for (const fileName of imgFiles) {
+      const ext = extname(fileName).toLowerCase().slice(1);
+      const modelName = basename(fileName, extname(fileName));
+      if (
+        (ext === "dff" || ext === "txd" || ext === "col") &&
+        !shouldPackageAsset(modelName, ext as ModelAsset)
+      ) {
+        say.skip(`  Skipped asset: ${fileName}`);
+        continue;
+      }
+      await Deno.copyFile(
+        join(modelsImgDir, fileName),
+        join(imgStagingDir, fileName),
+      );
+      say.done(`  Packaged modloader/${modName}/models/gta3.img/${fileName}`);
+    }
   }
 }
 
