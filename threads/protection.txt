@@ -14,6 +14,7 @@ Car DeadbeatCar = 0
 Blip TargetBlip = 0
 Blip LuigiBlip = 0
 int RouteState = 0
+int SkipArmed = 0
 
 $onmission = 1
 $OnProtectionMission = 1
@@ -114,9 +115,12 @@ while TIMERA < 250
         jump @Protection_Briefing_Skip
     end
 end
-Char.SetHeading(Luigi, 269.0)
-Player.SetHeading($player, 89.0)
+Char.SetHeading(Luigi, 89.0)
+Player.SetHeading($player, 269.0)
+wait 0
+Char.SetHeading(Luigi, 89.0)
 Char.SetObjWaitOnFoot(Luigi)
+Char.TurnToFacePlayer(Luigi, $player)
 TIMERA = 0
 while TIMERA < 250
     wait 0
@@ -182,12 +186,16 @@ Text.ClearPrints()
 Camera.RestoreJumpcut()
 Hud.SwitchWidescreen(False)
 Player.SetCoordinates($player, 1207.98, -325.48, 26.07)
-Player.SetHeading($player, 89.0)
+Player.SetHeading($player, 269.0)
 if not Luigi == 0
 then
     Char.SetCoordinates(Luigi, 1219.74, -325.69, 26.07)
-    Char.SetHeading(Luigi, 269.0)
+    Char.SetObjNoObj(Luigi)
+    Char.SetHeading(Luigi, 89.0)
+    wait 0
+    Char.SetHeading(Luigi, 89.0)
     Char.SetObjWaitOnFoot(Luigi)
+    Char.TurnToFacePlayer(Luigi, $player)
 end
 if Deadbeat == 0
 then
@@ -236,10 +244,48 @@ Hud.SwitchWidescreen(True)
 Char.TurnToFacePlayer(Deadbeat, $player)
 Camera.SetFixedPosition(1205.50, -422.10, 26.50, 0.0, 0.0, 0.0)
 Camera.PointAtChar(Deadbeat, CameraMode.FollowPed, SwitchType.JumpCut)
-wait 1000
+SkipArmed = 0
+TIMERA = 0
+while TIMERA < 1000
+    wait 0
+    if or
+        Pad.IsKeyPressed(KeyCode.LeftShift)
+        Pad.IsKeyPressed(KeyCode.Space)
+        Pad.IsKeyPressed(KeyCode.F)
+        Pad.IsKeyPressed(KeyCode.Return)
+    then
+        if SkipArmed == 1
+        then
+            jump @Protection_Confront_Skip
+        end
+    else
+        SkipArmed = 1
+    end
+end
 Text.PrintString("Look, tell Louie I don't have his cash this week!", 4000)
-wait 4000
+TIMERA = 0
+while TIMERA < 4000
+    wait 0
+    if or
+        Pad.IsKeyPressed(KeyCode.LeftShift)
+        Pad.IsKeyPressed(KeyCode.Space)
+        Pad.IsKeyPressed(KeyCode.F)
+        Pad.IsKeyPressed(KeyCode.Return)
+    then
+        if SkipArmed == 1
+        then
+            jump @Protection_Confront_Skip
+        end
+    else
+        SkipArmed = 1
+    end
+end
+jump @Protection_Confront_End
 
+:Protection_Confront_Skip
+Text.ClearPrints()
+
+:Protection_Confront_End
 // Spooked target runs to his nearby car while player gets control immediately
 Char.SetObjNoObj(Deadbeat)
 Char.SetObjGotoCoordOnFoot(Deadbeat, 1199.00, -438.00)
@@ -638,6 +684,16 @@ while not Player.LocateOnFootChar3D($player, Luigi, 5.0, 5.0, 0.75, False)
             end
         end
         Hud.SwitchWidescreen(True)
+        World.ClearArea(1219.74, -325.69, 26.07, 4.0, True)
+        Player.SetCoordinates($player, 1207.98, -325.48, 26.07)
+        Player.SetHeading($player, 269.0)
+        Char.SetCoordinates(Luigi, 1219.74, -325.69, 26.07)
+        Char.SetObjNoObj(Luigi)
+        Char.SetHeading(Luigi, 89.0)
+        wait 0
+        Char.SetHeading(Luigi, 89.0)
+        Char.SetObjWaitOnFoot(Luigi)
+        Char.TurnToFacePlayer(Luigi, $player)
         Camera.SetFixedPosition(1213.84, -325.56, 26.07, 0.0, 0.0, 0.0)
         Camera.PointAtChar(Luigi, CameraMode.Fixed, SwitchType.JumpCut)
         wait 0
