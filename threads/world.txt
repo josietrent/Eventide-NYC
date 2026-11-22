@@ -5,6 +5,9 @@ nop
 
 script_name 'WORLD'
 
+int HealthTmp = 0
+int NoodleCool = 0
+
 while not Player.IsPlaying($player)
     wait 0
 end
@@ -45,6 +48,10 @@ if $AK47Spawn == 0
 then
     $AK47Spawn = Pickup.CreateWithAmmo(#AK47, PickupType.OnStreet, 150, 85.13, -986.52, 26.17)
 end
+if $AK47RoofSpawn == 0
+then
+    $AK47RoofSpawn = Pickup.CreateWithAmmo(#AK47, PickupType.OnStreet, 150, 1019.40, -26.80, 20.35)
+end
 
 // Ensure Staunton Newport Pay 'n' Spray exists on older savegames too
 if $SprayGarageCOMCreated == 0
@@ -68,7 +75,7 @@ then
     {$INCLUDE ../utils/lot_cars.txt}
 end
 
-// Keep density multipliers, Staunton Pay 'n' Spray state, and Act 2 contact markers enforced across missions, wasted/busted, and engine resets
+// Keep density multipliers, Staunton Pay 'n' Spray state, Act 2 contact markers, and Noodle Shop healing active
 while true
     wait 1000
     if Player.IsPlaying($player)
@@ -97,6 +104,34 @@ while true
             then
                 Garage.Deactivate($SprayGarageCOM)
                 $SprayCOMActive = 0
+            end
+        end
+
+        // Vice-City-style food vendor healing at Dong's Noodle Shop (Chinatown) in freeroam
+        if and
+            $Intro_Passed == 1
+            $onmission == 0
+            Streaming.IsCollisionInMemory(LevelName.Industrial)
+        then
+            if Player.LocateOnFoot3D($player, 1041.73, -653.05, 14.82, 3.0, 3.0, 2.5, False)
+            then
+                if NoodleCool == 0
+                then
+                    Player.GetHealth($player, HealthTmp)
+                    if HealthTmp < 100
+                    then
+                        if Player.IsScoreGreater($player, 9)
+                        then
+                            Player.AddScore($player, -10)
+                        end
+                        Player.SetHealth($player, 100)
+                        Sound.AddOneOffSound(1041.73, -653.05, 14.82, ScriptSound.SoundPartMissionComplete)
+                        Text.Print('NOODLEV', 3500, 1)
+                        NoodleCool = 1
+                    end
+                end
+            else
+                NoodleCool = 0
             end
         end
     end
