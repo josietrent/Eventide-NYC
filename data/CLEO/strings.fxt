@@ -142,7 +142,7 @@ SMUG1	The cops are crawling all over Saint Mark's, but business doesn't stop.
 SMUG2	I got a crate of high-grade contraband bound for Staunton Island.
 SMUG3	The bridge is blocked, but a smuggler's meeting us near Harwood.
 SMUG4	Go grab the package from my stash in Saint Mark's.
-SMUG5	Pick up the ~y~contraband~w~ from the stash.
+SMUG5	Pick up the ~b~contraband~w~ from the stash.
 SMUG6	The heat is on! Lose the ~r~cops~w~ before you meet the smuggler!
 SMUG7	Deliver the contraband to the ~y~smuggler~w~ in Harwood.
 SMUG8	The smuggler won't talk to you with the cops on your ass! Lose the ~r~heat!~w~
@@ -154,7 +154,7 @@ STAT1	Toni, over here. We've got a serious situation.
 STAT2	Marie's frozen stiff in the open near the Trenton supply yard.
 STAT3	She isn't responding to anyone. She's standing there like a statue.
 STAT4	Scavengers and thugs have caught wind of it. Get to her before they grab her!
-STAT5	Reach ~y~Marie~w~ before the attackers take her!
+STAT5	Reach ~b~Marie~w~ before the attackers take her!
 STAT6	Defend ~b~Marie~w~ from the attackers!
 STAT7	She's locked up stiff as stone. Pull a vehicle close to haul her in.
 STAT8	Bring a vehicle close to ~b~Marie~w~.
@@ -207,4 +207,7 @@ BLEED8	Chinatown's clear. Assault the ~y~Callahan Bridge~w~ blockade and blow th
 BLEED9	Defenders down! Enter the ~y~marker~w~ at the barrier to plant the Sap charge!
 BLEEDA	Sap charge armed - stand clear!
 BLEEDB	Charge across Callahan Bridge into ~y~Staunton Island~w~!
-BLEEDC	Callahan Bridge is open. Welcome to Staunton Island, Toni!
+BLEEDC	Callahan Bridge is open.
+NOODLEH	You are hurt and starving. Visit ~y~Dong's Noodle Shop~w~ to heal up—just like food vendors in Vice City, you can stop by on foot anytime in freeroam to restore health.
+NOODLE2	You grab a hot bowl of noodles and feel much stronger.
+NOODLEV	Bought a hot bowl of noodles (). Health restored!
