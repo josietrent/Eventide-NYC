@@ -437,15 +437,60 @@ Camera.DoFade(800, Fade.In)
 wait 800
 
 Text.Print('ASHB', 4000, 1)
-wait 4000
+TIMERA = 0
+while TIMERA < 4000
+    wait 0
+    if or
+        Pad.IsKeyPressed(KeyCode.LeftShift)
+        Pad.IsKeyPressed(KeyCode.Space)
+        Pad.IsKeyPressed(KeyCode.F)
+    then
+        jump @Ashes_Outro_Skip
+    end
+end
+
 Text.Print('ASHC', 4500, 1)
-wait 4500
+TIMERA = 0
+while TIMERA < 4500
+    wait 0
+    if or
+        Pad.IsKeyPressed(KeyCode.LeftShift)
+        Pad.IsKeyPressed(KeyCode.Space)
+        Pad.IsKeyPressed(KeyCode.F)
+    then
+        jump @Ashes_Outro_Skip
+    end
+end
+
 Text.Print('ASHD', 3500, 1)
-wait 3500
+TIMERA = 0
+while TIMERA < 3500
+    wait 0
+    if or
+        Pad.IsKeyPressed(KeyCode.LeftShift)
+        Pad.IsKeyPressed(KeyCode.Space)
+        Pad.IsKeyPressed(KeyCode.F)
+    then
+        jump @Ashes_Outro_Skip
+    end
+end
+
 Text.Print('ASHE', 4500, 1)
 Char.SetObjFleeOnFootTillSafe(Reinhardt)
-wait 3000
+TIMERA = 0
+while TIMERA < 3000
+    wait 0
+    if or
+        Pad.IsKeyPressed(KeyCode.LeftShift)
+        Pad.IsKeyPressed(KeyCode.Space)
+        Pad.IsKeyPressed(KeyCode.F)
+    then
+        jump @Ashes_Outro_Skip
+    end
+end
 
+:Ashes_Outro_Skip
+Text.ClearPrints()
 Camera.DoFade(1000, Fade.Out)
 wait 1000
 Camera.RestoreJumpcut()
