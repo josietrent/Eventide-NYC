@@ -28,6 +28,8 @@ Car BlockCar1 = 0
 Car BlockCar2 = 0
 Object Crate1 = 0
 Object Crate2 = 0
+int RoadblockAggro = 0
+Blip BlockCarBlip = 0
 
 $onmission = 1
 $OnBleedMission = 1
@@ -223,9 +225,10 @@ Char.SetObjWaitOnFoot(Enemy1)
 
 Enemy2 = Char.Create(PedType.Gang2, #GANG03, 914.00, -413.00, 13.85)
 Char.SetHeading(Enemy2, 0.0)
-Char.GiveWeapon(Enemy2, WeaponType.Pistol, 100)
+Char.GiveWeapon(Enemy2, WeaponType.Pistol, 999)
 Char.SetCurrentWeapon(Enemy2, WeaponType.Pistol)
 Char.SetAccuracy(Enemy2, 40)
+Char.SetStayInSamePlace(Enemy2, True)
 Char.SetObjWaitOnFoot(Enemy2)
 
 MainBlip = Blip.AddForCoord(911.00, -410.52, 13.85)
@@ -239,31 +242,121 @@ while $BleedStage == 0
         jump @Bleed_Fail
     end
 
-    if Player.LocateAnyMeans3D($player, 911.00, -410.52, 13.85, 40.0, 40.0, 10.0, False)
+    if and
+        RoadblockAggro == 0
+        Player.LocateAnyMeans3D($player, 911.00, -410.52, 13.85, 40.0, 40.0, 10.0, False)
     then
+        RoadblockAggro = 1
+        if not MainBlip == 0
+        then
+            Blip.Remove(MainBlip)
+            MainBlip = 0
+        end
+        if not MainSphere == 0
+        then
+            Sphere.Remove(MainSphere)
+            MainSphere = 0
+        end
         if Char.IsStillAlive(Enemy1)
         then
             Char.SetObjKillCharAnyMeans(Enemy1, $scplayer)
+            $BleedEnemyBlip1 = Blip.AddForChar(Enemy1)
         end
         if Char.IsStillAlive(Enemy2)
         then
-            Char.SetObjKillCharAnyMeans(Enemy2, $scplayer)
+            Char.SetObjKillCharOnFoot(Enemy2, $scplayer)
+            $BleedEnemyBlip2 = Blip.AddForChar(Enemy2)
+        end
+        if Car.IsStillAlive(BlockCar1)
+        then
+            BlockCarBlip = Blip.AddForCar(BlockCar1)
+        end
+        Text.Print('BLEED5B', 5000, 1)
+    end
+
+    if not $BleedEnemyBlip1 == 0
+    then
+        if not Char.IsStillAlive(Enemy1)
+        then
+            Blip.Remove($BleedEnemyBlip1)
+            $BleedEnemyBlip1 = 0
         end
     end
 
-    if Player.LocateAnyMeans3D($player, 911.00, -410.52, 13.85, 7.0, 7.0, 5.0, False)
+    if not $BleedEnemyBlip2 == 0
     then
-        Blip.Remove(MainBlip)
-        MainBlip = 0
-        Sphere.Remove(MainSphere)
-        MainSphere = 0
+        if not Char.IsStillAlive(Enemy2)
+        then
+            Blip.Remove($BleedEnemyBlip2)
+            $BleedEnemyBlip2 = 0
+        end
+    end
+
+    if not BlockCarBlip == 0
+    then
+        if not Car.IsStillAlive(BlockCar1)
+        then
+            Blip.Remove(BlockCarBlip)
+            BlockCarBlip = 0
+        end
+    end
+
+    if and
+        not Char.IsStillAlive(Enemy1)
+        not Char.IsStillAlive(Enemy2)
+        not Car.IsStillAlive(BlockCar1)
+    then
+        if not MainBlip == 0
+        then
+            Blip.Remove(MainBlip)
+            MainBlip = 0
+        end
+        if not MainSphere == 0
+        then
+            Sphere.Remove(MainSphere)
+            MainSphere = 0
+        end
+        if not $BleedEnemyBlip1 == 0
+        then
+            Blip.Remove($BleedEnemyBlip1)
+            $BleedEnemyBlip1 = 0
+        end
+        if not $BleedEnemyBlip2 == 0
+        then
+            Blip.Remove($BleedEnemyBlip2)
+            $BleedEnemyBlip2 = 0
+        end
+        if not BlockCarBlip == 0
+        then
+            Blip.Remove(BlockCarBlip)
+            BlockCarBlip = 0
+        end
         Text.Print('BLEED6', 5000, 1)
         $BleedStage = 1
         break
     end
 end
 
-// Clean up Stage 0 roadblock entities before Chinatown ambush
+// Stage 1: Punk Noodles / Chinatown Diner Ambush (dinerind 14.03 / rd_road2a30 13.78)
+MainBlip = Blip.AddForCoord(1038.00, -653.00, 13.90)
+Blip.ChangeColor(MainBlip, BlipColor.Yellow)
+
+while true
+    wait 200
+    if not Player.IsPlaying($player)
+    then
+        jump @Bleed_Fail
+    end
+
+    if Player.LocateAnyMeans3D($player, 1038.00, -653.00, 13.90, 55.0, 55.0, 15.0, False)
+    then
+        Blip.Remove(MainBlip)
+        MainBlip = 0
+        break
+    end
+end
+
+// Clean up Stage 0 roadblock entities once player arrives in Chinatown
 if not BlockCar1 == 0
 then
     Car.MarkAsNoLongerNeeded(BlockCar1)
@@ -290,28 +383,10 @@ then
     Enemy2 = 0
 end
 
-// Stage 1: Punk Noodles / Chinatown Diner Ambush (dinerind 14.03 / rd_road2a30 13.78)
-MainBlip = Blip.AddForCoord(1038.00, -653.00, 13.90)
-Blip.ChangeColor(MainBlip, BlipColor.Yellow)
-
-while true
-    wait 200
-    if not Player.IsPlaying($player)
-    then
-        jump @Bleed_Fail
-    end
-
-    if Player.LocateAnyMeans3D($player, 1038.00, -653.00, 13.90, 55.0, 55.0, 15.0, False)
-    then
-        Blip.Remove(MainBlip)
-        MainBlip = 0
-        break
-    end
-end
-
 World.ClearArea(1038.00, -653.00, 13.90, 20.0, True)
 BlockCar1 = Car.Create(#MAFIA, 1041.00, -646.00, 13.80)
 Car.SetHeading(BlockCar1, 35.0)
+BlockCarBlip = Blip.AddForCar(BlockCar1)
 
 Enemy1 = Char.Create(PedType.Gang1, #GANG01, 1033.00, -656.00, 14.03)
 Char.SetHeading(Enemy1, 0.0)
@@ -372,10 +447,20 @@ while true
         end
     end
 
+    if not BlockCarBlip == 0
+    then
+        if not Car.IsStillAlive(BlockCar1)
+        then
+            Blip.Remove(BlockCarBlip)
+            BlockCarBlip = 0
+        end
+    end
+
     if and
         $BleedEnemyBlip1 == 0
         $BleedEnemyBlip2 == 0
         $BleedEnemyBlip3 == 0
+        BlockCarBlip == 0
     then
         break
     end
@@ -827,6 +912,11 @@ if not MainSphere == 0
 then
     Sphere.Remove(MainSphere)
     MainSphere = 0
+end
+if not BlockCarBlip == 0
+then
+    Blip.Remove(BlockCarBlip)
+    BlockCarBlip = 0
 end
 if not $BleedEnemyBlip1 == 0
 then
