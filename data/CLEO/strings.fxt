@@ -87,6 +87,7 @@ NOODLE	Drive to Dong's Noodle Shop.
 MISTAXI That's it, I'm taking a taxi!
 OUCH	Ouch! That looks like it hurt!
 OUTCAR	Get out of the car.
+PACKER	Packer
 PACK6	A Baseball Bat has been delivered to the Mansion!
 PACK12	A Pistol has been delivered to the Mansion!
 PACK18	A Shotgun has been delivered to the Mansion!
@@ -214,4 +215,6 @@ NOODLEV	Bought a hot bowl of noodles (). Health restored!
 POLE1	Streetlight down! ~g~+$~1~
 POLE2	Traffic signal down! ~g~+$~1~
 POLE3	Double streetlamp down! ~g~+$~1~
+POLE4	Park light down! ~g~+$~1~
+POLE5	Double park light down! ~g~+$~1~
 POLEC	~y~Pole Combo x~1~! ~g~+$~1~
