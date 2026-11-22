@@ -139,3 +139,8 @@ Alloc($BleedEnemyBlip1, 5123)
 Alloc($BleedEnemyBlip2, 5124)
 Alloc($BleedEnemyBlip3, 5125)
 Alloc($BleedEnemyBlip4, 5126)
+
+Alloc($BarrierTunnelObj, 5127)
+Alloc($BarrierLift1Obj, 5128)
+Alloc($BarrierLift2Obj, 5129)
+Alloc($AK47Spawn, 5130)
