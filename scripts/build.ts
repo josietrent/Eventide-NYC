@@ -977,15 +977,31 @@ if (shouldRun(18, "map")) {
   }
 }
 
-// Step 19: Custom Handling Overrides (handling.cfg)
+// Step 19: Custom Vehicle/Data Overrides (handling.cfg, default.ide, carcols.dat, object.dat)
 if (shouldRun(19, "handling")) {
-  const handlingSrc = join(cwd, "data", "handling.cfg");
-  if (await allExist([handlingSrc])) {
-    say.heading("Step 19 (handling): Packaging custom handling.cfg...");
+  const dataOverrides = [
+    "handling.cfg",
+    "default.ide",
+    "carcols.dat",
+    "object.dat",
+  ];
+  const existingOverrides: string[] = [];
+  for (const fileName of dataOverrides) {
+    if (await allExist([join(cwd, "data", fileName)])) {
+      existingOverrides.push(fileName);
+    }
+  }
+  if (existingOverrides.length > 0) {
+    say.heading("Step 19 (handling): Packaging custom data overrides...");
     const dataStagingDir = join(modStagingDir, "data");
     await ensureDir(dataStagingDir);
-    await Deno.copyFile(handlingSrc, join(dataStagingDir, "handling.cfg"));
-    say.done(`  Packaged modloader/${modName}/data/handling.cfg`);
+    for (const fileName of existingOverrides) {
+      await Deno.copyFile(
+        join(cwd, "data", fileName),
+        join(dataStagingDir, fileName),
+      );
+      say.done(`  Packaged modloader/${modName}/data/${fileName}`);
+    }
   }
 }
 
