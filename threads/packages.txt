@@ -64,6 +64,7 @@ while true
             Stat.PlayerMadeProgress(1)
             Pager.AddMessage('PACK6', 140, 2, 0)
             Pickup.Create(#BAT, PickupType.OnStreet, 1482.88, -200.08, 55.59, 7@)
+            Pickup.Create(#BAT, PickupType.OnStreet, 529.35, -614.00, 16.40, 7@)
         end
     end
 
@@ -75,6 +76,7 @@ while true
             Stat.PlayerMadeProgress(1)
             Pager.AddMessage('PACK12', 140, 2, 0)
             Pickup.CreateWithAmmo(#COLT45, PickupType.OnStreet, 500, 1472.27, -192.85, 55.47, 7@)
+            Pickup.CreateWithAmmo(#COLT45, PickupType.OnStreet, 500, 529.35, -616.50, 16.40, 7@)
         end
     end
 
@@ -86,6 +88,7 @@ while true
             Stat.PlayerMadeProgress(1)
             Pager.AddMessage('PACK18', 140, 2, 0)
             Pickup.CreateWithAmmo(#SHOTGUN, PickupType.OnStreet, 40, 1460.34, -165.63, 55.50, 7@)
+            Pickup.CreateWithAmmo(#SHOTGUN, PickupType.OnStreet, 40, 529.35, -619.00, 16.40, 7@)
         end
     end
 
@@ -97,6 +100,7 @@ while true
             Stat.PlayerMadeProgress(1)
             Pager.AddMessage('PACK24', 140, 2, 0)
             Pickup.CreateWithAmmo(#UZI, PickupType.OnStreet, 500, 1488.08, -171.86, 55.59, 7@)
+            Pickup.CreateWithAmmo(#UZI, PickupType.OnStreet, 500, 529.35, -621.50, 16.40, 7@)
         end
     end
 
@@ -108,6 +112,7 @@ while true
             Stat.PlayerMadeProgress(1)
             Pager.AddMessage('PACK30', 140, 2, 0)
             Pickup.CreateWithAmmo(#M16, PickupType.OnStreet, 150, 1479.09, -169.66, 55.63, 7@)
+            Pickup.CreateWithAmmo(#M16, PickupType.OnStreet, 150, 529.35, -624.00, 16.40, 7@)
         end
     end
 
@@ -119,6 +124,7 @@ while true
             Stat.PlayerMadeProgress(1)
             Pager.AddMessage('PACK36', 140, 2, 0)
             Pickup.CreateWithAmmo(#SNIPER, PickupType.OnStreet, 30, 1470.42, -167.22, 55.58, 7@)
+            Pickup.CreateWithAmmo(#SNIPER, PickupType.OnStreet, 30, 529.35, -626.50, 16.40, 7@)
         end
     end
 
@@ -130,6 +136,7 @@ while true
             Stat.PlayerMadeProgress(1)
             Pager.AddMessage('PACK42', 140, 2, 0)
             Pickup.CreateWithAmmo(#FLAME, PickupType.OnStreet, 500, 1462.00, -165.00, 55.50, 7@)
+            Pickup.CreateWithAmmo(#FLAME, PickupType.OnStreet, 500, 529.35, -629.00, 16.40, 7@)
         end
     end
 
@@ -141,6 +148,7 @@ while true
             Stat.PlayerMadeProgress(1)
             Pager.AddMessage('PACK48', 140, 2, 0)
             Pickup.CreateWithAmmo(#GRENADE, PickupType.OnStreet, 30, 1454.61, -164.78, 55.40, 7@)
+            Pickup.CreateWithAmmo(#GRENADE, PickupType.OnStreet, 30, 529.35, -631.50, 16.40, 7@)
         end
     end
 
@@ -152,6 +160,7 @@ while true
             Stat.PlayerMadeProgress(1)
             Pager.AddMessage('PACK54', 140, 2, 0)
             Pickup.CreateWithAmmo(#ROCKET, PickupType.OnStreet, 1000, 1446.00, -161.00, 55.50, 7@)
+            Pickup.CreateWithAmmo(#ROCKET, PickupType.OnStreet, 1000, 529.35, -634.00, 16.40, 7@)
         end
     end
 
@@ -788,5 +797,11 @@ then
     $PackCoordX = 513.13
     $PackCoordY = -680.28
     $PackCoordZ = 19.15
+end
+if $PackIndex == 65
+then
+    $PackCoordX = 556.08
+    $PackCoordY = -231.40
+    $PackCoordZ = 22.30
 end
 return
