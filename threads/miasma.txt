@@ -1,0 +1,141 @@
+{$CLEO .cs}
+{$USE CLEO, Audio}
+{$INCLUDE ../utils/globals.txt}
+nop
+
+script_name 'MIASMA'
+
+int health = 0
+int armed = 1
+int waitCount = 0
+
+while not Player.IsPlaying($player)
+    wait 250
+end
+
+while true
+    wait 250
+
+    if or
+        not Player.IsPlaying($player)
+        Camera.GetFadingStatus()
+        not Game.HasSaveGameFinished()
+    then
+        continue
+    end
+
+    Player.GetHealth($player, health)
+    if
+        health <= 0
+    then
+        continue
+    end
+
+    if
+        health >= 50
+    then
+        armed = 1
+        continue
+    end
+
+    if
+        armed == 0
+    then
+        continue
+    end
+
+    if
+        $onmission == 1
+    then
+        // On mission: low-key disorientation without stealing control, teleporting, or failing the mission
+        armed = 0
+        play_audio_stream_1channel "audio/EC/miasma.wav", False, 1.0
+        Camera.Shake(0.5)
+        Text.Print('ZOEYBAD', 3000, 0)
+        waitCount = 0
+        while waitCount < 15
+            wait 100
+            waitCount += 1
+            if or
+                not Player.IsPlaying($player)
+                Camera.GetFadingStatus()
+            then
+                break
+            end
+        end
+        Camera.Shake(0)
+        continue
+    end
+
+    // Off mission: avoid colliding with active cutscenes, save menus, or barrier countdowns
+    if or
+        not Player.CanStartMission($player)
+        not $BarrierTimer == 0
+    then
+        continue
+    end
+
+    armed = 0
+    Player.SetControl($player, False)
+    play_audio_stream_1channel "audio/EC/miasma.wav", False, 1.0
+    Camera.Shake(1.0)
+    wait 2000
+
+    if
+        not Player.IsPlaying($player)
+    then
+        Camera.Shake(0)
+        Player.SetControl($player, True)
+        continue
+    end
+
+    Camera.SetFadingColor(40, 0, 70)
+    Camera.DoFade(1000, Fade.Out)
+    wait 1000
+
+    // Ensure Portland collision is loaded before warping (safe if player was on Staunton/Shoreside)
+    waitCount = 0
+    Streaming.LoadCollision(LevelName.Industrial)
+    while not Streaming.IsCollisionInMemory(LevelName.Industrial)
+        wait 0
+        waitCount += 1
+        if
+            waitCount > 200
+        then
+            break
+        end
+    end
+
+    if
+        Player.IsPlaying($player)
+    then
+        Clock.SetTimeOfDay(0, 0)
+        wait 0
+        World.ClearArea(1200.0, -500.0, 24.8, 4.0, True)
+        if
+            Player.IsInAnyCar($player)
+        then
+            Player.WarpFromCarToCoord($player, 1200.0, -500.0, 24.8)
+        else
+            Player.SetCoordinates($player, 1200.0, -500.0, 24.8)
+        end
+        Camera.SetBehindPlayer()
+        Player.GetHealth($player, health)
+        if
+            health > 10
+        then
+            Player.SetHealth($player, 10)
+        end
+    end
+
+    wait 1000
+    Camera.Shake(0)
+    Camera.DoFade(1000, Fade.In)
+    wait 1000
+    if
+        Player.IsPlaying($player)
+    then
+        Player.SetControl($player, True)
+        Text.Print('ZOEYBAD', 5000, 0)
+    end
+end
