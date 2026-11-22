@@ -854,6 +854,7 @@ while TIMERA < 4000
 end
 
 :Bleed_Outro_Skip
+Game.SetMaxWantedLevel(4)
 Text.ClearPrints()
 Camera.RestoreJumpcut()
 Hud.SwitchWidescreen(False)
