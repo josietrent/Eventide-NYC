@@ -61,20 +61,21 @@ Hud.SwitchWidescreen(True)
 wait 1000
 Player.SetControl($player, False)
 
-// Create Kenji at Harwood contact point (1004.42, -49.06, 7.44)
-World.ClearArea(978.25, -51.00, 7.35, 8.0, True)
-Kenji = Char.Create(PedType.Special, #SPECIAL01, 980.00, -51.00, 7.35)
+// Create Kenji on the South side of the Head Radio roof
+World.ClearArea(1018.75, -68.50, 19.70, 8.0, True)
+Kenji = Char.Create(PedType.Special, #SPECIAL01, 1020.50, -68.50, 19.70)
 Char.SetObjNoObj(Kenji)
 Char.SetHeading(Kenji, 90.0)
 
-// Position Toni in the Head Radio parking lot facing Kenji
-Player.SetCoordinates($player, 976.50, -51.00, 7.35)
+// Position Toni on the South side of the Head Radio roof facing Kenji
+Player.SetCoordinates($player, 1017.00, -68.50, 19.70)
 Player.SetHeading($player, 270.0)
 wait 0
 Char.SetHeading(Kenji, 90.0)
 Char.SetObjWaitOnFoot(Kenji)
+Char.TurnToFacePlayer(Kenji, $player)
 
-Camera.SetFixedPosition(974.50, -49.00, 8.45, 0.0, 0.0, 0.0)
+Camera.SetFixedPosition(1015.00, -70.00, 20.80, 0.0, 0.0, 0.0)
 Camera.PointAtChar(Kenji, CameraMode.FollowPed, SwitchType.JumpCut)
 Camera.SetFadingColor(40, 0, 70)
 Camera.DoFade(1500, Fade.In)
@@ -135,9 +136,9 @@ end
 
 :Ashes_Briefing_Skip
 Text.ClearPrints()
-Camera.RestoreJumpcut()
-Hud.SwitchWidescreen(False)
-Player.SetControl($player, True)
+Camera.SetFadingColor(40, 0, 70)
+Camera.DoFade(800, Fade.Out)
+wait 800
 
 if not Kenji == 0
 then
@@ -145,6 +146,15 @@ then
     Kenji = 0
 end
 Streaming.UnloadSpecialCharacter(1)
+
+World.ClearArea(978.25, -51.00, 7.35, 8.0, True)
+Player.SetCoordinates($player, 976.50, -51.00, 7.35)
+Player.SetHeading($player, 270.0)
+Camera.RestoreJumpcut()
+Hud.SwitchWidescreen(False)
+Camera.DoFade(800, Fade.In)
+wait 800
+Player.SetControl($player, True)
 
 // Stage 1: Harwood Fire Station Firetruck + 3 Chinatown Market Square fires (IDE/IPL verified)
 // Harwood Fire Station apron (INDUSTNE.IPL: fire_platform 1090.8,-69.02,6.55 -> rd_Road1A25 1125.77,-71.32,6.28)
@@ -183,19 +193,11 @@ Char.SetObjKillCharAnyMeans(Thug2, $scplayer)
 
 Text.Print('ASH5', 5000, 1)
 wait 0
-$TIMER = 210000 // 3:30 to extinguish Chinatown fires
-Hud.DisplayTimer($TIMER)
 
 while FireCount < 3
     wait 250
     if not Player.IsPlaying($player)
     then
-        jump @Ashes_Fail
-    end
-
-    if $TIMER <= 0
-    then
-        Text.Print('ASHTIM', 4000, 1)
         jump @Ashes_Fail
     end
 
@@ -209,7 +211,15 @@ while FireCount < 3
                 TruckBlip = 0
             end
             Text.Print('ASH6', 5000, 1)
+            $TIMER = 120000 // 2:00 once in the Firetruck
+            Hud.DisplayTimer($TIMER)
             InTruckHelp = 1
+        end
+    else
+        if $TIMER <= 0
+        then
+            Text.Print('ASHTIM', 4000, 1)
+            jump @Ashes_Fail
         end
     end
 
@@ -278,7 +288,10 @@ while FireCount < 3
 end
 
 // All 3 fires extinguished! Release Stage 1 entities cleanly
-Hud.ClearTimer($TIMER)
+if InTruckHelp == 1
+then
+    Hud.ClearTimer($TIMER)
+end
 if not TruckBlip == 0
 then
     Blip.Remove(TruckBlip)
@@ -371,7 +384,7 @@ while MissionStage == 1
 end
 
 while MissionStage == 2
-    wait 50
+    wait 0
     if not Player.IsPlaying($player)
     then
         jump @Ashes_Fail
@@ -384,7 +397,7 @@ while MissionStage == 2
     end
 
     Char.GetHealth(Reinhardt, $ReinhardtHealthBar)
-    if $ReinhardtHealthBar <= 25
+    if $ReinhardtHealthBar <= 60
     then
         Hud.ClearCounter($ReinhardtHealthBar)
         Blip.Remove(Blip1)
@@ -430,6 +443,7 @@ Char.SetHeading(Reinhardt, 180.0)
 wait 0
 Char.SetHeading(Reinhardt, 180.0)
 Char.SetObjWaitOnFoot(Reinhardt)
+Char.TurnToFacePlayer(Reinhardt, $player)
 
 Camera.SetFixedPosition(1200.50, -974.50, 16.00, 0.0, 0.0, 0.0)
 Camera.PointAtChar(Reinhardt, CameraMode.FollowPed, SwitchType.JumpCut)
@@ -536,7 +550,10 @@ terminate_this_custom_script
 $onmission = 0
 $AshesMissionDone = 0
 Text.ClearPrints()
-Hud.ClearTimer($TIMER)
+if InTruckHelp == 1
+then
+    Hud.ClearTimer($TIMER)
+end
 Hud.ClearCounter($ReinhardtHealthBar)
 World.RemoveAllScriptFires()
 if not TruckBlip == 0

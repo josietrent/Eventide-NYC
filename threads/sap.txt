@@ -55,20 +55,21 @@ Hud.SwitchWidescreen(True)
 wait 1000
 Player.SetControl($player, False)
 
-// Create Kenji at Harwood contact point (1004.42, -49.06, 7.44)
-World.ClearArea(978.25, -51.00, 7.35, 8.0, True)
-Kenji = Char.Create(PedType.Special, #SPECIAL01, 980.00, -51.00, 7.35)
+// Create Kenji on the South side of the Head Radio roof
+World.ClearArea(1018.75, -68.50, 19.70, 8.0, True)
+Kenji = Char.Create(PedType.Special, #SPECIAL01, 1020.50, -68.50, 19.70)
 Char.SetObjNoObj(Kenji)
 Char.SetHeading(Kenji, 90.0)
 
-// Position Toni in the Head Radio parking lot facing Kenji
-Player.SetCoordinates($player, 976.50, -51.00, 7.35)
+// Position Toni on the South side of the Head Radio roof facing Kenji
+Player.SetCoordinates($player, 1017.00, -68.50, 19.70)
 Player.SetHeading($player, 270.0)
 wait 0
 Char.SetHeading(Kenji, 90.0)
 Char.SetObjWaitOnFoot(Kenji)
+Char.TurnToFacePlayer(Kenji, $player)
 
-Camera.SetFixedPosition(974.50, -49.00, 8.45, 0.0, 0.0, 0.0)
+Camera.SetFixedPosition(1015.00, -70.00, 20.80, 0.0, 0.0, 0.0)
 Camera.PointAtChar(Kenji, CameraMode.FollowPed, SwitchType.JumpCut)
 Camera.SetFadingColor(40, 0, 70)
 Camera.DoFade(1500, Fade.In)
@@ -129,9 +130,9 @@ end
 
 :Sap_Briefing_Skip
 Text.ClearPrints()
-Camera.RestoreJumpcut()
-Hud.SwitchWidescreen(False)
-Player.SetControl($player, True)
+Camera.SetFadingColor(40, 0, 70)
+Camera.DoFade(800, Fade.Out)
+wait 800
 
 if not Kenji == 0
 then
@@ -139,6 +140,15 @@ then
     Kenji = 0
 end
 Streaming.UnloadSpecialCharacter(1)
+
+World.ClearArea(978.25, -51.00, 7.35, 8.0, True)
+Player.SetCoordinates($player, 976.50, -51.00, 7.35)
+Player.SetHeading($player, 270.0)
+Camera.RestoreJumpcut()
+Hud.SwitchWidescreen(False)
+Camera.DoFade(800, Fade.In)
+wait 800
+Player.SetControl($player, True)
 
 // Stage 1: Spawn 3 guarded Sap caches at verified Portland outskirts sites (IDE/IPL & packages.txt)
 // Site 1: Harwood North Coast path (ind_land150 COL ground Z=2.51, clear of hidden package at 761.59, 137.26)
@@ -313,29 +323,30 @@ while true
     end
 end
 
-// Stage 3: Ending cutscene with Kenji
+// Stage 3: Ending cutscene with Kenji on the South side of the Head Radio roof
 Player.SetControl($player, False)
 Hud.SwitchWidescreen(True)
 Camera.SetFadingColor(40, 0, 70)
 Camera.DoFade(800, Fade.Out)
 wait 800
 
-World.ClearArea(978.25, -51.00, 7.35, 8.0, True)
+World.ClearArea(1018.75, -68.50, 19.70, 8.0, True)
 if Player.IsInAnyCar($player)
 then
-    Player.WarpFromCarToCoord($player, 976.50, -51.00, 7.35)
+    Player.WarpFromCarToCoord($player, 1017.00, -68.50, 19.70)
 else
-    Player.SetCoordinates($player, 976.50, -51.00, 7.35)
+    Player.SetCoordinates($player, 1017.00, -68.50, 19.70)
 end
 Player.SetHeading($player, 270.0)
-Char.SetCoordinates(Kenji, 980.00, -51.00, 7.35)
+Char.SetCoordinates(Kenji, 1020.50, -68.50, 19.70)
 Char.SetObjNoObj(Kenji)
 Char.SetHeading(Kenji, 90.0)
 wait 0
 Char.SetHeading(Kenji, 90.0)
 Char.SetObjWaitOnFoot(Kenji)
+Char.TurnToFacePlayer(Kenji, $player)
 
-Camera.SetFixedPosition(974.50, -49.00, 8.45, 0.0, 0.0, 0.0)
+Camera.SetFixedPosition(1015.00, -70.00, 20.80, 0.0, 0.0, 0.0)
 Camera.PointAtChar(Kenji, CameraMode.FollowPed, SwitchType.JumpCut)
 Camera.DoFade(800, Fade.In)
 wait 800
@@ -383,6 +394,16 @@ end
 Text.ClearPrints()
 Camera.DoFade(1000, Fade.Out)
 wait 1000
+Weather.ForceNow(WeatherType.Foggy)
+if not Kenji == 0
+then
+    Char.RemoveElegantly(Kenji)
+    Kenji = 0
+end
+Streaming.UnloadSpecialCharacter(1)
+World.ClearArea(978.25, -51.00, 7.35, 8.0, True)
+Player.SetCoordinates($player, 976.50, -51.00, 7.35)
+Player.SetHeading($player, 270.0)
 Camera.RestoreJumpcut()
 Hud.SwitchWidescreen(False)
 Camera.SetFadingColor(40, 0, 70)
@@ -488,6 +509,7 @@ wait 3000
 Camera.SetFadingColor(40, 0, 70)
 Camera.DoFade(1500, Fade.Out)
 wait 1500
+Weather.ForceNow(WeatherType.Foggy)
 if not Kenji == 0
 then
     Char.Delete(Kenji)

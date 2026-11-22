@@ -79,20 +79,21 @@ Hud.SwitchWidescreen(True)
 wait 1000
 Player.SetControl($player, False)
 
-// Create Kenji at Harwood contact point (1004.42, -49.06, 7.44)
-World.ClearArea(978.25, -51.00, 7.35, 8.0, True)
-Enemy1 = Char.Create(PedType.Special, #SPECIAL01, 980.00, -51.00, 7.35)
+// Create Kenji on the South side of the Head Radio roof
+World.ClearArea(1018.75, -68.50, 19.70, 8.0, True)
+Enemy1 = Char.Create(PedType.Special, #SPECIAL01, 1020.50, -68.50, 19.70)
 Char.SetObjNoObj(Enemy1)
 Char.SetHeading(Enemy1, 90.0)
 
-// Position Toni in the Head Radio parking lot facing Kenji
-Player.SetCoordinates($player, 976.50, -51.00, 7.35)
+// Position Toni on the South side of the Head Radio roof facing Kenji
+Player.SetCoordinates($player, 1017.00, -68.50, 19.70)
 Player.SetHeading($player, 270.0)
 wait 0
 Char.SetHeading(Enemy1, 90.0)
 Char.SetObjWaitOnFoot(Enemy1)
+Char.TurnToFacePlayer(Enemy1, $player)
 
-Camera.SetFixedPosition(974.50, -49.00, 8.45, 0.0, 0.0, 0.0)
+Camera.SetFixedPosition(1015.00, -70.00, 20.80, 0.0, 0.0, 0.0)
 Camera.PointAtChar(Enemy1, CameraMode.FollowPed, SwitchType.JumpCut)
 Camera.SetFadingColor(40, 0, 70)
 Camera.DoFade(1500, Fade.In)
@@ -153,9 +154,9 @@ end
 
 :Bleed_Briefing_Skip
 Text.ClearPrints()
-Camera.RestoreJumpcut()
-Hud.SwitchWidescreen(False)
-Player.SetControl($player, True)
+Camera.SetFadingColor(40, 0, 70)
+Camera.DoFade(800, Fade.Out)
+wait 800
 
 if not Enemy1 == 0
 then
@@ -163,6 +164,15 @@ then
     Enemy1 = 0
 end
 Streaming.UnloadSpecialCharacter(1)
+
+World.ClearArea(978.25, -51.00, 7.35, 8.0, True)
+Player.SetCoordinates($player, 976.50, -51.00, 7.35)
+Player.SetHeading($player, 270.0)
+Camera.RestoreJumpcut()
+Hud.SwitchWidescreen(False)
+Camera.DoFade(800, Fade.In)
+wait 800
+Player.SetControl($player, True)
 
 // Stage 0: Pre-damaged Sentinel in Head Radio lot (ind_newradio Z=6.31) & bleed-through audio
 World.ClearArea(974.00, -59.00, 6.45, 8.0, True)
@@ -825,14 +835,26 @@ while true
     end
 end
 
-// Finale Arrival Cutscene
+// Finale Arrival Cutscene (skippable)
 Player.SetControl($player, False)
 Hud.SwitchWidescreen(True)
 Camera.SetFixedPosition(139.00, -923.00, 27.50, 0.0, 0.0, 0.0)
 Camera.PointAtChar($scplayer, CameraMode.FollowPed, SwitchType.JumpCut)
 Text.Print('BLEEDC', 4000, 1)
-wait 4000
+TIMERA = 0
+while TIMERA < 4000
+    wait 0
+    if or
+        Pad.IsKeyPressed(KeyCode.LeftShift)
+        Pad.IsKeyPressed(KeyCode.Space)
+        Pad.IsKeyPressed(KeyCode.F)
+    then
+        jump @Bleed_Outro_Skip
+    end
+end
 
+:Bleed_Outro_Skip
+Text.ClearPrints()
 Camera.RestoreJumpcut()
 Hud.SwitchWidescreen(False)
 Player.SetControl($player, True)
