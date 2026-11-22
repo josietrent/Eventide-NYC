@@ -230,6 +230,9 @@ wait 300
 Camera.DoFade(500, Fade.In)
 wait 500
 
+Text.Print('MYGOD', 2000, 1)
+wait 2000
+
 Text.Print('SMUGA', 3500, 1)
 wait 3500
 
