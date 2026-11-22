@@ -685,6 +685,24 @@ if (shouldRun(10, "triblips")) {
   say.done(`  Packaged modloader/${modName}/CLEO/${basename(triOutput)}`);
 }
 
+// Step 10b: Miasma Thread
+if (shouldRun(10, "miasma")) {
+  const miasmaInput = join(cwd, "threads", "miasma.txt");
+  const miasmaOutput = join(cwd, "threads", "miasma.cs");
+  if (await allExist([miasmaInput])) {
+    say.heading("Step 10b (miasma): Compiling miasma thread...");
+    await compileIfChanged(miasmaInput, miasmaOutput);
+
+    const cleoStagingDir = join(modStagingDir, "CLEO");
+    await ensureDir(cleoStagingDir);
+    await Deno.copyFile(
+      miasmaOutput,
+      join(cleoStagingDir, basename(miasmaOutput)),
+    );
+    say.done(`  Packaged modloader/${modName}/CLEO/${basename(miasmaOutput)}`);
+  }
+}
+
 // Package CLEO custom strings into CLEO/cleo_text (CLEO reads .fxt from here, not modloader)
 const stringsSrc = join(cwd, "data", "CLEO", "strings.fxt");
 if (await allExist([stringsSrc])) {
