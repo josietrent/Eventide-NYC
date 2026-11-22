@@ -5,15 +5,12 @@
 {$INCLUDE ../utils/globals.txt}
 
 var
-    $BleedCrate7: Object
-    $BleedCrate8: Object
     $BleedEnemyBlip1: Blip
     $BleedEnemyBlip2: Blip
     $BleedEnemyBlip3: Blip
     $BleedEnemyBlip4: Blip
 end
 
-const MODEL_WOODENBOX = 1343
 const MODEL_ROADBARRIER = 1349
 
 //-------------Mission 9 / Portland Finale (triggered by :Bleed in main.txt)---------------
@@ -31,18 +28,11 @@ Car BlockCar1 = 0
 Car BlockCar2 = 0
 Object Crate1 = 0
 Object Crate2 = 0
-Object Crate3 = 0
-Object Crate4 = 0
-Object Crate5 = 0
-Object Crate6 = 0
 
 $onmission = 1
 $OnBleedMission = 1
 $BleedMissionDone = 0
 $BleedStage = 0
-$BleedCratesBroken = 0
-$BleedCrate7 = 0
-$BleedCrate8 = 0
 $BleedEnemyBlip1 = 0
 $BleedEnemyBlip2 = 0
 $BleedEnemyBlip3 = 0
@@ -209,38 +199,38 @@ while true
     end
 end
 
-// Spawn Red Light shattered roadblock (rd_road1a5 Z=13.933)
-World.ClearArea(904.00, -400.00, 13.93, 16.0, True)
-BlockCar1 = Car.Create(#MAFIA, 904.00, -400.00, 13.93)
-Car.SetHeading(BlockCar1, 45.0)
+// Spawn Red Light shattered roadblock across rd_Road1A10 (center X=910.77, Z=13.78)
+World.ClearArea(911.00, -410.52, 13.85, 16.0, True)
+BlockCar1 = Car.Create(#MAFIA, 912.46, -410.52, 13.85)
+Car.SetHeading(BlockCar1, 90.0)
 Car.SetHealth(BlockCar1, 300)
 
-Crate1 = Object.CreateNoOffset(MODEL_ROADBARRIER, 900.00, -396.50, 14.35)
-Object.SetHeading(Crate1, 0.0)
+Crate1 = Object.CreateNoOffset(MODEL_ROADBARRIER, 906.00, -410.52, 14.25)
+Object.SetHeading(Crate1, 90.0)
 Object.SetDynamic(Crate1, True)
 Object.SetCollision(Crate1, True)
 
-Crate2 = Object.CreateNoOffset(MODEL_ROADBARRIER, 908.00, -403.50, 14.35)
-Object.SetHeading(Crate2, 0.0)
+Crate2 = Object.CreateNoOffset(MODEL_ROADBARRIER, 908.20, -410.52, 14.25)
+Object.SetHeading(Crate2, 90.0)
 Object.SetDynamic(Crate2, True)
 Object.SetCollision(Crate2, True)
 
-Enemy1 = Char.Create(PedType.Gang1, #GANG01, 901.00, -402.00, 13.93)
+Enemy1 = Char.Create(PedType.Gang1, #GANG01, 907.00, -413.00, 13.85)
 Char.SetHeading(Enemy1, 0.0)
 Char.GiveWeapon(Enemy1, WeaponType.BaseballBat, 1)
 Char.SetCurrentWeapon(Enemy1, WeaponType.BaseballBat)
 Char.SetObjWaitOnFoot(Enemy1)
 
-Enemy2 = Char.Create(PedType.Gang2, #GANG03, 907.00, -398.00, 13.93)
+Enemy2 = Char.Create(PedType.Gang2, #GANG03, 914.00, -413.00, 13.85)
 Char.SetHeading(Enemy2, 0.0)
 Char.GiveWeapon(Enemy2, WeaponType.Pistol, 100)
 Char.SetCurrentWeapon(Enemy2, WeaponType.Pistol)
 Char.SetAccuracy(Enemy2, 40)
 Char.SetObjWaitOnFoot(Enemy2)
 
-MainBlip = Blip.AddForCoord(904.00, -400.00, 13.93)
+MainBlip = Blip.AddForCoord(911.00, -410.52, 13.85)
 Blip.ChangeColor(MainBlip, BlipColor.Yellow)
-MainSphere = Sphere.Create(904.00, -400.00, 13.93, 4.5)
+MainSphere = Sphere.Create(911.00, -410.52, 13.85, 4.5)
 
 while $BleedStage == 0
     wait 150
@@ -249,7 +239,7 @@ while $BleedStage == 0
         jump @Bleed_Fail
     end
 
-    if Player.LocateAnyMeans3D($player, 904.00, -400.00, 13.93, 40.0, 40.0, 10.0, False)
+    if Player.LocateAnyMeans3D($player, 911.00, -410.52, 13.85, 40.0, 40.0, 10.0, False)
     then
         if Char.IsStillAlive(Enemy1)
         then
@@ -261,7 +251,7 @@ while $BleedStage == 0
         end
     end
 
-    if Player.LocateAnyMeans3D($player, 904.00, -400.00, 13.93, 7.0, 7.0, 5.0, False)
+    if Player.LocateAnyMeans3D($player, 911.00, -410.52, 13.85, 7.0, 7.0, 5.0, False)
     then
         Blip.Remove(MainBlip)
         MainBlip = 0
@@ -414,13 +404,10 @@ then
 end
 Streaming.MarkModelAsNoLongerNeeded(#BAT)
 Streaming.RequestModel(#SHOTGUN)
-Streaming.RequestModel(MODEL_WOODENBOX)
 Streaming.LoadAllModelsNow()
 while true
     wait 0
-    if and
-        Streaming.HasModelLoaded(#SHOTGUN)
-        Streaming.HasModelLoaded(MODEL_WOODENBOX)
+    if Streaming.HasModelLoaded(#SHOTGUN)
     then
         break
     end
@@ -689,47 +676,6 @@ else
     end
 end
 
-// Spawn 8 destructible wooden crates on the Callahan Bridge deck (all COL surface Z + 0.62)
-Crate1 = Object.CreateNoOffset(MODEL_WOODENBOX, 920.00, -922.00, 24.98)
-Object.SetHeading(Crate1, 0.0)
-Object.SetDynamic(Crate1, True)
-Object.SetCollision(Crate1, True)
-
-Crate2 = Object.CreateNoOffset(MODEL_WOODENBOX, 880.00, -942.00, 29.23)
-Object.SetHeading(Crate2, 15.0)
-Object.SetDynamic(Crate2, True)
-Object.SetCollision(Crate2, True)
-
-Crate3 = Object.CreateNoOffset(MODEL_WOODENBOX, 740.00, -922.00, 40.32)
-Object.SetHeading(Crate3, 0.0)
-Object.SetDynamic(Crate3, True)
-Object.SetCollision(Crate3, True)
-
-Crate4 = Object.CreateNoOffset(MODEL_WOODENBOX, 700.00, -940.00, 41.51)
-Object.SetHeading(Crate4, 20.0)
-Object.SetDynamic(Crate4, True)
-Object.SetCollision(Crate4, True)
-
-Crate5 = Object.CreateNoOffset(MODEL_WOODENBOX, 610.00, -940.00, 42.53)
-Object.SetHeading(Crate5, 10.0)
-Object.SetDynamic(Crate5, True)
-Object.SetCollision(Crate5, True)
-
-Crate6 = Object.CreateNoOffset(MODEL_WOODENBOX, 560.00, -922.00, 42.09)
-Object.SetHeading(Crate6, 0.0)
-Object.SetDynamic(Crate6, True)
-Object.SetCollision(Crate6, True)
-
-$BleedCrate7 = Object.CreateNoOffset(MODEL_WOODENBOX, 360.00, -922.00, 35.57)
-Object.SetHeading($BleedCrate7, 12.0)
-Object.SetDynamic($BleedCrate7, True)
-Object.SetCollision($BleedCrate7, True)
-
-$BleedCrate8 = Object.CreateNoOffset(MODEL_WOODENBOX, 260.00, -942.00, 30.58)
-Object.SetHeading($BleedCrate8, 0.0)
-Object.SetDynamic($BleedCrate8, True)
-Object.SetCollision($BleedCrate8, True)
-
 // Spawn bridge deck defenders along the span & Staunton foot
 Enemy1 = Char.Create(PedType.Gang1, #GANG01, 720.00, -926.00, 40.55)
 Char.SetHeading(Enemy1, 270.0)
@@ -771,7 +717,7 @@ Hud.SwitchWidescreen(False)
 Player.SetControl($player, True)
 $BleedStage = 3
 
-// Stage 3: Charge across Callahan Bridge, smash crates (+$100 each), reach Staunton Island (com_cust_roads52 Z=24.98)
+// Stage 3: Charge across Callahan Bridge and reach Staunton Island (com_cust_roads52 Z=24.98)
 MainBlip = Blip.AddForCoord(130.00, -932.00, 25.00)
 Blip.ChangeColor(MainBlip, BlipColor.Yellow)
 MainSphere = Sphere.Create(130.00, -932.00, 25.00, 4.5)
@@ -782,126 +728,6 @@ while true
     if not Player.IsPlaying($player)
     then
         jump @Bleed_Fail
-    end
-
-    if not Crate1 == 0
-    then
-        if or
-            not Object.DoesExist(Crate1)
-            Object.HasBeenDamaged(Crate1)
-        then
-            Player.AddScore($player, 100)
-            $BleedCratesBroken += 1
-            Text.PrintWithNumber('BLDCRAT', $BleedCratesBroken, 2500, 1)
-            Sound.AddOneOffSound(920.00, -922.00, 24.98, ScriptSound.SoundPartMissionComplete)
-            Object.MarkAsNoLongerNeeded(Crate1)
-            Crate1 = 0
-        end
-    end
-
-    if not Crate2 == 0
-    then
-        if or
-            not Object.DoesExist(Crate2)
-            Object.HasBeenDamaged(Crate2)
-        then
-            Player.AddScore($player, 100)
-            $BleedCratesBroken += 1
-            Text.PrintWithNumber('BLDCRAT', $BleedCratesBroken, 2500, 1)
-            Sound.AddOneOffSound(880.00, -942.00, 29.23, ScriptSound.SoundPartMissionComplete)
-            Object.MarkAsNoLongerNeeded(Crate2)
-            Crate2 = 0
-        end
-    end
-
-    if not Crate3 == 0
-    then
-        if or
-            not Object.DoesExist(Crate3)
-            Object.HasBeenDamaged(Crate3)
-        then
-            Player.AddScore($player, 100)
-            $BleedCratesBroken += 1
-            Text.PrintWithNumber('BLDCRAT', $BleedCratesBroken, 2500, 1)
-            Sound.AddOneOffSound(740.00, -922.00, 40.32, ScriptSound.SoundPartMissionComplete)
-            Object.MarkAsNoLongerNeeded(Crate3)
-            Crate3 = 0
-        end
-    end
-
-    if not Crate4 == 0
-    then
-        if or
-            not Object.DoesExist(Crate4)
-            Object.HasBeenDamaged(Crate4)
-        then
-            Player.AddScore($player, 100)
-            $BleedCratesBroken += 1
-            Text.PrintWithNumber('BLDCRAT', $BleedCratesBroken, 2500, 1)
-            Sound.AddOneOffSound(700.00, -940.00, 41.51, ScriptSound.SoundPartMissionComplete)
-            Object.MarkAsNoLongerNeeded(Crate4)
-            Crate4 = 0
-        end
-    end
-
-    if not Crate5 == 0
-    then
-        if or
-            not Object.DoesExist(Crate5)
-            Object.HasBeenDamaged(Crate5)
-        then
-            Player.AddScore($player, 100)
-            $BleedCratesBroken += 1
-            Text.PrintWithNumber('BLDCRAT', $BleedCratesBroken, 2500, 1)
-            Sound.AddOneOffSound(610.00, -940.00, 42.53, ScriptSound.SoundPartMissionComplete)
-            Object.MarkAsNoLongerNeeded(Crate5)
-            Crate5 = 0
-        end
-    end
-
-    if not Crate6 == 0
-    then
-        if or
-            not Object.DoesExist(Crate6)
-            Object.HasBeenDamaged(Crate6)
-        then
-            Player.AddScore($player, 100)
-            $BleedCratesBroken += 1
-            Text.PrintWithNumber('BLDCRAT', $BleedCratesBroken, 2500, 1)
-            Sound.AddOneOffSound(560.00, -922.00, 42.09, ScriptSound.SoundPartMissionComplete)
-            Object.MarkAsNoLongerNeeded(Crate6)
-            Crate6 = 0
-        end
-    end
-
-    if not $BleedCrate7 == 0
-    then
-        if or
-            not Object.DoesExist($BleedCrate7)
-            Object.HasBeenDamaged($BleedCrate7)
-        then
-            Player.AddScore($player, 100)
-            $BleedCratesBroken += 1
-            Text.PrintWithNumber('BLDCRAT', $BleedCratesBroken, 2500, 1)
-            Sound.AddOneOffSound(360.00, -922.00, 35.57, ScriptSound.SoundPartMissionComplete)
-            Object.MarkAsNoLongerNeeded($BleedCrate7)
-            $BleedCrate7 = 0
-        end
-    end
-
-    if not $BleedCrate8 == 0
-    then
-        if or
-            not Object.DoesExist($BleedCrate8)
-            Object.HasBeenDamaged($BleedCrate8)
-        then
-            Player.AddScore($player, 100)
-            $BleedCratesBroken += 1
-            Text.PrintWithNumber('BLDCRAT', $BleedCratesBroken, 2500, 1)
-            Sound.AddOneOffSound(260.00, -942.00, 30.58, ScriptSound.SoundPartMissionComplete)
-            Object.MarkAsNoLongerNeeded($BleedCrate8)
-            $BleedCrate8 = 0
-        end
     end
 
     if Player.LocateAnyMeans3D($player, 130.00, -932.00, 25.00, 4.5, 4.5, 4.0, False)
@@ -976,36 +802,6 @@ then
     Object.MarkAsNoLongerNeeded(Crate2)
     Crate2 = 0
 end
-if not Crate3 == 0
-then
-    Object.MarkAsNoLongerNeeded(Crate3)
-    Crate3 = 0
-end
-if not Crate4 == 0
-then
-    Object.MarkAsNoLongerNeeded(Crate4)
-    Crate4 = 0
-end
-if not Crate5 == 0
-then
-    Object.MarkAsNoLongerNeeded(Crate5)
-    Crate5 = 0
-end
-if not Crate6 == 0
-then
-    Object.MarkAsNoLongerNeeded(Crate6)
-    Crate6 = 0
-end
-if not $BleedCrate7 == 0
-then
-    Object.MarkAsNoLongerNeeded($BleedCrate7)
-    $BleedCrate7 = 0
-end
-if not $BleedCrate8 == 0
-then
-    Object.MarkAsNoLongerNeeded($BleedCrate8)
-    $BleedCrate8 = 0
-end
 
 Streaming.MarkModelAsNoLongerNeeded(#SENTINEL)
 Streaming.MarkModelAsNoLongerNeeded(#GANG01)
@@ -1013,7 +809,6 @@ Streaming.MarkModelAsNoLongerNeeded(#GANG03)
 Streaming.MarkModelAsNoLongerNeeded(#COLT45)
 Streaming.MarkModelAsNoLongerNeeded(#UZI)
 Streaming.MarkModelAsNoLongerNeeded(#SHOTGUN)
-Streaming.MarkModelAsNoLongerNeeded(MODEL_WOODENBOX)
 $OnBleedMission = 0
 terminate_this_custom_script
 
@@ -1104,36 +899,6 @@ then
     Object.Delete(Crate2)
     Crate2 = 0
 end
-if not Crate3 == 0
-then
-    Object.Delete(Crate3)
-    Crate3 = 0
-end
-if not Crate4 == 0
-then
-    Object.Delete(Crate4)
-    Crate4 = 0
-end
-if not Crate5 == 0
-then
-    Object.Delete(Crate5)
-    Crate5 = 0
-end
-if not Crate6 == 0
-then
-    Object.Delete(Crate6)
-    Crate6 = 0
-end
-if not $BleedCrate7 == 0
-then
-    Object.Delete($BleedCrate7)
-    $BleedCrate7 = 0
-end
-if not $BleedCrate8 == 0
-then
-    Object.Delete($BleedCrate8)
-    $BleedCrate8 = 0
-end
 
 Streaming.UnloadSpecialCharacter(1)
 Streaming.MarkModelAsNoLongerNeeded(#SENTINEL)
@@ -1145,7 +910,6 @@ Streaming.MarkModelAsNoLongerNeeded(#COLT45)
 Streaming.MarkModelAsNoLongerNeeded(#UZI)
 Streaming.MarkModelAsNoLongerNeeded(#SHOTGUN)
 Streaming.MarkModelAsNoLongerNeeded(MODEL_ROADBARRIER)
-Streaming.MarkModelAsNoLongerNeeded(MODEL_WOODENBOX)
 Camera.RestoreJumpcut()
 Hud.SwitchWidescreen(False)
 Camera.DoFade(1500, Fade.In)
