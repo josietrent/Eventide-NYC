@@ -10,8 +10,14 @@ while not Player.IsPlaying($player)
 end
 
 Camera.SetFadingColor(40, 0, 70)
-World.SetCarDensityMultiplier(0.25)
-World.SetPedDensityMultiplier(0.1)
+if $BarrierIND == 0
+then
+    World.SetCarDensityMultiplier(0.5)
+    World.SetPedDensityMultiplier(0.25)
+else
+    World.SetCarDensityMultiplier(0.25)
+    World.SetPedDensityMultiplier(0.1)
+end
 
 // Re-apply after load fade-in settles so engine reset on save reload never leaves density at 1.0
 while true
@@ -25,8 +31,14 @@ while true
 end
 
 Camera.SetFadingColor(40, 0, 70)
-World.SetCarDensityMultiplier(0.25)
-World.SetPedDensityMultiplier(0.1)
+if $BarrierIND == 0
+then
+    World.SetCarDensityMultiplier(0.5)
+    World.SetPedDensityMultiplier(0.25)
+else
+    World.SetCarDensityMultiplier(0.25)
+    World.SetPedDensityMultiplier(0.1)
+end
 
 // Ensure late-added pickups also spawn when loading an existing savegame
 if $AK47Spawn == 0
@@ -39,7 +51,13 @@ while true
     wait 1000
     if Player.IsPlaying($player)
     then
-        World.SetCarDensityMultiplier(0.25)
-        World.SetPedDensityMultiplier(0.1)
+        if $BarrierIND == 0
+        then
+            World.SetCarDensityMultiplier(0.5)
+            World.SetPedDensityMultiplier(0.25)
+        else
+            World.SetCarDensityMultiplier(0.25)
+            World.SetPedDensityMultiplier(0.1)
+        end
     end
 end
