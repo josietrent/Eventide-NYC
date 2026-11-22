@@ -59,6 +59,11 @@ end
 //=============
 script_name 'MAIN'
 
+var
+    0@: int
+    1@: int
+end
+
 // Load Portland
 Game.SetMaxWantedLevel(2)
 set_deatharrest_state 0
@@ -107,12 +112,96 @@ LoadGameAssets()
 World.SwapNearestBuildingModel(1027.25, -933.75, 15.0, 50.0, #LOD_LAND014, #INDHELIX_BARRIER)
 World.SetVisibilityOfClosestObjectOfType(1027.25, -933.75, 15.0, 50.0, #INDHELIX_BARRIER, True)
 
-// All done!
-Camera.SetFadingColor(40, 0, 70)
-Camera.DoFade(1000, Fade.In)
+// All done! Run 3-shot skippable Cold Open before handing control to the player
+play_audio_stream_1channel "audio/EC/miasma.wav", True, 1.0
 Player.SetControl($player, False)
 Player.SetNeverGetsTired($player, True)
-wait 2000
+Hud.SwitchWidescreen(True)
+
+// Wait until any New Game menu keypress is released so Shot 1 does not skip immediately
+while true
+    if or
+        Pad.IsKeyPressed(KeyCode.Space)
+        Pad.IsKeyPressed(KeyCode.Return)
+        Pad.IsKeyPressed(KeyCode.LeftShift)
+        Pad.IsKeyPressed(KeyCode.F)
+    then
+        wait 0
+    else
+        break
+    end
+end
+
+1@ = 0
+
+// Shot 1: Callahan Bridge & #INDHELIX_BARRIER pan
+Streaming.LoadScene(1010.0, -933.0, 20.0)
+Camera.SetFixedPosition(1072.0, -952.0, 24.5, 0.0, 0.0, 0.0)
+Camera.PointAtPoint(1015.0, -933.0, 16.5, SwitchType.JumpCut)
+Camera.SetFadingColor(40, 0, 70)
+Camera.DoFade(1000, Fade.In)
+0@ = 1000
+gosub @ColdOpen_Wait
+if 1@ == 0
+then
+    Camera.SetInterpolationParameters(0.0, 6000)
+    Camera.SetFixedPosition(835.0, -952.0, 48.0, 0.0, 0.0, 0.0)
+    Camera.PointAtPoint(600.0, -932.0, 38.0, SwitchType.Interpolation)
+    0@ = 6500
+    gosub @ColdOpen_Wait
+end
+
+// Shot 2: Aerial pan across Portland, well above and clear of Hidden Packages
+if 1@ == 0
+then
+    Streaming.LoadScene(900.0, -560.0, 30.0)
+    Camera.SetFixedPosition(860.0, -780.0, 74.0, 0.0, 0.0, 0.0)
+    Camera.PointAtPoint(980.0, -540.0, 25.0, SwitchType.JumpCut)
+    0@ = 300
+    gosub @ColdOpen_Wait
+end
+if 1@ == 0
+then
+    Camera.SetInterpolationParameters(0.0, 6000)
+    Camera.SetFixedPosition(990.0, -320.0, 68.0, 0.0, 0.0, 0.0)
+    Camera.PointAtPoint(1160.0, -240.0, 24.0, SwitchType.Interpolation)
+    0@ = 6500
+    gosub @ColdOpen_Wait
+end
+
+// Shot 3: Pan to Portland Beach, glide up in front of Player, then Fade Out -> RestoreJumpcut -> Fade In
+if 1@ == 0
+then
+    Streaming.LoadScene(935.0, -240.0, 5.0)
+    Camera.SetFixedPosition(972.0, -206.0, 22.0, 0.0, 0.0, 0.0)
+    Camera.PointAtPoint(934.0, -245.0, 5.2, SwitchType.JumpCut)
+    0@ = 300
+    gosub @ColdOpen_Wait
+end
+if 1@ == 0
+then
+    Camera.SetInterpolationParameters(0.0, 5500)
+    Camera.SetFixedPosition(937.48, -251.44, 5.55, 0.0, 0.0, 0.0)
+    Camera.PointAtPoint(933.66, -252.64, 5.15, SwitchType.Interpolation)
+    0@ = 6200
+    gosub @ColdOpen_Wait
+end
+
+Camera.SetFadingColor(40, 0, 70)
+Camera.DoFade(800, Fade.Out)
+while Camera.GetFadingStatus()
+    wait 0
+end
+Hud.SwitchWidescreen(False)
+Streaming.LoadScene(933.66, -252.64, 4.50)
+Camera.RestoreJumpcut()
+Camera.DoFade(800, Fade.In)
+while Camera.GetFadingStatus()
+    wait 0
+end
+
+// Start player hurt to incentivize healing at Dong's Noodle Shop in Mission 0
+Player.SetHealth($player, 30)
 
 // Spawn BG threads
 start_new_script @Driving
@@ -122,7 +211,6 @@ start_new_script @Barrier
 
 Text.Print('BEACH', 5000, 1)
 Player.SetControl($player, True)
-play_audio_stream_1channel "audio/EC/miasma.wav", True, 1.0
 // Terminate the main initialization thread cleanly now that setup is complete
 
 terminate_this_script
@@ -147,6 +235,22 @@ Car.SetHeading($Canyonero, 110)
 // FIXME: Blip and Sphere are not on mini-map.
 $MissionTriggerBlip = Blip.AddForCoord(774.45, -880.88, 14.74)
 $MissionTriggerSphere = Sphere.Create(774.45, -880.88, 14.74, 3.0)
+return
+
+:ColdOpen_Wait
+TIMERA = 0
+while TIMERA < 0@
+    wait 0
+    if or
+        Pad.IsKeyPressed(KeyCode.Space)
+        Pad.IsKeyPressed(KeyCode.Return)
+        Pad.IsKeyPressed(KeyCode.LeftShift)
+        Pad.IsKeyPressed(KeyCode.F)
+    then
+        1@ = 1
+        return
+    end
+end
 return
 
 //=========================================
@@ -186,10 +290,32 @@ while $OnCarMission == 0
             Blip.Remove($MissionTriggerBlip)
             Sphere.Remove($MissionTriggerSphere)
             Player.SetControl($player, False)
+            Hud.SwitchWidescreen(True)
             Text.PrintBigString("Nowhere Like Home...", 5000, TextStyle.BottomRight)
+            Camera.SetFixedPosition(782.0, -878.0, 16.5, 0.0, 0.0, 0.0)
+            Camera.PointAtPoint(700.0, -900.0, 15.0, SwitchType.JumpCut)
+            wait 0
+            Camera.SetInterpolationParameters(0.0, 3500)
+            Camera.SetFixedPosition(772.0, -882.0, 16.2, 0.0, 0.0, 0.0)
+            Camera.PointAtPoint(650.0, -915.0, 17.5, SwitchType.Interpolation)
+            // TODO (Option A Voiced Narration): play_audio_stream_1channel "audio/EC/<narration>.wav", False, 1.0 + timed subtitles (see docs/intro_narration.md)
+            TIMERA = 0
+            while TIMERA < 3500
+                wait 0
+                if or
+                    Pad.IsKeyPressed(KeyCode.Space)
+                    Pad.IsKeyPressed(KeyCode.Return)
+                    Pad.IsKeyPressed(KeyCode.LeftShift)
+                    Pad.IsKeyPressed(KeyCode.F)
+                then
+                    break
+                end
+            end
             Camera.SetFadingColor(40, 0, 70)
             Camera.DoFade(1500, Fade.Out)
             wait 1500
+            Hud.SwitchWidescreen(False)
+            Camera.RestoreJumpcut()
             $OnCarMission = 1
             stream_custom_script "INIT.cm"
             break
