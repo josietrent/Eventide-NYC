@@ -642,12 +642,6 @@ $SafeBlip = Blip.AddSpriteForContactPoint(1454.08, -173.18, 55.77, RadarSprite.S
 Hud.SwitchWidescreen(False)
 wait 500
 Camera.RestoreJumpcut()
-Streaming.MarkModelAsNoLongerNeeded(#STALLION)
-if not $Stallion == 0
-then
-    Car.MarkAsNoLongerNeeded($Stallion)
-    $Stallion = 0
-end
 Text.Print('GTOROOF', 8000, 0)
 Camera.DoFade(1500, Fade.In)
 wait 1500
