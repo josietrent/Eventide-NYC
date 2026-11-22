@@ -924,6 +924,17 @@ if (shouldRun(17, "fleeonshot")) {
   say.done(`  Packaged modloader/${modName}/${basename(asiOutput)}`);
 }
 
+// Step 21: ParamedicCash ASI Plugin
+if (shouldRun(21, "paramediccash")) {
+  say.heading("Step 21 (paramediccash): Compiling ParamedicCash.asi...");
+  const asiInput = join(cwd, "plugins", "ParamedicCash", "ParamedicCash.cpp");
+  const asiOutput = join(cwd, "plugins", "ParamedicCash", "ParamedicCash.asi");
+  await compileAsiIfChanged(asiInput, asiOutput, join(stagingDir, "obj"));
+
+  await Deno.copyFile(asiOutput, join(modStagingDir, basename(asiOutput)));
+  say.done(`  Packaged modloader/${modName}/${basename(asiOutput)}`);
+}
+
 // Step 18: Custom Map Overrides (IPL/IDE)
 if (shouldRun(18, "map")) {
   const mapsSrcDir = join(cwd, "data", "maps");
