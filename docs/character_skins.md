@@ -35,9 +35,9 @@ Currently on the playing field in Portland: **Toni** (above), **Marie**, **Pento
   - **TXD Reskin:** Light pink dress fabric with puffy-sleeve shading and black lace hem trim.
   - **`.dff` Note:** Vanilla `misty.dff` wears a mini-skirt; swapping base `.dff` to `maria.dff` / `female03.dff` gives a longer skirt immediately, and a custom `.dff` pass is needed for a true floor-length crinoline bell silhouette.
 
-### Pentor, an Elf _(Active in Portland — `#SPECIAL01`: `kenji`)_
+### Pentor, an Elf _(Active in Portland — Replaces Louie / `#SPECIAL01`: `luigi`)_
 - **Role & Description:** Head cook (beginning as the castle's demure and shy head cook in Book 1, coming into his own in Book 2 while helping free Toni from her coma). A tall elf wearing a crisp white chef's coat, apron, and chef's toque, standing regally with arms crossed behind him.
-- **GTA III Mapping (`kenji.dff` / `kenji.txd`):**
+- **GTA III Mapping (`luigi.dff` / `luigi.txd`):**
   - **TXD Reskin:** Crisp white double-breasted chef's coat, white apron ties/straps, pale elven complexion & brows.
   - **`.dff` Note:** Needs a `.dff` pass for a tall **chef's toque**, **apron skirt/panel**, and **pointy elf ears** on a tall male frame.
 
@@ -69,6 +69,6 @@ Currently on the playing field in Portland: **Toni** (above), **Marie**, **Pento
 ---
 
 ## 4. Next Implementation Steps (Portland Priority)
-1. Extract vanilla `player.txd`, `misty.txd` / `maria.txd`, `kenji.txd`, and `gang05.txd` (plus candidate female `.dff`s for Toni/Marie) from `GTA3/models/gta3.img`.
+1. Extract vanilla `player.txd`, `misty.txd` / `maria.txd`, `luigi.txd`, and `gang05.txd` (plus candidate female `.dff`s for Toni/Marie) from `GTA3/models/gta3.img`.
 2. Build & wire a `models` packaging step in [`scripts/build.ts`](../scripts/build.ts) copying `data/models/gta3.img/*` -> `modloader/Eventide/models/gta3.img/`.
-3. Reskin the 4 active Portland characters (**Toni**, **Marie**, **Pentor**, **Reinhardt**) first, then add **Zoey**'s Act 2 swap (`Char.Undress` / `Char.Dress`) into [`threads/bleed.txt`](../threads/bleed.txt) and [`main.txt`](../main.txt).
+3. Reskin the 4 active Portland characters (**Toni**, **Marie**, **Pentor** [`luigi`], **Reinhardt** [`gang05`]) first, then add **Zoey**'s Act 2 swap (`Char.Undress` / `Char.Dress`) into [`threads/bleed.txt`](../threads/bleed.txt) and [`main.txt`](../main.txt).
