@@ -178,7 +178,7 @@ Camera.DoFade(1000, Fade.Out)
 wait 1000
 World.ClearArea(758.46, 80.57, 4.0, 50.0, False)
 wait 500
-Camera.DoFade(1000, Fade.Out)
+Camera.DoFade(1000, Fade.In)
 wait 1000
 Text.Print('STARVE', 3000, 0)
 wait 3000
