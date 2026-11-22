@@ -218,3 +218,11 @@ POLE3	Double streetlamp down! ~g~+$~1~
 POLE4	Park light down! ~g~+$~1~
 POLE5	Double park light down! ~g~+$~1~
 POLEC	~y~Pole Combo x~1~! ~g~+$~1~
+TLAW1	~r~Property Damage! ~w~Cop saw hydrant hit - ~r~-$~1~
+TLAW2	~r~Property Damage! ~w~Cop saw pole destroyed - ~r~-$~1~
+TLAW3	~r~Property Damage! ~w~Cop saw city property hit - ~r~-$~1~
+TLAW4	~r~Speeding (~1~ mph)! ~w~Cop witnessed - ~r~-$~1~
+TLAW5	~y~Speed Camera (~1~ mph)! ~w~Ticket - ~r~-$~1~
+TLAW6	~r~Ran Red Light! ~w~Cop witnessed - ~r~-$~1~
+TLAW7	~y~Red Light Camera! ~w~Ticket - ~r~-$~1~
+TLAW8	~r~Reckless Driving! ~w~Hit & run - ~r~-$~1~

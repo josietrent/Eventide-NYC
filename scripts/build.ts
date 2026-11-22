@@ -740,7 +740,7 @@ if (shouldRun(10, "savest")) {
   }
 }
 
-// Step 10e: Streetlight & Traffic Signal Knockdown Thread
+// Step 10e: Streetlight Knockdown & Traffic Law Thread
 if (shouldRun(10, "poles")) {
   const polesInput = join(cwd, "threads", "poles.txt");
   const polesOutput = join(cwd, "threads", "poles.cs");
@@ -953,11 +953,11 @@ if (shouldRun(21, "paramediccash")) {
   say.done(`  Packaged modloader/${modName}/${basename(asiOutput)}`);
 }
 
-// Step 22: PoleKnockdown ASI Plugin
-if (shouldRun(22, "poleknockdown")) {
-  say.heading("Step 22 (poleknockdown): Compiling PoleKnockdown.asi...");
-  const asiInput = join(cwd, "plugins", "PoleKnockdown", "PoleKnockdown.cpp");
-  const asiOutput = join(cwd, "plugins", "PoleKnockdown", "PoleKnockdown.asi");
+// Step 22: TrafficLaw ASI Plugin
+if (shouldRun(22, "trafficlaw")) {
+  say.heading("Step 22 (trafficlaw): Compiling TrafficLaw.asi...");
+  const asiInput = join(cwd, "plugins", "TrafficLaw", "TrafficLaw.cpp");
+  const asiOutput = join(cwd, "plugins", "TrafficLaw", "TrafficLaw.asi");
   await compileAsiIfChanged(asiInput, asiOutput, join(stagingDir, "obj"));
 
   await Deno.copyFile(asiOutput, join(modStagingDir, basename(asiOutput)));

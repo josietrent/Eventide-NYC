@@ -7,6 +7,10 @@ var
     $PoleKnockTotal: int
     $PoleKnockLastModel: int
     $PoleKnockEnabled: int
+    $TrafficLawActive: int
+    $TrafficLawEvent: int
+    $TrafficLawFine: int
+    $TrafficLawValue: int
 end
 
 script_name 'POLES'
@@ -19,6 +23,9 @@ int mult = 0
 int basePay = 0
 int payout = 0
 int modelId = 0
+int lawEvent = 0
+int lawFine = 0
+int lawVal = 0
 float px = 0.0
 float py = 0.0
 float pz = 0.0
@@ -39,6 +46,10 @@ while true
 end
 
 $PoleKnockEnabled = 1
+$TrafficLawActive = 0
+$TrafficLawEvent = 0
+$TrafficLawFine = 0
+$TrafficLawValue = 0
 lastTotal = $PoleKnockTotal
 streak = 0
 TIMERA = 10000
@@ -51,9 +62,96 @@ while true
         Camera.GetFadingStatus()
         not Game.HasSaveGameFinished()
     then
+        $TrafficLawActive = 0
+        $TrafficLawEvent = 0
         lastTotal = $PoleKnockTotal
         streak = 0
         continue
+    end
+
+    // Enable post-story "Be Good" traffic-law enforcement once the finale is beaten
+    if and
+        $BleedMissionDone == 1
+        $Intro_Passed == 1
+        $onmission == 0
+    then
+        $TrafficLawActive = 1
+    else
+        $TrafficLawActive = 0
+        $TrafficLawEvent = 0
+    end
+
+    // Handle queued post-story traffic-law citations / property-damage fines
+    if and
+        $TrafficLawActive == 1
+        $TrafficLawEvent > 0
+    then
+        lawEvent = $TrafficLawEvent
+        lawFine = $TrafficLawFine
+        lawVal = $TrafficLawValue
+        $TrafficLawEvent = 0
+        $TrafficLawFine = 0
+        $TrafficLawValue = 0
+
+        if lawFine > 0
+        then
+            // Reuse delta as curCash and mult as negative fine delta to stay within 16 CLEO locals
+            Player.StoreScore($player, delta)
+            if delta > 0
+            then
+                mult = 0
+                if lawFine > delta
+                then
+                    mult -= delta
+                else
+                    mult -= lawFine
+                end
+                Player.AddScore($player, mult)
+            end
+        end
+
+        Char.GetCoordinates($scplayer, px, py, pz)
+        Sound.AddOneOffSound(px, py, pz, ScriptSound.SoundPartMissionComplete)
+
+        if lawEvent == 1
+        then
+            Text.PrintWithNumberNow('TLAW1', lawFine, 4000, 1)
+        else
+            if lawEvent == 2
+            then
+                Text.PrintWithNumberNow('TLAW2', lawFine, 4000, 1)
+            else
+                if lawEvent == 3
+                then
+                    Text.PrintWithNumberNow('TLAW3', lawFine, 4000, 1)
+                else
+                    if lawEvent == 4
+                    then
+                        Text.PrintWith2NumbersNow('TLAW4', lawVal, lawFine, 4000, 1)
+                    else
+                        if lawEvent == 5
+                        then
+                            Text.PrintWith2NumbersNow('TLAW5', lawVal, lawFine, 4000, 1)
+                        else
+                            if lawEvent == 6
+                            then
+                                Text.PrintWithNumberNow('TLAW6', lawFine, 4000, 1)
+                            else
+                                if lawEvent == 7
+                                then
+                                    Text.PrintWithNumberNow('TLAW7', lawFine, 4000, 1)
+                                else
+                                    if lawEvent == 8
+                                    then
+                                        Text.PrintWithNumberNow('TLAW8', lawFine, 4000, 1)
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+        end
     end
 
     curTotal = $PoleKnockTotal
