@@ -10,7 +10,7 @@ DEFINE MISSIONS 0
 {$USE CLEO, AUDIO, ini}
 nop
 
-const PACKAGE_COUNT = 64
+const PACKAGE_COUNT = 65
 
 {$INCLUDE utils/globals.txt}
 
