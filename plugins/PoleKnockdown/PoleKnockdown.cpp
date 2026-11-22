@@ -41,7 +41,10 @@ constexpr uint8_t ENTITY_FLAG_IS_STATIC = 0x04;
 
 // Target uprootable streetlight & traffic signal model IDs (generic.IDE /
 // object.dat)
+constexpr int16_t MI_LAMPOST_COAST = 1342;
 constexpr int16_t MI_LAMPPOST3 = 1345;
+constexpr int16_t MI_STREETLAMP2 = 1352;
+constexpr int16_t MI_STREETLAMP1 = 1353;
 constexpr int16_t MI_LAMPPOST1 = 1393;
 constexpr int16_t MI_DOUBLESTREETLGHT1 = 1394;
 constexpr int16_t MI_LAMPPOST2 = 1404;
@@ -407,9 +410,10 @@ inline uint32_t TimeMs() {
 }
 
 inline bool IsTargetPoleModel(int16_t modelIndex) {
-  return modelIndex == MI_LAMPPOST1 || modelIndex == MI_LAMPPOST2 ||
-         modelIndex == MI_LAMPPOST3 || modelIndex == MI_DOUBLESTREETLGHT1 ||
-         modelIndex == MI_TRAFFICLIGHT1;
+  return modelIndex == MI_LAMPOST_COAST || modelIndex == MI_LAMPPOST1 ||
+         modelIndex == MI_LAMPPOST2 || modelIndex == MI_LAMPPOST3 ||
+         modelIndex == MI_STREETLAMP1 || modelIndex == MI_STREETLAMP2 ||
+         modelIndex == MI_DOUBLESTREETLGHT1 || modelIndex == MI_TRAFFICLIGHT1;
 }
 
 inline bool IsEntityType(const void *entity, uint8_t type) {
