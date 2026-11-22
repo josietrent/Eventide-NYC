@@ -95,11 +95,28 @@ while true
             end
             if $StauntonContactsCreated == 0
             then
-                $AsukaBlip = Blip.AddSpriteForContactPoint(287.92, -658.24, 26.17, RadarSprite.Asuka)
-                $AsukaSphere = Sphere.Create(287.92, -658.24, 26.17, 1.5)
+                $AsukaBlip = Blip.AddSpriteForContactPoint(245.59, -1207.57, 26.67, RadarSprite.Asuka)
+                $AsukaSphere = Sphere.Create(245.59, -1207.57, 26.67, 1.5)
                 $RayBlip = Blip.AddSpriteForContactPoint(151.72, -757.56, 29.18, RadarSprite.Ray)
                 $RaySphere = Sphere.Create(151.72, -757.56, 29.18, 1.5)
-                $StauntonContactsCreated = 1
+                $StauntonContactsCreated = 2
+            else
+                if $StauntonContactsCreated == 1
+                then
+                    if not $AsukaBlip == 0
+                    then
+                        Blip.Remove($AsukaBlip)
+                        $AsukaBlip = 0
+                    end
+                    if not $AsukaSphere == 0
+                    then
+                        Sphere.Remove($AsukaSphere)
+                        $AsukaSphere = 0
+                    end
+                    $AsukaBlip = Blip.AddSpriteForContactPoint(245.59, -1207.57, 26.67, RadarSprite.Asuka)
+                    $AsukaSphere = Sphere.Create(245.59, -1207.57, 26.67, 1.5)
+                    $StauntonContactsCreated = 2
+                end
             end
         else
             World.SetCarDensityMultiplier(0.25)
