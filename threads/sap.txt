@@ -341,12 +341,46 @@ Camera.DoFade(800, Fade.In)
 wait 800
 
 Text.Print('SAPA', 4000, 1)
-wait 4000
-Text.Print('SAPB', 4500, 1)
-wait 4500
-Text.Print('SAPC', 4500, 1)
-wait 4500
+TIMERA = 0
+while TIMERA < 4000
+    wait 0
+    if or
+        Pad.IsKeyPressed(KeyCode.LeftShift)
+        Pad.IsKeyPressed(KeyCode.Space)
+        Pad.IsKeyPressed(KeyCode.F)
+    then
+        jump @Sap_Ending_Skip
+    end
+end
 
+Text.Print('SAPB', 4500, 1)
+TIMERA = 0
+while TIMERA < 4500
+    wait 0
+    if or
+        Pad.IsKeyPressed(KeyCode.LeftShift)
+        Pad.IsKeyPressed(KeyCode.Space)
+        Pad.IsKeyPressed(KeyCode.F)
+    then
+        jump @Sap_Ending_Skip
+    end
+end
+
+Text.Print('SAPC', 4500, 1)
+TIMERA = 0
+while TIMERA < 4500
+    wait 0
+    if or
+        Pad.IsKeyPressed(KeyCode.LeftShift)
+        Pad.IsKeyPressed(KeyCode.Space)
+        Pad.IsKeyPressed(KeyCode.F)
+    then
+        jump @Sap_Ending_Skip
+    end
+end
+
+:Sap_Ending_Skip
+Text.ClearPrints()
 Camera.DoFade(1000, Fade.Out)
 wait 1000
 Camera.RestoreJumpcut()
