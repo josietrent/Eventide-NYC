@@ -208,6 +208,10 @@ BLEED9	Defenders down! Enter the ~y~marker~w~ at the barrier to plant the Sap ch
 BLEEDA	Sap charge armed - stand clear!
 BLEEDB	Charge across Callahan Bridge into ~y~Staunton Island~w~!
 BLEEDC	Callahan Bridge is open.
-NOODLEH	You are hurt and starving. Visit ~y~Dong's Noodle Shop~w~ to heal up—just like food vendors in Vice City, you can stop by on foot anytime in freeroam to restore health.
+NOODLEH	Visit ~y~Dong's Noodle Shop~w~ to heal up. You can also stop by on foot anytime in freeroam.
 NOODLE2	You grab a hot bowl of noodles and feel much stronger.
 NOODLEV	Bought a hot bowl of noodles (). Health restored!
+POLE1	Streetlight down! ~g~+$~1~
+POLE2	Traffic signal down! ~g~+$~1~
+POLE3	Double streetlamp down! ~g~+$~1~
+POLEC	~y~Pole Combo x~1~! ~g~+$~1~
