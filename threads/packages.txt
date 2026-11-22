@@ -226,7 +226,6 @@ $PackIndex = $Packages
 $BlipActive = 1
 2@ = 0
 $PackBlip = 0
-$LastPackCount = $Packages
 
 while true
     wait 250
@@ -245,14 +244,6 @@ while true
     end
 
     $Packages = Game.GetCollectablesCollected()
-
-    // Auto-advance tracker if a package was collected
-    if $Packages > $LastPackCount
-    then
-        $LastPackCount = $Packages
-        $PackIndex = $Packages
-        $BlipActive = 1
-    end
 
     // ==========================================
     // MANUAL INDEX OVERRIDE SNIFFER (COMMA / PERIOD)
