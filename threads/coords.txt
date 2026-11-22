@@ -16,14 +16,33 @@ end
 if
     $Intro_Passed == 0
 then
-    while not Player.CanStartMission($player)
-        wait 0
+    while $ColdOpenDone == 0
+        wait 100
+        if $Intro_Passed == 1
+        then
+            break
+        end
     end
 
     if
         $Intro_Passed == 0
     then
         wait 6500
+        while true
+            if $Intro_Passed == 1
+            then
+                break
+            end
+            if and
+                Player.IsPlaying($player)
+                Player.CanStartMission($player)
+                not Camera.GetFadingStatus()
+            then
+                break
+            end
+            wait 250
+        end
+
         if
             $Intro_Passed == 0
         then
