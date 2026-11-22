@@ -97,6 +97,7 @@ while true
     if or
         modelId == 1394 // doublestreetlght1
         modelId == 1405 // trafficlight1
+        modelId == 1352 // Streetlamp2 (double park light)
     then
         basePay = 50
     else
@@ -140,7 +141,17 @@ while true
             then
                 Text.PrintWithNumberNow('POLE3', payout, 2500, 1)
             else
-                Text.PrintWithNumberNow('POLE1', payout, 2500, 1)
+                if modelId == 1352
+                then
+                    Text.PrintWithNumberNow('POLE5', payout, 2500, 1)
+                else
+                    if modelId == 1353
+                    then
+                        Text.PrintWithNumberNow('POLE4', payout, 2500, 1)
+                    else
+                        Text.PrintWithNumberNow('POLE1', payout, 2500, 1)
+                    end
+                end
             end
         end
     end
