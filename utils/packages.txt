@@ -44,6 +44,7 @@ Game.CreateCollectable(174.26, -360.54, 16.21)
 Game.CreateCollectable(93.16, -724.08, 31.59)
 Game.CreateCollectable(37.93, -732.17, 22.72)
 Game.CreateCollectable(281.59, -1556.22, 27.04)
+Game.CreateCollectable(513.13, -680.28, 19.15)
 // Shoreside Vale
 Game.CreateCollectable(1161.74, -72.59, 7.58)
 Game.CreateCollectable(189.06, 237.74, 11.53)
