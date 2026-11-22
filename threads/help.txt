@@ -35,7 +35,13 @@ then
     $HelpHealth1 = Pickup.Create(#HEALTH, PickupType.OnStreet, 1399.89, -390.78, 50.56)
 
     // Info pickups
-    $HelpBridgeInfo = Pickup.Create(#INFO, PickupType.Once, 1026.04, -932.74, 14.97) // Callahan Bridge coordinate
+    if $BarrierIND == 1
+    then
+        $HelpBridgeInfo = Pickup.Create(#INFO, PickupType.Once, 1026.04, -932.74, 14.97) // Callahan Bridge coordinate
+    else
+        $HelpBridgeInfo = 0
+        $BridgeHelpPlayed = 1
+    end
     $HelpWastedInfo = Pickup.Create(#INFO, PickupType.Once, 1148.41, -585.33, 15.00) // Hospital coordinate
     $HelpPickupsSpawned = 1
 end
@@ -52,6 +58,26 @@ while true
         Camera.GetFadingStatus()
     then
         continue
+    end
+
+    // Remove Callahan Bridge info pickup and disable bridge help once Staunton is unlocked
+    if not $HelpBridgeInfo == 0
+    then
+        if Pickup.HasBeenCollected($HelpBridgeInfo)
+        then
+            $HelpBridgeInfo = 0
+        else
+            if $BarrierIND == 0
+            then
+                Pickup.Remove($HelpBridgeInfo)
+                $HelpBridgeInfo = 0
+            end
+        end
+    end
+
+    if $BarrierIND == 0
+    then
+        $BridgeHelpPlayed = 1
     end
 
     //====================================================
@@ -160,10 +186,11 @@ while true
         continue
     end
 
-    // 6. Callahan Bridge Info Check
+    // 6. Callahan Bridge Info Check (only while Callahan Bridge is locked)
     if and
-        Player.LocateAnyMeans3D($player, 1026.04, -932.74, 14.97, 2.0, 2.0, 2.0, False)
+        $BarrierIND == 1
         $BridgeHelpPlayed == 0
+        Player.LocateAnyMeans3D($player, 1026.04, -932.74, 14.97, 2.0, 2.0, 2.0, False)
     then
         PrintBridgeHelp()
         continue
@@ -190,18 +217,32 @@ end
 
 :PrintBridgeHelp
     $BridgeHelpPlayed = 1
+    if not $HelpBridgeInfo == 0
+    then
+        $HelpBridgeInfo = 0
+    end
     Text.PrintHelp('CALHAN')
     wait 6000
+    if $BarrierIND == 0
+    then
+        Text.ClearHelp()
+        return
+    end
     Text.PrintHelp('CALHAN2')
 
     PorterTunnel = Blip.AddForCoord(755.8988, 174.7568, -20.0351)
     Blip.ChangeColor(PorterTunnel, BlipColor.Cyan)
 
-    while not Player.LocateAnyMeans3D($player, 756.7936, 176.8842, -20.4789, 10.0, 10.0, 5.0, False)
+    while $BarrierIND == 1
         wait 0
+        if Player.LocateAnyMeans3D($player, 756.7936, 176.8842, -20.4789, 10.0, 10.0, 5.0, False)
+        then
+            break
+        end
     end
 
     Blip.Remove(PorterTunnel)
+    PorterTunnel = 0
     if and
         TunnelLaunched == 0
         $BarrierIND == 1
