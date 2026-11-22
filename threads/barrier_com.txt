@@ -52,6 +52,7 @@ end
 
 if $BarrierCOM == 0
 then
+    Path.SwitchRoadsOn(-230.0, 30.0, -25.0, 537.0, 112.0, -15.0)
     terminate_this_custom_script
 end
 
@@ -63,12 +64,18 @@ end
 
 if $BarrierCOM == 0
 then
+    Path.SwitchRoadsOn(-230.0, 30.0, -25.0, 537.0, 112.0, -15.0)
     if $BarrierIND == 0
     then
         Streaming.MarkModelAsNoLongerNeeded(MODEL_HELIX_BARRIER)
     end
     terminate_this_custom_script
 end
+
+// Disable traffic paths on the closed Shoreside Porter Tunnel branch (tunl_t2 #2 / tunl_t2n @ 534.06, 101.10, -21.09 westward)
+// without touching the active Harwood <-> Staunton junction nodes (tunl_t2 #0/#1/#3 @ X >= 541.22).
+Path.SwitchRoadsOff(-230.0, 30.0, -25.0, 537.0, 112.0, -15.0)
+World.ClearArea(532.38, 99.51, -20.12, 12.0, True)
 
 // Porter Tunnel junction (tunl_t2n SW branch toward Shoreside, at ~532.38, 99.51, -20.12)
 // Spans the 24m tunnel wall-to-wall while leaving the Staunton exit ramp unobstructed.
@@ -112,7 +119,8 @@ while $BarrierCOM == 1
     end
 end
 
-// Shoreside unlocked: remove all physical barriers
+// Shoreside unlocked: remove all physical barriers and restore Porter Tunnel traffic paths
+Path.SwitchRoadsOn(-230.0, 30.0, -25.0, 537.0, 112.0, -15.0)
 if not $BarrierTunnelObj == 0
 then
     if Object.DoesExist($BarrierTunnelObj)
