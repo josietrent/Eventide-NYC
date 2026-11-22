@@ -183,6 +183,7 @@ PunkNoodles = Blip.AddSpriteForCoord(1041.73, -653.05, 14.82, RadarSprite.Love)
 NoodleSphere = Sphere.Create(1041.73, -653.05, 14.82, 3.0)
 Text.Print('NOODLE', 5000, 1)
 Text.PrintHelp('NOODLEH')
+World.ClearArea(758.46, 80.57, 4.0, 50.0, False)
 
 :INIT_Near
 while not Player.LocateAnyMeans3D($player, 1041.73, -653.05, 14.82, 15.0, 15.0, 5.0, False)
