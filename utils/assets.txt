@@ -38,6 +38,7 @@ $HEAL_COM1 = Pickup.Create(#HEALTH, PickupType.OnStreet, 515.85, -624.16, 16.65)
 $HEAL_COM2 = Pickup.Create(#HEALTH, PickupType.OnStreet, 178.76, -300.27, 16.46)
 $HEAL_COM3 = Pickup.Create(#HEALTH, PickupType.OnStreet, -222.43, -315.29, 1.45)
 $HEAL_COM4 = Pickup.Create(#HEALTH, PickupType.OnStreet, 24.27, -581.40, 26.18)
+$HEAL_COM5 = Pickup.Create(#BODYARMOUR, PickupType.OnStreet, 517.06, -613.96, 16.66)
 $HEAL_RES1 = Pickup.Create(#HEALTH, PickupType.OnStreet, -1242.60, -81.18, 59.24)
 $HEAL_RES2 = Pickup.Create(#HEALTH, PickupType.OnStreet, -1095.05, -1028.18, 3.48)
 
