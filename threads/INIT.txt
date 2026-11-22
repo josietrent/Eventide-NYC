@@ -30,6 +30,14 @@ wait 0
 
 :INIT_Car
 wait 500
+if NoodleVisited == 0
+then
+    Player.GetHealth($player, StallionHealth)
+    if StallionHealth > 35
+    then
+        Player.SetHealth($player, 35)
+    end
+end
 if not $Stallion == 0
 then
     if Car.IsStillAlive($Stallion)
@@ -174,6 +182,7 @@ Player.SetControl($player, True)
 PunkNoodles = Blip.AddSpriteForCoord(1041.73, -653.05, 14.82, RadarSprite.Love)
 NoodleSphere = Sphere.Create(1041.73, -653.05, 14.82, 3.0)
 Text.Print('NOODLE', 5000, 1)
+Text.PrintHelp('NOODLEH')
 
 :INIT_Near
 while not Player.LocateAnyMeans3D($player, 1041.73, -653.05, 14.82, 15.0, 15.0, 5.0, False)
@@ -269,6 +278,9 @@ then
     NoodleSphere = 0
 end
 Sound.AddOneOffSound(1041.73, -653.05, 14.82, ScriptSound.SoundPartMissionComplete)
+Player.SetHealth($player, 100)
+Text.Print('NOODLE2', 3000, 1)
+wait 2000
 NoodleVisited = 1
 jump @INIT_Safehouse
 
@@ -298,6 +310,7 @@ while PlayerNotInStallion == 1
         PunkNoodles = Blip.AddSpriteForCoord(1041.73, -653.05, 14.82, RadarSprite.Love)
         NoodleSphere = Sphere.Create(1041.73, -653.05, 14.82, 3.0)
         Text.Print('NOODLE', 5000, 1)
+        Text.PrintHelp('NOODLEH')
         jump @INIT_Near
     end
 end
