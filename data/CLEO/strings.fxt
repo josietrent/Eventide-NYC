@@ -159,8 +159,8 @@ STAT6	Defend ~b~Marie~w~ from the attackers!
 STAT7	She's locked up stiff as stone. Pull a vehicle close to haul her in.
 STAT8	Bring a vehicle close to ~b~Marie~w~.
 STAT9	You haul her dead weight into the passenger seat...
-STATA	Take Marie back to the ~y~home~w~.
-STATB	...What happened? Why are we in the barn?
+STATA	Take her ~y~home~w~.
+STATB	...What happened? Why are we here?
 STATC	...Everything went cold and then black. Toni, what's happening to me?
 MIS7NAM	Digging for Sap...
 SAPTIME	Come back between 22:00 and 04:00.
