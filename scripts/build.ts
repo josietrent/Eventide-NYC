@@ -740,6 +740,24 @@ if (shouldRun(10, "savest")) {
   }
 }
 
+// Step 10e: Streetlight & Traffic Signal Knockdown Thread
+if (shouldRun(10, "poles")) {
+  const polesInput = join(cwd, "threads", "poles.txt");
+  const polesOutput = join(cwd, "threads", "poles.cs");
+  if (await allExist([polesInput])) {
+    say.heading("Step 10e (poles): Compiling pole knockdown thread...");
+    await compileIfChanged(polesInput, polesOutput);
+
+    const cleoStagingDir = join(modStagingDir, "CLEO");
+    await ensureDir(cleoStagingDir);
+    await Deno.copyFile(
+      polesOutput,
+      join(cleoStagingDir, basename(polesOutput)),
+    );
+    say.done(`  Packaged modloader/${modName}/CLEO/${basename(polesOutput)}`);
+  }
+}
+
 // Package CLEO custom strings into CLEO/cleo_text (CLEO reads .fxt from here, not modloader)
 const stringsSrc = join(cwd, "data", "CLEO", "strings.fxt");
 if (await allExist([stringsSrc])) {
@@ -929,6 +947,17 @@ if (shouldRun(21, "paramediccash")) {
   say.heading("Step 21 (paramediccash): Compiling ParamedicCash.asi...");
   const asiInput = join(cwd, "plugins", "ParamedicCash", "ParamedicCash.cpp");
   const asiOutput = join(cwd, "plugins", "ParamedicCash", "ParamedicCash.asi");
+  await compileAsiIfChanged(asiInput, asiOutput, join(stagingDir, "obj"));
+
+  await Deno.copyFile(asiOutput, join(modStagingDir, basename(asiOutput)));
+  say.done(`  Packaged modloader/${modName}/${basename(asiOutput)}`);
+}
+
+// Step 22: PoleKnockdown ASI Plugin
+if (shouldRun(22, "poleknockdown")) {
+  say.heading("Step 22 (poleknockdown): Compiling PoleKnockdown.asi...");
+  const asiInput = join(cwd, "plugins", "PoleKnockdown", "PoleKnockdown.cpp");
+  const asiOutput = join(cwd, "plugins", "PoleKnockdown", "PoleKnockdown.asi");
   await compileAsiIfChanged(asiInput, asiOutput, join(stagingDir, "obj"));
 
   await Deno.copyFile(asiOutput, join(modStagingDir, basename(asiOutput)));
