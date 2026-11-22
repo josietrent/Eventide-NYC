@@ -69,10 +69,10 @@ while true
         continue
     end
 
-    // Enable post-story "Be Good" traffic-law enforcement once the finale is beaten
+    // Testing gate: activate once 'BEACH' prints ($ColdOpenDone == 1) and not on a mission
+    // (Restore to $BleedMissionDone == 1 and $Intro_Passed == 1 after testing)
     if and
-        $BleedMissionDone == 1
-        $Intro_Passed == 1
+        $ColdOpenDone == 1
         $onmission == 0
     then
         $TrafficLawActive = 1
@@ -81,7 +81,7 @@ while true
         $TrafficLawEvent = 0
     end
 
-    // Handle queued post-story traffic-law citations / property-damage fines
+    // Handle queued traffic-law citations / property-damage fines
     if and
         $TrafficLawActive == 1
         $TrafficLawEvent > 0

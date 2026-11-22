@@ -131,6 +131,7 @@ constexpr size_t SLOT_BLEED_DONE = 5118;
 constexpr size_t SLOT_POLE_TOTAL = 5146;
 constexpr size_t SLOT_POLE_LAST_MODEL = 5147;
 constexpr size_t SLOT_POLE_ENABLED = 5148;
+constexpr size_t SLOT_COLD_OPEN_DONE = 5149;
 constexpr size_t SLOT_TRAFFIC_LAW_ACTIVE = 5153;
 constexpr size_t SLOT_TRAFFIC_LAW_EVENT = 5154;
 constexpr size_t SLOT_TRAFFIC_LAW_FINE = 5155;
@@ -637,9 +638,10 @@ bool IsIntactCityProperty(const void *entity, int16_t *outModel,
 }
 
 inline bool IsPostStoryTrafficLawActive() {
-  return *ScriptGlobalPtr(SLOT_BLEED_DONE) != 0 &&
+  // Testing gate: enabled as soon as 'BEACH' prints ($ColdOpenDone == 1).
+  // Restore to SLOT_BLEED_DONE != 0 && SLOT_INTRO_PASSED != 0 after testing.
+  return *ScriptGlobalPtr(SLOT_COLD_OPEN_DONE) != 0 &&
          *ScriptGlobalPtr(SLOT_ON_MISSION) == 0 &&
-         *ScriptGlobalPtr(SLOT_INTRO_PASSED) != 0 &&
          *ScriptGlobalPtr(SLOT_TRAFFIC_LAW_ACTIVE) != 0;
 }
 
