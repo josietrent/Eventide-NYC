@@ -216,11 +216,24 @@ void InitPaths(HMODULE hModule) {
       g_asiDir = full.substr(0, pos);
     }
   }
+  std::string exeDir;
+  if (GetModuleFileNameA(nullptr, buf, MAX_PATH) > 0) {
+    std::string full(buf);
+    const size_t pos = full.find_last_of("\\/");
+    if (pos != std::string::npos) {
+      exeDir = full.substr(0, pos);
+    }
+  }
   if (!g_asiDir.empty()) {
     g_txdPath = g_asiDir + "\\eventide_cyrillic.txd";
-    g_logPath = g_asiDir + "\\CyrillicText.log";
   } else {
     g_txdPath = "eventide_cyrillic.txd";
+  }
+  if (!exeDir.empty()) {
+    g_logPath = exeDir + "\\CyrillicText.log";
+  } else if (!g_asiDir.empty()) {
+    g_logPath = g_asiDir + "\\CyrillicText.log";
+  } else {
     g_logPath = "CyrillicText.log";
   }
   HANDLE f = CreateFileA(g_logPath.c_str(), GENERIC_WRITE,

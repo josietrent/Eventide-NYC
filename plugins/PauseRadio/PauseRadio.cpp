@@ -112,7 +112,8 @@ void WriteLog(const char *line) {
 }
 
 void InitLogPath(HMODULE hModule) {
-  DWORD len = GetModuleFileNameA(hModule, g_logPath, MAX_PATH);
+  (void)hModule;
+  DWORD len = GetModuleFileNameA(nullptr, g_logPath, MAX_PATH);
   if (len == 0 || len >= MAX_PATH) {
     g_logPath[0] = '\0';
     return;

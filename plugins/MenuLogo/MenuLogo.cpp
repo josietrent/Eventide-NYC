@@ -133,11 +133,24 @@ void InitPaths(HMODULE hModule) {
       g_asiDir = full.substr(0, pos);
     }
   }
+  std::string exeDir;
+  if (GetModuleFileNameA(nullptr, buf, MAX_PATH) > 0) {
+    std::string full(buf);
+    const size_t pos = full.find_last_of("\\/");
+    if (pos != std::string::npos) {
+      exeDir = full.substr(0, pos);
+    }
+  }
   if (!g_asiDir.empty()) {
     g_txdPath = g_asiDir + "\\eventide_menu.txd";
-    g_logPath = g_asiDir + "\\MenuLogo.log";
   } else {
     g_txdPath = "eventide_menu.txd";
+  }
+  if (!exeDir.empty()) {
+    g_logPath = exeDir + "\\MenuLogo.log";
+  } else if (!g_asiDir.empty()) {
+    g_logPath = g_asiDir + "\\MenuLogo.log";
+  } else {
     g_logPath = "MenuLogo.log";
   }
   HANDLE f = CreateFileA(g_logPath.c_str(), GENERIC_WRITE,

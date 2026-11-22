@@ -170,8 +170,9 @@ void WriteLog(const char *line) {
 }
 
 void InitLogPath(HMODULE hModule) {
+  (void)hModule;
   char buf[MAX_PATH] = {};
-  if (GetModuleFileNameA(hModule, buf, MAX_PATH) > 0) {
+  if (GetModuleFileNameA(nullptr, buf, MAX_PATH) > 0) {
     std::string full(buf);
     const size_t pos = full.find_last_of("\\/");
     if (pos != std::string::npos) {

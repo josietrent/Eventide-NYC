@@ -172,12 +172,16 @@ void InitModulePaths(HMODULE hModule) {
   }
   if (!g_asiDir.empty()) {
     g_iniPath = g_asiDir + "\\PauseMusic.ini";
-    g_logPath = g_asiDir + "\\PauseMusic.log";
   } else if (!g_exeDir.empty()) {
     g_iniPath = g_exeDir + "\\PauseMusic.ini";
-    g_logPath = g_exeDir + "\\PauseMusic.log";
   } else {
     g_iniPath = "PauseMusic.ini";
+  }
+  if (!g_exeDir.empty()) {
+    g_logPath = g_exeDir + "\\PauseMusic.log";
+  } else if (!g_asiDir.empty()) {
+    g_logPath = g_asiDir + "\\PauseMusic.log";
+  } else {
     g_logPath = "PauseMusic.log";
   }
   HANDLE f = CreateFileA(g_logPath.c_str(), GENERIC_WRITE,
