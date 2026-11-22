@@ -66,7 +66,7 @@ while $BarrierIND == true
         0@ = true
         Hud.DisplayTimer($BarrierTimer)
     else
-        // If the player is off the bridge deck in Newport or elsewhere on Staunton, teleport immediately
+        // If the player is off the bridge deck in Newport/Staunton or Shoreside, teleport immediately
         if and
             3@ == false
             0@ == false
@@ -74,6 +74,12 @@ while $BarrierIND == true
             if or
                 Player.IsInZone($player, 'COM_EAS')
                 Player.IsInZone($player, 'COM_ZON')
+                Player.IsInZone($player, 'SUB_ZON')
+                Player.IsInZone($player, 'AIRPORT')
+                Player.IsInZone($player, 'PROJECT')
+                Player.IsInZone($player, 'SWANKS')
+                Player.IsInZone($player, 'SUB_IND')
+                Player.IsInZone($player, 'BIG_DAM')
             then
                 goto @BarrierTeleport
             end
@@ -103,6 +109,12 @@ while $BarrierIND == true
             if or
                 Player.IsInZone($player, 'COM_EAS')
                 Player.IsInZone($player, 'COM_ZON')
+                Player.IsInZone($player, 'SUB_ZON')
+                Player.IsInZone($player, 'AIRPORT')
+                Player.IsInZone($player, 'PROJECT')
+                Player.IsInZone($player, 'SWANKS')
+                Player.IsInZone($player, 'SUB_IND')
+                Player.IsInZone($player, 'BIG_DAM')
             then
                 goto @BarrierTeleport
             end
@@ -138,7 +150,11 @@ end
 
 Object.Delete(8@)
 Object.Delete(9@)
-Streaming.MarkModelAsNoLongerNeeded(#HELIX_BARRIER)
+if
+    $BarrierCOM == false
+then
+    Streaming.MarkModelAsNoLongerNeeded(#HELIX_BARRIER)
+end
 World.SetVisibilityOfClosestObjectOfType(1027.25, -933.75, 15.0, 50.0, #INDHELIX_BARRIER, False)
 World.SwapNearestBuildingModel(1027.25, -933.75, 15.0, 50.0, #INDHELIX_BARRIER, #LOD_LAND014)
 terminate_this_script
