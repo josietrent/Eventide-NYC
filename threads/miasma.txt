@@ -50,7 +50,7 @@ while true
         // On mission: low-key disorientation without stealing control, teleporting, or failing the mission
         armed = 0
         play_audio_stream_1channel "audio/EC/miasma.wav", False, 1.0
-        Camera.Shake(0.5)
+        Camera.Shake(25)
         Text.Print('ZOEYBAD', 3000, 0)
         waitCount = 0
         while waitCount < 15
@@ -78,7 +78,7 @@ while true
     armed = 0
     Player.SetControl($player, False)
     play_audio_stream_1channel "audio/EC/miasma.wav", False, 1.0
-    Camera.Shake(1.0)
+    Camera.Shake(40)
     wait 2000
 
     if
