@@ -287,7 +287,7 @@ while true
         else
             if and
                 $BarrierCOM == 1
-                $PackIndex >= 45
+                $PackIndex >= 54
             then
                 Text.PrintHelp('PACK_SH')
             else
@@ -306,7 +306,7 @@ while true
                     end
                     if and
                         $BarrierCOM == 1
-                        $PackIndex >= 45
+                        $PackIndex >= 54
                     then
                         0@ = 0
                     end
@@ -348,7 +348,7 @@ while true
                 end
             else
                 if and
-                    $PackIndex >= 45
+                    $PackIndex >= 54
                     $BarrierCOM == 1
                 then
                     if not 2@ == 2
@@ -674,134 +674,146 @@ then
 end
 if $PackIndex == 44
 then
-    $PackCoordX = -150.99
-    $PackCoordY = 784.43
-    $PackCoordZ = 146.03
-end
-if $PackIndex == 45
-then
-    $PackCoordX = -193.01
-    $PackCoordY = 364.40
-    $PackCoordZ = 84.95
-end
-if $PackIndex == 46
-then
-    $PackCoordX = -562.38
-    $PackCoordY = 310.61
-    $PackCoordZ = 70.80
-end
-if $PackIndex == 47
-then
-    $PackCoordX = -1040.00
-    $PackCoordY = 542.43
-    $PackCoordZ = 64.79
-end
-if $PackIndex == 48
-then
-    $PackCoordX = -1385.74
-    $PackCoordY = 568.86
-    $PackCoordZ = 77.64
-end
-if $PackIndex == 49
-then
-    $PackCoordX = -1365.51
-    $PackCoordY = -22.18
-    $PackCoordZ = 51.71
-end
-if $PackIndex == 50
-then
-    $PackCoordX = -1433.74
-    $PackCoordY = -437.54
-    $PackCoordZ = 22.08
-end
-if $PackIndex == 51
-then
-    $PackCoordX = -1616.32
-    $PackCoordY = -780.96
-    $PackCoordZ = 12.66
-end
-if $PackIndex == 52
-then
-    $PackCoordX = -1557.19
-    $PackCoordY = -866.96
-    $PackCoordZ = 18.66
-end
-if $PackIndex == 53
-then
-    $PackCoordX = -1491.04
-    $PackCoordY = -1057.51
-    $PackCoordZ = 3.48
-end
-if $PackIndex == 54
-then
-    $PackCoordX = -886.09
-    $PackCoordY = -1331.87
-    $PackCoordZ = 1.32
-end
-if $PackIndex == 55
-then
-    $PackCoordX = -1060.24
-    $PackCoordY = -1162.36
-    $PackCoordZ = 3.45
-end
-if $PackIndex == 56
-then
-    $PackCoordX = -846.15
-    $PackCoordY = -649.64
-    $PackCoordZ = 14.34
-end
-if $PackIndex == 57
-then
     $PackCoordX = 304.87
     $PackCoordY = -506.73
     $PackCoordZ = 36.27
 end
-if $PackIndex == 58
+if $PackIndex == 45
 then
     $PackCoordX = 93.16
     $PackCoordY = -724.08
     $PackCoordZ = 31.59
 end
-if $PackIndex == 59
+if $PackIndex == 46
 then
     $PackCoordX = 37.93
     $PackCoordY = -732.17
     $PackCoordZ = 22.72
 end
-if $PackIndex == 60
-then
-    $PackCoordX = -1209.33
-    $PackCoordY = -184.39
-    $PackCoordZ = 58.74
-end
-if $PackIndex == 61
-then
-    $PackCoordX = -562.38
-    $PackCoordY = 310.61
-    $PackCoordZ = 70.80
-end
-if $PackIndex == 62
-then
-    $PackCoordX = 1295.85
-    $PackCoordY = -957.13
-    $PackCoordZ = 18.00
-end
-if $PackIndex == 63
+if $PackIndex == 47
 then
     $PackCoordX = 281.59
     $PackCoordY = -1556.22
     $PackCoordZ = 27.04
 end
-if $PackIndex == 64
+if $PackIndex == 48
 then
     $PackCoordX = 513.13
     $PackCoordY = -680.28
     $PackCoordZ = 19.15
 end
-if $PackIndex == 65
+if $PackIndex == 49
 then
     $PackCoordX = 556.08
     $PackCoordY = -231.40
     $PackCoordZ = 22.30
+end
+if $PackIndex == 50
+then
+    $PackCoordX = 49.41
+    $PackCoordY = -639.18
+    $PackCoordZ = 28.95
+end
+if $PackIndex == 51
+then
+    $PackCoordX = 201.53
+    $PackCoordY = -1257.70
+    $PackCoordZ = 60.16
+end
+if $PackIndex == 52
+then
+    $PackCoordX = 174.26
+    $PackCoordY = -360.54
+    $PackCoordZ = 16.21
+end
+if $PackIndex == 53
+then
+    $PackCoordX = 229.32
+    $PackCoordY = -1092.59
+    $PackCoordZ = 26.17
+end
+if $PackIndex == 54
+then
+    $PackCoordX = -150.99
+    $PackCoordY = 784.43
+    $PackCoordZ = 146.03
+end
+if $PackIndex == 55
+then
+    $PackCoordX = -193.01
+    $PackCoordY = 364.40
+    $PackCoordZ = 84.95
+end
+if $PackIndex == 56
+then
+    $PackCoordX = -562.38
+    $PackCoordY = 310.61
+    $PackCoordZ = 70.80
+end
+if $PackIndex == 57
+then
+    $PackCoordX = -1040.00
+    $PackCoordY = 542.43
+    $PackCoordZ = 64.79
+end
+if $PackIndex == 58
+then
+    $PackCoordX = -1385.74
+    $PackCoordY = 568.86
+    $PackCoordZ = 77.64
+end
+if $PackIndex == 59
+then
+    $PackCoordX = -1365.51
+    $PackCoordY = -22.18
+    $PackCoordZ = 51.71
+end
+if $PackIndex == 60
+then
+    $PackCoordX = -1433.74
+    $PackCoordY = -437.54
+    $PackCoordZ = 22.08
+end
+if $PackIndex == 61
+then
+    $PackCoordX = -1616.32
+    $PackCoordY = -780.96
+    $PackCoordZ = 12.66
+end
+if $PackIndex == 62
+then
+    $PackCoordX = -1557.19
+    $PackCoordY = -866.96
+    $PackCoordZ = 18.66
+end
+if $PackIndex == 63
+then
+    $PackCoordX = -1491.04
+    $PackCoordY = -1057.51
+    $PackCoordZ = 3.48
+end
+if $PackIndex == 64
+then
+    $PackCoordX = -886.09
+    $PackCoordY = -1331.87
+    $PackCoordZ = 1.32
+end
+if $PackIndex == 65
+then
+    $PackCoordX = -1060.24
+    $PackCoordY = -1162.36
+    $PackCoordZ = 3.45
+end
+if $PackIndex == 66
+then
+    $PackCoordX = -846.15
+    $PackCoordY = -649.64
+    $PackCoordZ = 14.34
+end
+if $PackIndex == 67
+then
+    $PackCoordX = -1209.33
+    $PackCoordY = -184.39
+    $PackCoordZ = 58.74
 end
 return
