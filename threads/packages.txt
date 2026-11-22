@@ -3,7 +3,7 @@ script_name 'Packing'
 // --- LOCAL REGISTER ALLOCATION MAP ---
 // $CurrentPackages = Tracking Pointer / Package Index Counter
 // $BlipActive = BlipActive Flag (1 = Needs Update, 0 = Active)
-// 2@ = Barrier for Portland Flag
+// 2@ = Barrier Flag (0 = Open, 1 = Portland Barrier, 2 = Staunton/Shoreside Barrier)
 // $PackTutShown = Package Tutorial Shown Flag
 // $PackHunt = Package Hunt flag
 // 5@ = Active Package Blip Handle
@@ -285,22 +285,40 @@ while true
         then
             Text.PrintHelp('PACK_ST')
         else
-            $CurrentPackages = PACKAGE_COUNT
-            $CurrentPackages -= 1
-            if $PackIndex < $CurrentPackages
+            if and
+                $BarrierCOM == 1
+                $PackIndex >= 45
             then
-                $PackIndex += 1
-                $BlipActive = 1
-                if or
-                    $BarrierIND == 0
-                    $PackIndex < 27
-                then
-                    $CurrentPackages = $PackIndex
-                    $CurrentPackages += 1
-                    Text.PrintHelpFormatted("Currently tracked package changed to ~y~Package %d~w~ of %d.", $CurrentPackages, PACKAGE_COUNT)
-                end
+                Text.PrintHelp('PACK_SH')
             else
-                Text.PrintHelpFormatted("Already tracking ~y~Package %d~w~ of %d.", PACKAGE_COUNT, PACKAGE_COUNT)
+                $CurrentPackages = PACKAGE_COUNT
+                $CurrentPackages -= 1
+                if $PackIndex < $CurrentPackages
+                then
+                    $PackIndex += 1
+                    $BlipActive = 1
+                    0@ = 1
+                    if and
+                        $BarrierIND == 1
+                        $PackIndex >= 27
+                    then
+                        0@ = 0
+                    end
+                    if and
+                        $BarrierCOM == 1
+                        $PackIndex >= 45
+                    then
+                        0@ = 0
+                    end
+                    if 0@ == 1
+                    then
+                        $CurrentPackages = $PackIndex
+                        $CurrentPackages += 1
+                        Text.PrintHelpFormatted("Currently tracked package changed to ~y~Package %d~w~ of %d.", $CurrentPackages, PACKAGE_COUNT)
+                    end
+                else
+                    Text.PrintHelpFormatted("Already tracking ~y~Package %d~w~ of %d.", PACKAGE_COUNT, PACKAGE_COUNT)
+                end
             end
         end
         wait 300
@@ -318,7 +336,7 @@ while true
                 $PackIndex >= 27
                 $BarrierIND == 1
             then
-                if 2@ == 0
+                if not 2@ == 1
                 then
                     2@ = 1
                     if $PackBlip > 0
@@ -329,28 +347,44 @@ while true
                     Text.PrintHelp('PACK_ST')
                 end
             else
-                if 2@ == 1
+                if and
+                    $PackIndex >= 45
+                    $BarrierCOM == 1
                 then
-                    2@ = 0
-                    $BlipActive = 1
-                end
-
-                GetPackageCoords()
-
-                if $BlipActive == 1
-                then
-                    $BlipActive = 0
-
-                    if $PackBlip > 0
+                    if not 2@ == 2
                     then
-                        Blip.Remove($PackBlip)
-                        $PackBlip = 0
+                        2@ = 2
+                        if $PackBlip > 0
+                        then
+                            Blip.Remove($PackBlip)
+                            $PackBlip = 0
+                        end
+                        Text.PrintHelp('PACK_SH')
+                    end
+                else
+                    if not 2@ == 0
+                    then
+                        2@ = 0
+                        $BlipActive = 1
                     end
 
-                    if not $PackCoordX == 0.0
+                    GetPackageCoords()
+
+                    if $BlipActive == 1
                     then
-                        $PackBlip = Blip.AddForCoord($PackCoordX, $PackCoordY, $PackCoordZ)
-                        Blip.ChangeColor($PackBlip, BlipColor.Red)
+                        $BlipActive = 0
+
+                        if $PackBlip > 0
+                        then
+                            Blip.Remove($PackBlip)
+                            $PackBlip = 0
+                        end
+
+                        if not $PackCoordX == 0.0
+                        then
+                            $PackBlip = Blip.AddForCoord($PackCoordX, $PackCoordY, $PackCoordZ)
+                            Blip.ChangeColor($PackBlip, BlipColor.Red)
+                        end
                     end
                 end
             end
@@ -757,5 +791,11 @@ then
     $PackCoordX = 281.59
     $PackCoordY = -1556.22
     $PackCoordZ = 27.04
+end
+if $PackIndex == 64
+then
+    $PackCoordX = 513.13
+    $PackCoordY = -680.28
+    $PackCoordZ = 19.15
 end
 return
