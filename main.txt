@@ -42,6 +42,16 @@ var
     $AshesMissionDone: int
     $ReinhardtHealthBar: int
     $RadioHelpPlayed: int
+    $OnBleedMission: int
+    $BleedMissionDone: int
+    $BleedStage: int
+    $BleedCratesBroken: int
+    $BleedCrate7: Object
+    $BleedCrate8: Object
+    $BleedEnemyBlip1: Blip
+    $BleedEnemyBlip2: Blip
+    $BleedEnemyBlip3: Blip
+    $BleedEnemyBlip4: Blip
 end
 
 //=============
@@ -643,9 +653,64 @@ end
 if
     $AshesMissionDone == 1
 then
+    $KenjiBlip = Blip.AddSpriteForContactPoint(1004.42, -49.06, 7.44, RadarSprite.Kenji)
+    start_new_script @Bleed
     terminate_this_script
 else
     $OnAshesMission = 0
     $KenjiBlip = Blip.AddSpriteForContactPoint(1004.42, -49.06, 7.44, RadarSprite.Kenji)
     goto @Ashes_Loop
+end
+
+/// Trigger mission 9 (Portland Finale): "The Bleeding Edge..."
+:Bleed
+script_name 'Bleed'
+
+:Bleed_Loop
+while $OnBleedMission == 0
+    wait 250
+    if or
+        not Player.IsPlaying($player)
+        Camera.GetFadingStatus()
+    then
+        continue
+    end
+
+    if and
+        Player.CanStartMission($player)
+        $onmission == 0
+        Player.LocateOnFoot3D($player, 1004.42, -49.06, 7.44, 2.0, 2.0, 2.0, False)
+    then
+        Blip.Remove($KenjiBlip)
+        Player.SetControl($player, False)
+        Text.PrintBigString("The Bleeding Edge...", 5000, TextStyle.BottomRight)
+        Camera.SetFadingColor(40, 0, 70)
+        Camera.DoFade(1500, Fade.Out)
+        wait 1500
+        $OnBleedMission = 1
+        stream_custom_script "bleed.cm"
+        break
+    else
+        if and
+            $onmission == 1
+            Player.LocateOnFoot3D($player, 1004.42, -49.06, 7.44, 3.0, 3.0, 3.0, False)
+        then
+            Text.Print('FUCKOFF', 4000, 1)
+            wait 5000
+        end
+    end
+end
+
+while $OnBleedMission == 1
+    wait 250
+end
+
+if
+    $BleedMissionDone == 1
+then
+    terminate_this_script
+else
+    $OnBleedMission = 0
+    $KenjiBlip = Blip.AddSpriteForContactPoint(1004.42, -49.06, 7.44, RadarSprite.Kenji)
+    goto @Bleed_Loop
 end

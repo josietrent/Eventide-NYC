@@ -639,6 +639,26 @@ if (shouldRun(8, "ashes")) {
   }
 }
 
+// Step 8f: Bleed Mission (Portland Finale)
+if (shouldRun(8, "bleed")) {
+  const bleedInput = join(cwd, "threads", "bleed.txt");
+  const bleedOutput = join(cwd, "threads", "bleed.cm");
+  if (await allExist([bleedInput])) {
+    say.heading("Step 8f (bleed): Compiling bleed mission...");
+    await compileIfChanged(bleedInput, bleedOutput);
+
+    const cleoStagingDir = join(modStagingDir, "CLEO");
+    await ensureDir(cleoStagingDir);
+    await Deno.copyFile(
+      bleedOutput,
+      join(cleoStagingDir, basename(bleedOutput)),
+    );
+    say.done(
+      `  Packaged modloader/${modName}/CLEO/${basename(bleedOutput)}`,
+    );
+  }
+}
+
 // Step 9: World Thread
 if (shouldRun(9, "world")) {
   say.heading("Step 9 (world): Compiling world thread...");

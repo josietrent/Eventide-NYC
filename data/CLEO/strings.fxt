@@ -80,7 +80,7 @@ MISWAIT Hey, now! Wait for me!
 MISWHRE Hey, where are you going?!
 MISWORK Good luck! OK, I gotta go, I'm late enough as it is! Love ya, bye!
 MISWREK Your car is a wreck! I'm not getting in that shit-heap!
-MYGOD   Бож мои!
+MYGOD   Ð‘Ð¾Ð¶ Ð¼Ð¾Ð¸!
 NOCAR   You need a car for this gig!
 NOCHASE I'm not chasing you!
 NOODLE	Drive to Dong's Noodle Shop.
@@ -194,3 +194,17 @@ ASHD	You won't make it past the barricade!
 ASHE    Reinhardt has crews guarding every way off Portland!
 ASHTIM	Chinatown burned down before you put the fires out!
 ASHF	You killed Reinhardt before he could talk!
+MIS9NAM	The Bleeding Edge...
+BLEED1	The Sap caches cracked their outer ward, Toni, but the Callahan barrier is bleeding through.
+BLEED2	Reinhardt's crews locked down Chinatown and the bridge mouth with heavy hardware.
+BLEED3	Take that beat-up Sentinel out back, punch through their Punk Noodles ambush, and hit the bridge.
+BLEED4	Plant the Sap charge on the barrier, smash through their supply crates, and cross into Staunton!
+BLEED5	Get in the ~b~Sentinel~w~ and push south through the ~y~Red Light~w~ roadblock!
+BLEED6	A shattered roadblock! Punch past them and head for ~y~Punk Noodles~w~ in Chinatown!
+BLEED7	Reinhardt's hit squad at Punk Noodles! Take them out before moving on the bridge!
+BLEED8	Chinatown's clear. Assault the ~y~Callahan Bridge~w~ blockade and blow the barrier!
+BLEED9	Defenders down! Enter the ~y~marker~w~ at the barrier to plant the Sap charge!
+BLEEDA	Sap charge armed - stand clear!
+BLEEDB	Smash their supply ~y~crates~w~ and cross Callahan Bridge into ~y~Staunton Island~w~!
+BLEEDC	Callahan Bridge is open. Welcome to Staunton Island, Toni!
+BLDCRAT	Crate destroyed! +$100 (~1~/8)

@@ -126,7 +126,6 @@ while $BarrierIND == true
             end
             Player.SetHealth($player, 1@)
             wait 50
-
             // ☠ Death penalty with safety collision check
             if
                 1@ < 5
@@ -140,6 +139,8 @@ end
 Object.Delete(8@)
 Object.Delete(9@)
 Streaming.MarkModelAsNoLongerNeeded(#HELIX_BARRIER)
+World.SetVisibilityOfClosestObjectOfType(1027.25, -933.75, 15.0, 50.0, #INDHELIX_BARRIER, False)
+World.SwapNearestBuildingModel(1027.25, -933.75, 15.0, 50.0, #INDHELIX_BARRIER, #LOD_LAND014)
 terminate_this_script
 
 :BarrierTeleport
