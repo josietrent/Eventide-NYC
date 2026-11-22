@@ -199,9 +199,10 @@ BLEED1	The Sap caches cracked their outer ward, Toni, but the Callahan barrier i
 BLEED2	Reinhardt's crews locked down Chinatown and the bridge mouth with heavy hardware.
 BLEED3	Take that beat-up Sentinel out back, punch through their Punk Noodles ambush, and hit the bridge.
 BLEED4	Plant the Sap charge on the barrier and cross into Staunton!
-BLEED5	Get in the ~b~Sentinel~w~ and push south through the ~y~Red Light~w~ roadblock!
-BLEED6	A shattered roadblock! Punch past them and head for ~y~Punk Noodles~w~ in Chinatown!
-BLEED7	Reinhardt's hit squad at Punk Noodles! Take them out before moving on the bridge!
+BLEED5	Get in the ~b~Sentinel~w~ and head south to the ~y~Red Light~w~ roadblock!
+BLEED5B	Take out the roadblock guards and destroy their ~r~Mafia Sentinel~w~!
+BLEED6	Roadblock cleared! Head for ~y~Punk Noodles~w~ in Chinatown!
+BLEED7	Reinhardt's hit squad at Punk Noodles! Take them out and destroy their ~r~Mafia Sentinel~w~!
 BLEED8	Chinatown's clear. Assault the ~y~Callahan Bridge~w~ blockade and blow the barrier!
 BLEED9	Defenders down! Enter the ~y~marker~w~ at the barrier to plant the Sap charge!
 BLEEDA	Sap charge armed - stand clear!
