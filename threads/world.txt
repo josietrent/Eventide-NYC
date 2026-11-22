@@ -56,6 +56,21 @@ if $HEAL_COM6 == 0
 then
     $HEAL_COM6 = Pickup.Create(#HEALTH, PickupType.OnStreet, 242.83, -1117.11, 21.11)
 end
+if $ShotgunSiloSpawn == 0
+then
+    $ShotgunSiloSpawn = Pickup.CreateWithAmmo(#SHOTGUN, PickupType.OnStreet, 48, 1514.21, -856.59, 27.41)
+end
+if $LinerunDocksCreated < 2
+then
+    if $LinerunDocksCreated == 1
+    then
+        CarGenerator.Switch($LinerunDocksGen, 0)
+    end
+    // Imported Vice City Packer (model ID 151 in data/default.ide)
+    $LinerunDocksGen = CarGenerator.Create(1411.48, -803.43, 11.83, 270.0, 151, -1, -1, False, 0, 0, 0, 10000)
+    CarGenerator.Switch($LinerunDocksGen, 101)
+    $LinerunDocksCreated = 2
+end
 
 // Ensure Staunton Newport Pay 'n' Spray exists on older savegames too
 if $SprayGarageCOMCreated == 0
