@@ -654,9 +654,7 @@ if (shouldRun(8, "bleed")) {
       bleedOutput,
       join(cleoStagingDir, basename(bleedOutput)),
     );
-    say.done(
-      `  Packaged modloader/${modName}/CLEO/${basename(bleedOutput)}`,
-    );
+    say.done(`  Packaged modloader/${modName}/CLEO/${basename(bleedOutput)}`);
   }
 }
 
@@ -701,6 +699,26 @@ if (shouldRun(10, "miasma")) {
       join(cleoStagingDir, basename(miasmaOutput)),
     );
     say.done(`  Packaged modloader/${modName}/CLEO/${basename(miasmaOutput)}`);
+  }
+}
+
+// Step 10c: Shoreside Vale Barrier Thread
+if (shouldRun(10, "barrier_com")) {
+  const barComInput = join(cwd, "threads", "barrier_com.txt");
+  const barComOutput = join(cwd, "threads", "barrier_com.cs");
+  if (await allExist([barComInput])) {
+    say.heading(
+      "Step 10c (barrier_com): Compiling Shoreside barrier thread...",
+    );
+    await compileIfChanged(barComInput, barComOutput);
+
+    const cleoStagingDir = join(modStagingDir, "CLEO");
+    await ensureDir(cleoStagingDir);
+    await Deno.copyFile(
+      barComOutput,
+      join(cleoStagingDir, basename(barComOutput)),
+    );
+    say.done(`  Packaged modloader/${modName}/CLEO/${basename(barComOutput)}`);
   }
 }
 
@@ -877,11 +895,22 @@ if (shouldRun(16, "emergencyradio")) {
   say.done(`  Packaged modloader/${modName}/${basename(asiOutput)}`);
 }
 
-// Step 17: Custom Map Overrides (IPL/IDE)
-if (shouldRun(17, "map")) {
+// Step 17: FleeOnShot ASI Plugin
+if (shouldRun(17, "fleeonshot")) {
+  say.heading("Step 17 (fleeonshot): Compiling FleeOnShot.asi...");
+  const asiInput = join(cwd, "plugins", "FleeOnShot", "FleeOnShot.cpp");
+  const asiOutput = join(cwd, "plugins", "FleeOnShot", "FleeOnShot.asi");
+  await compileAsiIfChanged(asiInput, asiOutput, join(stagingDir, "obj"));
+
+  await Deno.copyFile(asiOutput, join(modStagingDir, basename(asiOutput)));
+  say.done(`  Packaged modloader/${modName}/${basename(asiOutput)}`);
+}
+
+// Step 18: Custom Map Overrides (IPL/IDE)
+if (shouldRun(18, "map")) {
   const mapsSrcDir = join(cwd, "data", "maps");
   if (await allExist([mapsSrcDir])) {
-    say.heading("Step 17 (map): Packaging custom map overrides...");
+    say.heading("Step 18 (map): Packaging custom map overrides...");
     await copyFollowingSymlinks(
       mapsSrcDir,
       join(modStagingDir, "data", "maps"),
@@ -890,11 +919,11 @@ if (shouldRun(17, "map")) {
   }
 }
 
-// Step 18: Custom Handling Overrides (handling.cfg)
-if (shouldRun(18, "handling")) {
+// Step 19: Custom Handling Overrides (handling.cfg)
+if (shouldRun(19, "handling")) {
   const handlingSrc = join(cwd, "data", "handling.cfg");
   if (await allExist([handlingSrc])) {
-    say.heading("Step 18 (handling): Packaging custom handling.cfg...");
+    say.heading("Step 19 (handling): Packaging custom handling.cfg...");
     const dataStagingDir = join(modStagingDir, "data");
     await ensureDir(dataStagingDir);
     await Deno.copyFile(handlingSrc, join(dataStagingDir, "handling.cfg"));
@@ -902,8 +931,8 @@ if (shouldRun(18, "handling")) {
   }
 }
 
-// Step 19: Custom Models & Ped Skin TXDs (models/gta3.img)
-if (shouldRun(19, "models")) {
+// Step 20: Custom Models & Ped Skin TXDs (models/gta3.img)
+if (shouldRun(20, "models")) {
   const modelsSrcRoot = join(cwd, "data", "models", "src");
   const modelsImgDir = join(cwd, "data", "models", "gta3.img");
 
@@ -918,7 +947,7 @@ if (shouldRun(19, "models")) {
   srcModelDirs.sort((a, b) => a.localeCompare(b));
 
   if (srcModelDirs.length > 0) {
-    say.heading("Step 19 (models): Building & packaging model overrides...");
+    say.heading("Step 20 (models): Building & packaging model overrides...");
     await ensureDir(modelsImgDir);
     for (const modelName of srcModelDirs) {
       const pngDir = join(modelsSrcRoot, modelName);
@@ -934,7 +963,9 @@ if (shouldRun(19, "models")) {
 
       const hashes: string[] = [];
       for (const pngName of pngNames) {
-        hashes.push(`${pngName}:${await sha256(await Deno.readFile(join(pngDir, pngName)))}`);
+        hashes.push(
+          `${pngName}:${await sha256(await Deno.readFile(join(pngDir, pngName)))}`,
+        );
       }
       const combinedHash = await sha256(hashes.join("\n"));
       if (
@@ -963,7 +994,7 @@ if (shouldRun(19, "models")) {
 
   if (imgFiles.length > 0) {
     if (srcModelDirs.length === 0) {
-      say.heading("Step 19 (models): Packaging model overrides...");
+      say.heading("Step 20 (models): Packaging model overrides...");
     }
     const imgStagingDir = join(modStagingDir, "models", "gta3.img");
     await ensureDir(imgStagingDir);
