@@ -615,7 +615,7 @@ Camera.PointAtPoint(1027.25, -933.75, 15.00, SwitchType.JumpCut)
 Text.Print('BLEEDA', 2000, 1)
 wait 1500
 
-Camera.Shake(1.0)
+Camera.Shake(40)
 if not BlockCar1 == 0
 then
     if Car.IsStillAlive(BlockCar1)
