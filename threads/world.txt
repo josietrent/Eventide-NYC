@@ -14,13 +14,25 @@ World.SetCarDensityMultiplier(0.25)
 World.SetPedDensityMultiplier(0.1)
 
 // Re-apply after load fade-in settles so engine reset on save reload never leaves density at 1.0
-while Camera.GetFadingStatus()
+while true
     wait 0
+    if and
+        not Camera.GetFadingStatus()
+        Game.HasSaveGameFinished()
+    then
+        break
+    end
 end
 
 Camera.SetFadingColor(40, 0, 70)
 World.SetCarDensityMultiplier(0.25)
 World.SetPedDensityMultiplier(0.1)
+
+// Ensure late-added pickups also spawn when loading an existing savegame
+if $AK47Spawn == 0
+then
+    $AK47Spawn = Pickup.CreateWithAmmo(#AK47, PickupType.OnStreet, 150, 85.13, -986.52, 26.17)
+end
 
 // Keep density multipliers enforced across missions, wasted/busted, and engine resets
 while true
