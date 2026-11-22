@@ -51,5 +51,9 @@ CarGenerator.Switch(5@, 101)
 5@ = CarGenerator.Create(-953.17, 703.42, 62.09, 185, #SPEEDER, -1, -1, False, 0, 0, 0, 10000)
 5@ = CarGenerator.Create(1448.29, -91.16, 16.44, 0.0, #BFINJECT, -1, -1, False, 0, 0, 0, 10000)
 CarGenerator.Switch(5@, 101)
+// Imported Vice City Packer (model ID 151 in data/default.ide)
+$LinerunDocksGen = CarGenerator.Create(1411.48, -803.43, 11.83, 270.0, 151, -1, -1, False, 0, 0, 0, 10000)
+CarGenerator.Switch($LinerunDocksGen, 101)
+$LinerunDocksCreated = 2
 
 {$INCLUDE lot_cars.txt}
