@@ -1,0 +1,177 @@
+{$CLEO .cs}
+{$USE CLEO}
+{$INCLUDE ../utils/globals.txt}
+nop
+
+script_name 'BARCOM'
+
+const MODEL_HELIX_BARRIER = 1299
+
+int waitCount = 0
+
+while not Player.IsPlaying($player)
+    wait 250
+end
+
+// Wait for initial fade-in / save restore to settle
+while true
+    wait 100
+    if and
+        not Camera.GetFadingStatus()
+        Game.HasSaveGameFinished()
+    then
+        break
+    end
+end
+
+// Clean up any saved copies of these barriers from a prior session before recreating (or unlocking)
+if not $BarrierTunnelObj == 0
+then
+    if Object.DoesExist($BarrierTunnelObj)
+    then
+        Object.Delete($BarrierTunnelObj)
+    end
+    $BarrierTunnelObj = 0
+end
+if not $BarrierLift1Obj == 0
+then
+    if Object.DoesExist($BarrierLift1Obj)
+    then
+        Object.Delete($BarrierLift1Obj)
+    end
+    $BarrierLift1Obj = 0
+end
+if not $BarrierLift2Obj == 0
+then
+    if Object.DoesExist($BarrierLift2Obj)
+    then
+        Object.Delete($BarrierLift2Obj)
+    end
+    $BarrierLift2Obj = 0
+end
+
+if $BarrierCOM == 0
+then
+    terminate_this_custom_script
+end
+
+Streaming.RequestModel(MODEL_HELIX_BARRIER)
+Streaming.LoadAllModelsNow()
+while not Streaming.HasModelLoaded(MODEL_HELIX_BARRIER)
+    wait 0
+end
+
+if $BarrierCOM == 0
+then
+    if $BarrierIND == 0
+    then
+        Streaming.MarkModelAsNoLongerNeeded(MODEL_HELIX_BARRIER)
+    end
+    terminate_this_custom_script
+end
+
+// Porter Tunnel junction (tunl_t2n SW branch toward Shoreside, at ~532.38, 99.51, -20.12)
+// Spans the 24m tunnel wall-to-wall while leaving the Staunton exit ramp unobstructed.
+$BarrierTunnelObj = Object.CreateNoOffset(MODEL_HELIX_BARRIER, 532.38, 99.51, -20.12)
+Object.SetHeading($BarrierTunnelObj, 135.0)
+
+// Shoreside Lift Bridge (Staunton approach, blocking both westbound & eastbound decks)
+$BarrierLift1Obj = Object.CreateNoOffset(MODEL_HELIX_BARRIER, -132.0, -621.5, 43.84)
+Object.SetHeading($BarrierLift1Obj, 90.0)
+$BarrierLift2Obj = Object.CreateNoOffset(MODEL_HELIX_BARRIER, -132.0, -641.5, 43.84)
+Object.SetHeading($BarrierLift2Obj, 90.0)
+
+while $BarrierCOM == 1
+    wait 200
+
+    if or
+        not Player.IsPlaying($player)
+        Camera.GetFadingStatus()
+        not Game.HasSaveGameFinished()
+    then
+        continue
+    end
+
+    // While Portland is still locked ($BarrierIND == 1), barriers.txt handles zone teleports back to Portland.
+    if $BarrierIND == 1
+    then
+        continue
+    end
+
+    // Anti-bypass: prevent entering Shoreside Vale (by boat, Dodo, Lift Bridge, or tunnel clip) while $BarrierCOM == 1
+    if or
+        Player.IsInZone($player, 'SUB_ZON')
+        Player.IsInZone($player, 'AIRPORT')
+        Player.IsInZone($player, 'PROJECT')
+        Player.IsInZone($player, 'SWANKS')
+        Player.IsInZone($player, 'SUB_IND')
+        Player.IsInZone($player, 'BIG_DAM')
+        Player.IsInArea3D($player, -450.0, -655.0, 35.0, -145.0, -607.0, 120.0, False)
+    then
+        gosub @BarrierComTeleport
+    end
+end
+
+// Shoreside unlocked: remove all physical barriers
+if not $BarrierTunnelObj == 0
+then
+    if Object.DoesExist($BarrierTunnelObj)
+    then
+        Object.Delete($BarrierTunnelObj)
+    end
+    $BarrierTunnelObj = 0
+end
+if not $BarrierLift1Obj == 0
+then
+    if Object.DoesExist($BarrierLift1Obj)
+    then
+        Object.Delete($BarrierLift1Obj)
+    end
+    $BarrierLift1Obj = 0
+end
+if not $BarrierLift2Obj == 0
+then
+    if Object.DoesExist($BarrierLift2Obj)
+    then
+        Object.Delete($BarrierLift2Obj)
+    end
+    $BarrierLift2Obj = 0
+end
+
+if $BarrierIND == 0
+then
+    Streaming.MarkModelAsNoLongerNeeded(MODEL_HELIX_BARRIER)
+end
+terminate_this_custom_script
+
+:BarrierComTeleport
+waitCount = 0
+Streaming.LoadCollision(LevelName.Commercial)
+while not Streaming.IsCollisionInMemory(LevelName.Commercial)
+    wait 0
+    waitCount += 1
+    if waitCount > 200
+    then
+        break
+    end
+end
+
+Player.SetControl($player, False)
+Camera.SetFadingColor(40, 0, 70)
+Camera.DoFade(500, Fade.Out)
+wait 500
+
+if Player.IsInAnyCar($player)
+then
+    Player.WarpFromCarToCoord($player, 178.76, -300.27, 16.46)
+else
+    Player.SetCoordinates($player, 178.76, -300.27, 16.46)
+end
+
+wait 500
+Camera.DoFade(500, Fade.In)
+wait 500
+Text.Print('BARTELP', 5000, 1)
+Player.SetControl($player, True)
+Player.SetHealth($player, 0)
+return
