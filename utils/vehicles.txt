@@ -51,3 +51,5 @@ CarGenerator.Switch(5@, 101)
 5@ = CarGenerator.Create(-953.17, 703.42, 62.09, 185, #SPEEDER, -1, -1, False, 0, 0, 0, 10000)
 5@ = CarGenerator.Create(1448.29, -91.16, 16.44, 0.0, #BFINJECT, -1, -1, False, 0, 0, 0, 10000)
 CarGenerator.Switch(5@, 101)
+
+{$INCLUDE lot_cars.txt}
