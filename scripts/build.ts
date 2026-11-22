@@ -722,6 +722,24 @@ if (shouldRun(10, "barrier_com")) {
   }
 }
 
+// Step 10d: Staunton Island Safehouse Thread
+if (shouldRun(10, "savest")) {
+  const saveStInput = join(cwd, "threads", "savest.txt");
+  const saveStOutput = join(cwd, "threads", "savest.cs");
+  if (await allExist([saveStInput])) {
+    say.heading("Step 10d (savest): Compiling Staunton safehouse thread...");
+    await compileIfChanged(saveStInput, saveStOutput);
+
+    const cleoStagingDir = join(modStagingDir, "CLEO");
+    await ensureDir(cleoStagingDir);
+    await Deno.copyFile(
+      saveStOutput,
+      join(cleoStagingDir, basename(saveStOutput)),
+    );
+    say.done(`  Packaged modloader/${modName}/CLEO/${basename(saveStOutput)}`);
+  }
+}
+
 // Package CLEO custom strings into CLEO/cleo_text (CLEO reads .fxt from here, not modloader)
 const stringsSrc = join(cwd, "data", "CLEO", "strings.fxt");
 if (await allExist([stringsSrc])) {
