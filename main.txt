@@ -76,9 +76,16 @@ wait 0
 // NOTE: When using Sanny Builder, pressing F7 creates a .cs file in the CLEO folder.
 // DO NOT use this button unless you're working with a CLEO script. (What fucking nonsense... 🙄)
 
-// Global state
+// Global state (set before asset loading / fade-in so CLEO threads never observe uninitialized 0s)
 declare_mission_flag $onmission
 $onmission = false
+$CarMissionDone = false
+$BarrierIND = true
+$BarrierCOM = true
+$DriveHelpPlayed = 0
+$ReinhardtHealthBar = 0
+$RadioHelpPlayed = 0
+$LuigiSphere = 0
 Audio.SetMusicDoesFade(True)
 //
 World.SetVisibilityOfClosestObjectOfType(1027.25, -933.6875, 15.0, 50.0, #INDHELIX_BARRIER, False)
@@ -106,15 +113,6 @@ Camera.DoFade(1000, Fade.In)
 Player.SetControl($player, False)
 Player.SetNeverGetsTired($player, True)
 wait 2000
-
-// Setup global state
-/// Whether some vaguely defined "car" mission is done
-$CarMissionDone = false
-$BarrierIND = true
-$BarrierCOM = true
-$DriveHelpPlayed = 0
-$ReinhardtHealthBar = 0
-$RadioHelpPlayed = 0
 
 // Spawn BG threads
 start_new_script @Driving
@@ -332,7 +330,11 @@ while $OnAlleyMission == 0
         Player.LocateOnFoot3D($player, 1329.72, -465.71, 49.76, 1.5, 1.5, 2.0, False)
     then
         Blip.Remove($LuigiBlip)
-        Sphere.Remove($LuigiSphere)
+        if not $LuigiSphere == 0
+        then
+            Sphere.Remove($LuigiSphere)
+            $LuigiSphere = 0
+        end
         Player.SetControl($player, False)
         Text.PrintBigString("Meddling in Her Affairs...", 5000, TextStyle.BottomRight)
         Camera.SetFadingColor(40, 0, 70)
@@ -364,7 +366,10 @@ then
 else
     $OnAlleyMission = 0
     $LuigiBlip = Blip.AddSpriteForContactPoint(1329.72, -465.71, 49.76, RadarSprite.Luigi)
-    $LuigiSphere = Sphere.Create(1329.72, -465.71, 49.76, 1.5)
+    if $LuigiSphere == 0
+    then
+        $LuigiSphere = Sphere.Create(1329.72, -465.71, 49.76, 1.5)
+    end
     goto @Stairs_Loop
 end
 
