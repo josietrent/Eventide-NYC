@@ -52,6 +52,10 @@ if $AK47RoofSpawn == 0
 then
     $AK47RoofSpawn = Pickup.CreateWithAmmo(#AK47, PickupType.OnStreet, 150, 1019.40, -26.80, 20.35)
 end
+if $HEAL_COM6 == 0
+then
+    $HEAL_COM6 = Pickup.Create(#HEALTH, PickupType.OnStreet, 242.83, -1117.11, 21.11)
+end
 
 // Ensure Staunton Newport Pay 'n' Spray exists on older savegames too
 if $SprayGarageCOMCreated == 0
