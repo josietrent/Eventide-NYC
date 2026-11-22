@@ -21,23 +21,34 @@ while true
     end
 end
 
-// Wait until Staunton Island is unlocked ($BarrierIND == 0)
-while $BarrierIND == 1
-    wait 250
-end
-
-if $SafeBlipST == 0
-then
-    $SafeBlipST = Blip.AddSpriteForContactPoint(513.55, -627.24, 16.66, RadarSprite.Savehouse)
-end
-
 while true
     wait 0
 
     if or
         Camera.GetFadingStatus()
         not Player.IsPlaying($player)
-        $onmission == true
+    then
+        continue
+    end
+
+    if and
+        $BarrierIND == 0
+        Streaming.IsCollisionInMemory(LevelName.Commercial)
+    then
+        if $SafeBlipST == 0
+        then
+            $SafeBlipST = Blip.AddSpriteForContactPoint(513.55, -627.24, 16.66, RadarSprite.Savehouse)
+        end
+    else
+        if not $SafeBlipST == 0
+        then
+            Blip.Remove($SafeBlipST)
+            $SafeBlipST = 0
+        end
+        continue
+    end
+
+    if $onmission == true
     then
         continue
     end
