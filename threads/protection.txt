@@ -163,7 +163,7 @@ Deadbeat = Char.Create(PedType.CivMale, #B_MAN1, 1202.93, -426.60, 25.07)
 Char.SetObjWaitOnFoot(Deadbeat)
 DeadbeatCar = Car.Create(#KURUMA, 1199.00, -440.00, 24.20)
 Car.SetHeading(DeadbeatCar, 180.0)
-Car.SetDoorStatus(DeadbeatCar, CarLock.LockoutPlayerOnly)
+Car.LockDoors(DeadbeatCar, CarLock.LockoutPlayerOnly)
 Camera.RestoreJumpcut()
 Hud.SwitchWidescreen(False)
 Camera.DoFade(1500, Fade.In)
@@ -197,7 +197,7 @@ then
     Char.SetObjWaitOnFoot(Deadbeat)
     DeadbeatCar = Car.Create(#KURUMA, 1199.00, -440.00, 24.20)
     Car.SetHeading(DeadbeatCar, 180.0)
-    Car.SetDoorStatus(DeadbeatCar, CarLock.LockoutPlayerOnly)
+    Car.LockDoors(DeadbeatCar, CarLock.LockoutPlayerOnly)
 end
 Camera.SetFadingColor(40, 0, 70)
 Camera.DoFade(500, Fade.In)
@@ -537,7 +537,7 @@ if not DeadbeatCar == 0
 then
     if Car.IsStillAlive(DeadbeatCar)
     then
-        Car.SetDoorStatus(DeadbeatCar, CarLock.Unlocked)
+        Car.LockDoors(DeadbeatCar, CarLock.Unlocked)
     end
 end
 if
