@@ -52,6 +52,7 @@ var
     $BleedEnemyBlip2: Blip
     $BleedEnemyBlip3: Blip
     $BleedEnemyBlip4: Blip
+    $ColdOpenDone: int
 end
 
 //=============
@@ -91,6 +92,7 @@ $DriveHelpPlayed = 0
 $ReinhardtHealthBar = 0
 $RadioHelpPlayed = 0
 $LuigiSphere = 0
+$ColdOpenDone = 0
 Audio.SetMusicDoesFade(True)
 //
 World.SetVisibilityOfClosestObjectOfType(1027.25, -933.6875, 15.0, 50.0, #INDHELIX_BARRIER, False)
@@ -211,6 +213,7 @@ start_new_script @Barrier
 
 Text.Print('BEACH', 5000, 1)
 Player.SetControl($player, True)
+$ColdOpenDone = 1
 // Terminate the main initialization thread cleanly now that setup is complete
 
 terminate_this_script
