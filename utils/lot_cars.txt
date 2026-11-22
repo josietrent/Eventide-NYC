@@ -1,0 +1,38 @@
+// Aspatria / Staunton Stadium south parking lot (comlandnew4 @ -48.19, -346.48, floor Z=15.128)
+// Exact DFF stall centers across all 6 columns; Z=16.0 stays strictly above 15.128 after 1/16 SCM float quantization
+// Shared by utils/vehicles.txt (New Game) and threads/world.txt (existing saves)
+5@ = CarGenerator.Create(-72.83, -364.22, 16.0, 90.0, #ESPERANT, -1, -1, False, 15, 15, 0, 10000)
+CarGenerator.Switch(5@, 101)
+5@ = CarGenerator.Create(-72.83, -349.70, 16.0, 90.0, #LANDSTAL, -1, -1, False, 20, 20, 0, 10000)
+CarGenerator.Switch(5@, 101)
+5@ = CarGenerator.Create(-72.83, -329.55, 16.0, 270.0, #KURUMA, -1, -1, False, 15, 15, 0, 10000)
+CarGenerator.Switch(5@, 101)
+5@ = CarGenerator.Create(-72.83, -315.20, 16.0, 90.0, #PEREN, -1, -1, False, 10, 10, 0, 10000)
+CarGenerator.Switch(5@, 101)
+
+5@ = CarGenerator.Create(-62.02, -358.35, 16.0, 270.0, #STALLION, -1, -1, False, 20, 15, 0, 10000)
+CarGenerator.Switch(5@, 101)
+5@ = CarGenerator.Create(-62.02, -338.20, 16.0, 270.0, #IDAHO, -1, -1, False, 10, 15, 0, 10000)
+CarGenerator.Switch(5@, 101)
+
+5@ = CarGenerator.Create(-52.18, -352.57, 16.0, 90.0, #SENTINEL, -1, -1, False, 25, 20, 0, 10000)
+CarGenerator.Switch(5@, 101)
+5@ = CarGenerator.Create(-52.18, -323.85, 16.0, 270.0, #MANANA, -1, -1, False, 10, 10, 0, 10000)
+CarGenerator.Switch(5@, 101)
+
+5@ = CarGenerator.Create(-39.70, -361.28, 16.0, 270.0, #BLISTA, -1, -1, False, 20, 15, 0, 10000)
+CarGenerator.Switch(5@, 101)
+5@ = CarGenerator.Create(-39.70, -335.33, 16.0, 90.0, #MOONBEAM, -1, -1, False, 15, 15, 0, 10000)
+CarGenerator.Switch(5@, 101)
+5@ = CarGenerator.Create(-39.70, -318.07, 16.0, 270.0, #TAXI, -1, -1, False, 15, 10, 0, 10000)
+CarGenerator.Switch(5@, 101)
+
+5@ = CarGenerator.Create(-30.12, -343.95, 16.0, 90.0, #STINGER, -1, -1, False, 30, 25, 0, 10000)
+CarGenerator.Switch(5@, 101)
+
+5@ = CarGenerator.Create(-21.43, -355.44, 16.0, 270.0, #CHEETAH, -1, -1, False, 35, 25, 0, 10000)
+CarGenerator.Switch(5@, 101)
+5@ = CarGenerator.Create(-21.43, -326.70, 16.0, 270.0, #BANSHEE, -1, -1, False, 35, 25, 0, 10000)
+CarGenerator.Switch(5@, 101)
+
+$LotCarsCreated = 2
