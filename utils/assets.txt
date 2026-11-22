@@ -49,6 +49,7 @@ $PistolSpawn = Pickup.CreateWithAmmo(#colt45, PickupType.OnStreet, 250, 1400.68,
 $Shotgun = Pickup.CreateWithAmmo(#SHOTGUN, PickupType.OnStreet, 48, 1093.14, -239.40, 9.16)
 $UziSpawn = Pickup.CreateWithAmmo(#UZI, PickupType.OnStreet, 250, 1143.10, -106.37, 7.47)
 $AK47Spawn = Pickup.CreateWithAmmo(#AK47, PickupType.OnStreet, 150, 85.13, -986.52, 26.17)
+$AK47RoofSpawn = Pickup.CreateWithAmmo(#AK47, PickupType.OnStreet, 150, 1019.40, -26.80, 20.35)
 wait 0
 
 {$INCLUDE zones.txt}
