@@ -964,6 +964,27 @@ if (shouldRun(22, "trafficlaw")) {
   say.done(`  Packaged modloader/${modName}/${basename(asiOutput)}`);
 }
 
+// Step 23: ShortRangeBlips ASI Plugin
+if (shouldRun(23, "shortrangeblips")) {
+  say.heading("Step 23 (shortrangeblips): Compiling ShortRangeBlips.asi...");
+  const asiInput = join(
+    cwd,
+    "plugins",
+    "ShortRangeBlips",
+    "ShortRangeBlips.cpp",
+  );
+  const asiOutput = join(
+    cwd,
+    "plugins",
+    "ShortRangeBlips",
+    "ShortRangeBlips.asi",
+  );
+  await compileAsiIfChanged(asiInput, asiOutput, join(stagingDir, "obj"));
+
+  await Deno.copyFile(asiOutput, join(modStagingDir, basename(asiOutput)));
+  say.done(`  Packaged modloader/${modName}/${basename(asiOutput)}`);
+}
+
 // Step 18: Custom Map Overrides (IPL/IDE)
 if (shouldRun(18, "map")) {
   const mapsSrcDir = join(cwd, "data", "maps");
