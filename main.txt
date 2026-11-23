@@ -70,7 +70,7 @@ Game.SetMaxWantedLevel(2)
 set_deatharrest_state 0
 Clock.SetTimeOfDay(20, 0)
 Streaming.LoadCollision(LevelName.Industrial)
-
+Camera.DoFade(0, Fade.Out)
 // Spawn the player
 $player = Player.Create(0, 933.66, -252.64, 4.50)
 Player.SetHeading($player, 287.49)
