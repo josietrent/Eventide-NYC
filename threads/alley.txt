@@ -4,7 +4,7 @@
 
 {$INCLUDE ../utils/globals.txt}
 
-//-------------Mission 3 (triggered by :Stairs)---------------
+//-------------Mission 2 (triggered by :Stairs)---------------
 :Alley
 script_name 'Alley'
 
@@ -635,7 +635,7 @@ while true
         Text.PrintBigString("Mission Passed!", 5000, TextStyle.Middle)
         Audio.PlayMissionPassedTune(1)
         Blip.Remove($LuigiBlip)
-        Stat.RegisterMissionPassed('MIS3NAM')
+        Stat.RegisterMissionPassed('MIS2NAM')
         Mission.Finish()
         $AlleyMissionDone = 1
         $onmission = 0
@@ -666,6 +666,7 @@ end
 :Alley_Pass
 $LuigiBlip = Blip.AddSpriteForContactPoint(1214.89, -327.47, 26.07, RadarSprite.Luigi)
 Text.PrintString("A new Point of Contact is available.", 5000)
+Pager.AddMessage('TOMMY2', 140, 2, 0)
 while true
     wait 250
     if or

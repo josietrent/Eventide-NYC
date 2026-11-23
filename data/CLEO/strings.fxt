@@ -11,11 +11,11 @@ CALHAN	The Callahan Bridge is closed due to construction.
 CALHAN2	For an alternate route to Staunton Island, please use the Porter Tunnel in Harwood.
 CARDIE	The vehicle has been destroyed!
 CARHORN	Honk the horn to get her attention.
-CORHELP	You can press the ~y~Backslash~w~ key to show your current coordinates!
+CORHELP	You can press the ~y~Backslash~s~ key to show your current coordinates!
 DEBHEAL	Deadbeat Health:
-DRIVE   Press the ~k~~VEHICLE_ENTER_EXIT~ ~w~key to enter or exit a vehicle.
-DRIVE2  Press the ~k~~VEHICLE_ACCELERATE~ ~w~key to drive forwards.
-DRIVE3  Press the ~k~~VEHICLE_BRAKE~ ~w~key to apply the brakes. The vehicle will reverse when stopped.
+DRIVE   Press the ~k~~VEHICLE_ENTER_EXIT~ ~s~key to enter or exit a vehicle.
+DRIVE2  Press the ~k~~VEHICLE_ACCELERATE~ ~s~key to drive forwards.
+DRIVE3  Press the ~k~~VEHICLE_BRAKE~ ~s~key to apply the brakes. The vehicle will reverse when stopped.
 DRIVE4	Press the A or D Keys to steer.
 DRIVE5  Your vehicle's ~b~speed~s~ is indicated in the bottom right.
 DRUNK	Wow... She's so drunk she can't even find her way home!
@@ -56,27 +56,29 @@ LOUHOME	Take Louie home.
 NICEONE Nice one!
 MARKER  Drive into the Marker.
 MARKERW Walk into the marker to advance.
-MEETUP	Meet up with your ~b~girl~w~ and take her to her ~y~apartment.
+MEETUP	Meet up with ~b~Marie~s~ and take her to her ~y~apartment.
 MEETHER Pick up your girl from her apartment.
 MIS0NAM Nowhere Like Home...
-MIS1NAM Driving Mr. Mute...
-MIS2NAM Finding Your Bearings...
-MIS3NAM Meddling in Her Affairs...
-MIS4NAM Pest Removal Ain't Easy...
-MIS5NAM Border Smugglers...
-MIS6NAM The Living Statue...
+MIS1NAM Finding Your Bearings...
+MIS2NAM Meddling in Her Affairs...
+MIS3NAM Pest Removal Ain't Easy...
+MIS4NAM Border Smugglers...
+MIS5NAM The Living Statue...
+MIS6NAM Digging for Sap...
+MIS7NAM Ashes to Ashes, Dust to Dust...
+MIS8NAM The Bleeding Edge...
 MISDEAD	Marie's dead!
 MISFAIL	You fucked up!
 MISFIND Find Marie!
 MISGTWK	Take her to work.
 MISLUI  You should go talk to my boss, Louie.
 MISLUI2 I'll bet you can convince him to shorten my hours so we can see each other more.
-MISLUI3 I hear he likes to go to ~b~Marco's Bistro~w~ for breakfast. It's right around the corner.
+MISLUI3 I hear he likes to go to ~b~Marco's Bistro~s~ for breakfast. It's right around the corner.
 MISLUI4 You should be able to find him there this time of day.
 MISMONY I know you're a little strapped on cash, so take some of my pocket change.
 MISPASS Mission Passed! $~1~
 MISRIDE Thanks for the ride to work, babe!
-MISSUG  Thanks for the lift, sugar.
+MISSUG  Thanks for the lift, Toni!
 MISWAIT Hey, now! Wait for me!
 MISWHRE Hey, where are you going?!
 MISWORK Good luck! OK, I gotta go, I'm late enough as it is! Love ya, bye!
@@ -99,8 +101,8 @@ PACK40	A Flamethrower has been delivered to the Mansion!
 PACK44	Grenades have been delivered to the Mansion!
 PACK48	A Rocket Launcher has been delivered to the Mansion!
 PACKALL	Nice! That's all the packages!
-PACK_ST	You cannot proceed in the ~y~Package Hunt~w~ until you unlock Staunton Island.
-PACK_SH	You cannot proceed in the ~y~Package Hunt~w~ until you unlock Shoreside Vale.
+PACK_ST	You cannot proceed in the ~y~Package Hunt~s~ until you unlock Staunton Island.
+PACK_SH	You cannot proceed in the ~y~Package Hunt~s~ until you unlock Shoreside Vale.
 PACKDON Package Tracking has become obsolete. You can keep tapping, but nothing interesting will happen.
 PACKON  Package Tracking System Enabled! Disable with the ~y~ O Key.
 PACKON1	The Package Tracking System is already on, ~r~dumbass!
@@ -108,17 +110,17 @@ PACKOFF Package Tracking System Disabled! Press the ~y~ P Key~w~ to re-enable it
 PACKREW	Here's a bonus! $10000
 PAKTUT1	You have found a ~y~Hidden Package!
 PAKTUT2	Collect 6 more for a special reward!
-PAKTUT3	A ~y~Package Tracking System~w~ is available. Pressing the ~y~ P Key~w~ will turn it on.
-PAKTUT4 Pressing the ~y~Comma~w~ or ~y~Period~w~ keys will change the currently tracked package.
-PISTOL  Get a ~b~Pistol~w~ from the parking lot behind ~b~AMCo.~w~
+PAKTUT3	A ~y~Package Tracking System~s~ is available. Pressing the ~y~ P Key~w~ will turn it on.
+PAKTUT4 Pressing the ~y~Comma~s~ or ~y~Period~s~ keys will change the currently tracked package.
+PISTOL  Get a ~b~Pistol~s~ from the parking lot behind ~b~AMCo.~s~
 RADIO1	Press the ~k~~VEHICLE_CHANGE_RADIO_STATION~ key to change radio stations.
 RADIO2  You can change the radio station at any time by pressing the ~k~~VEHICLE_CHANGE_RADIO_STATION~ key.
 RADIO3  Listen to whatever station you want!
-RADIOH	Your portable radio stays on when you exit a vehicle. Press ~y~R~w~ or ~y~Insert~w~ on foot to change stations or turn it off.
+RADIOH	You have access to a portable radio. Press ~y~R~s~ or ~y~Insert~s~ on foot to change stations.
 REWARD	You've unlocked a new weapon!
 SAVE_1  This abandoned house will serve as a nice hideout.
 SAVE_2  For now, at least...
-SAVE_3  Walking into this sphere behind the bar will save the game.
+SAVE_3  Walking into this ~b~sphere~s~ behind the bar will save the game.
 SAVE_4  When saving the game, you will lose any wanted level you may have, and time will advance by six hours.
 STARVE  Jesus, I'm starving!
 SEVEN	Go to ~b~Sex Club 7~w~ in the ~y~Red Light District~w~.
@@ -126,6 +128,7 @@ SPRINT	Press the ~k~~PED_SPRINT~ ~w~key to sprint.
 SPRINT2 You will never tire, and can sprint for as long as you like.
 SUBWAY  Drive to the nearby Subway Station.
 TOMMY   If you need another car, Tommy's in Harwood has some inventory in stock.
+TOMMY2  A Cheetah is now in stock at Tommy's!
 TRYTRY  Try again, yo!
 TURRET	Look around using the Mouse to aim the turret.
 UPSIDE  You rolled the royce! Run for it!
@@ -144,11 +147,11 @@ SMUG1	The cops are crawling all over Saint Mark's, but business doesn't stop.
 SMUG2	I got a crate of high-grade contraband bound for Staunton Island.
 SMUG3	The bridge is blocked, but a smuggler's meeting us near Harwood.
 SMUG4	Go grab the package from my stash in Saint Mark's.
-SMUG5	Pick up the ~b~contraband~w~ from the stash.
-SMUG6	The heat is on! Lose the ~r~cops~w~ before you meet the smuggler!
-SMUG7	Deliver the contraband to the ~y~smuggler~w~ in Harwood.
+SMUG5	Pick up the ~b~contraband~s~ from the stash.
+SMUG6	The heat is on! Lose the ~r~cops~s~ before you meet the smuggler!
+SMUG7	Deliver the contraband to the ~y~smuggler~s~ in Harwood.
 SMUG8	The smuggler won't talk to you with the cops on your ass! Lose the ~r~heat!~w~
-SMUG9	You brought the cops! Deal is off, kid!
+SMUG9	You brought the cops! This deal is off!
 SMUGA	What the hell was that?! The barrier is flaring up!
 SMUGB	No way in hell am I crossing that border today. The deal's off!
 SMUGC	The contraband was lost!
@@ -157,14 +160,12 @@ STAT2	Marie's frozen stiff in the open near the Trenton supply yard.
 STAT3	She isn't responding to anyone. She's standing there like a statue.
 STAT4	Scavengers and thugs have caught wind of it. Get to her before they grab her!
 STAT5	Reach ~b~Marie~w~ before the attackers take her!
-STAT6	Defend ~b~Marie~w~ from the attackers!
+STAT6	Defend ~b~Marie~s~ from the attackers!
 STAT7	She's locked up stiff as stone. Pull a vehicle close to haul her in.
-STAT8	Bring a vehicle close to ~b~Marie~w~.
 STAT9	You haul her dead weight into the passenger seat...
 STATA	Take her ~y~home~w~.
 STATB	...What happened? Why are we here?
 STATC	...Everything went cold and then black. Toni, what's happening to me?
-MIS7NAM	Digging for Sap...
 SAPTIME	Come back between 22:00 and 04:00.
 SAP1	Marie's episodes are getting worse, and the barrier's cutting us off.
 SAP2	There's an old inscription on the other side: The blood begins where the Sap ends.
@@ -173,30 +174,28 @@ SAP4	Scavengers are sniffing around the coast. Grab all three and get back here 
 SAP5	Collect the three ~g~Sap caches~w~ along Portland's coast before dawn!
 SAP6	Sap cache 1 of 3 recovered. Keep moving!
 SAP7	Sap cache 2 of 3 recovered. One left!
-SAP8	Something in the fog just shifted... Return to ~y~Kenji~w~ in Harwood!
+SAP8	Something in the fog just shifted... Return to ~y~Kenji~s~ in Harwood!
 SAP9	Dawn broke before you finished. You ran out of time!
 SAPA	You got all three? Jesus, I felt that flare-up from here.
 SAPB	This might be enough to destabilize the Callahan barrier... almost.
 SAPC	Lay low until nightfall. Next time, we hit the bridge directly.
-MIS8NAM	Ashes to Ashes, Dust to Dust...
 REINHEA	Reinhardt:
 ASH1	Reinhardt just torched Chinatown!
 ASH2	Nobody around here's lifting a finger, and the smoke is starting to draw police attention.
 ASH3	Find a ~b~Firetruck~w~ and extinguish the flames before the block burns.
 ASH4	Once Chinatown's clear, find Reinhardt and make him talk. We need answers before we hit the bridge.
-ASH5	Grab the ~b~Firetruck~w~ from Harwood Fire Station and douse the fires in ~y~Chinatown~w~!
+ASH5	Grab the ~b~Firetruck~s~ from Harwood Fire Station and douse the fires in ~y~Chinatown~w~!
 ASH6	Use the water cannon to extinguish all three fires in ~y~Chinatown~w~!
 ASH7	Fire 1 of 3 extinguished.
 ASH8	Fire 2 of 3 extinguished.
 ASH9	An arsonist spilled it - Reinhardt's holed up at ~y~Portland Harbor~w~!
-ASHA	Scatter his crew and beat ~g~Reinhardt~w~ down, but don't kill him!
+ASHA	Scatter his crew and beat ~g~Reinhardt~s~ down, but don't kill him!
 ASHB	Alright, alright! Call off the beating!
 ASHC	They're paying us to keep Portland burning while they lock down the rest of the city!
 ASHD	You won't make it past the barricade!
 ASHE    Reinhardt has crews guarding every way off Portland!
 ASHTIM	Chinatown burned down before you put the fires out!
 ASHF	You killed Reinhardt before he could talk!
-MIS9NAM	The Bleeding Edge...
 BLEED1	The Sap caches cracked their outer ward, Toni, but the Callahan barrier is bleeding through.
 BLEED2	Reinhardt's crews locked down Chinatown and the bridge mouth with heavy hardware.
 BLEED3	Take that beat-up Sentinel out back, punch through their Punk Noodles ambush, and hit the bridge.

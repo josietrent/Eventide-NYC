@@ -13,7 +13,7 @@ end
 
 const MODEL_ROADBARRIER = 1349
 
-//-------------Mission 9 / Portland Finale (triggered by :Bleed in main.txt)---------------
+//-------------Mission 8 / Portland Finale (triggered by :Bleed in main.txt)---------------
 :Bleed
 script_name 'Bleed'
 
@@ -976,7 +976,7 @@ Path.SwitchRoadsOn(1026.59, -954.79, 14.94, 852.72, -942.23, 32.27)
 Text.PrintWithNumberBig('MISPASS', 50000, 5000, TextStyle.Middle)
 Audio.PlayMissionPassedTune(1)
 Player.AddScore($player, 50000)
-Stat.RegisterMissionPassed('MIS9NAM')
+Stat.RegisterMissionPassed('MIS8NAM')
 Mission.Finish()
 $BleedMissionDone = 1
 $onmission = 0

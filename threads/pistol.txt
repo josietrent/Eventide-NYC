@@ -4,7 +4,7 @@
 
 {$INCLUDE ../utils/globals.txt}
 
-//-------------Mission 2 (triggered by :Pistol)---------------
+//-------------Mission 1 (triggered by :Pistol)---------------
 :Marie
 script_name 'Marie'
 
@@ -1134,7 +1134,7 @@ while not Player.LocateAnyMeans3D($player, 1419.15, -194.40, 49.74, 1.0, 1.0, 1.
         $OnGunMission = 0
         Player.SetControl($player, True)
         Text.PrintString("Follow the L blip to find Louie.", 5000)
-        Stat.RegisterMissionPassed('MIS2NAM')
+        Stat.RegisterMissionPassed('MIS1NAM')
         Mission.Finish()
         break
     else

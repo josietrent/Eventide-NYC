@@ -8,7 +8,7 @@ var
     $ReinhardtHealthBar: int
 end
 
-//-------------Mission 8 (triggered by :Ashes in main.txt)---------------
+//-------------Mission 7 (triggered by :Ashes in main.txt)---------------
 :Ashes
 script_name 'Ashes'
 
@@ -517,7 +517,7 @@ wait 1000
 Text.PrintWithNumberBig('MISPASS', 30000, 5000, TextStyle.Middle)
 Audio.PlayMissionPassedTune(1)
 Player.AddScore($player, 30000)
-Stat.RegisterMissionPassed('MIS8NAM')
+Stat.RegisterMissionPassed('MIS7NAM')
 Mission.Finish()
 $AshesMissionDone = 1
 $onmission = 0

@@ -4,7 +4,7 @@
 
 {$INCLUDE ../utils/globals.txt}
 
-//-------------Mission 4 (triggered by :Affairs)---------------
+//-------------Mission 3 (triggered by :Affairs)---------------
 :Protection
 script_name 'Protect'
 
@@ -769,7 +769,7 @@ wait 1500
 Text.PrintWithNumberBig('MISPASS', 10000, 5000, TextStyle.Middle)
 Audio.PlayMissionPassedTune(1)
 Player.AddScore($player, 10000)
-Stat.RegisterMissionPassed('MIS4NAM')
+Stat.RegisterMissionPassed('MIS3NAM')
 Mission.Finish()
 $ProtectionDone = 1
 $onmission = 0

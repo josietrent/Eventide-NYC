@@ -4,7 +4,7 @@
 
 {$INCLUDE ../utils/globals.txt}
 
-//-------------Mission 5 (triggered by :Smuggle in main.txt)---------------
+//-------------Mission 4 (triggered by :Smuggle in main.txt)---------------
 :Smuggle
 script_name 'Smuggle'
 
@@ -251,7 +251,7 @@ wait 1000
 Text.PrintWithNumberBig('MISPASS', 15000, 5000, TextStyle.Middle)
 Audio.PlayMissionPassedTune(1)
 Player.AddScore($player, 15000)
-Stat.RegisterMissionPassed('MIS5NAM')
+Stat.RegisterMissionPassed('MIS4NAM')
 Mission.Finish()
 $SmuggleMissionDone = 1
 $onmission = 0

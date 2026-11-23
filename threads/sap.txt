@@ -4,7 +4,7 @@
 
 {$INCLUDE ../utils/globals.txt}
 
-//-------------Mission 7 (triggered by :Sap in main.txt)---------------
+//-------------Mission 6 (triggered by :Sap in main.txt)---------------
 :Sap
 script_name 'Sap'
 
@@ -414,7 +414,7 @@ wait 1000
 Text.PrintWithNumberBig('MISPASS', 25000, 5000, TextStyle.Middle)
 Audio.PlayMissionPassedTune(1)
 Player.AddScore($player, 25000)
-Stat.RegisterMissionPassed('MIS7NAM')
+Stat.RegisterMissionPassed('MIS6NAM')
 Mission.Finish()
 $SapMissionDone = 1
 $onmission = 0

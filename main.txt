@@ -359,7 +359,7 @@ else
     goto @Driving_Loop
 end
 
-/// Trigger mission 2: "Finding Your Bearings..."
+/// Trigger mission 1: "Finding Your Bearings..."
 :Pistol
 script_name 'Pistol'
 wait 500
@@ -439,7 +439,7 @@ else
     goto @Pistol
 end
 
-/// Trigger mission 3: "Meddling in Her Affairs..."
+/// Trigger mission 2: "Meddling in Her Affairs..."
 :Stairs
 script_name 'Stairs'
 
@@ -502,7 +502,7 @@ else
     goto @Stairs_Loop
 end
 
-/// Trigger mission 4: "Pest Removal Ain't Easy..."
+/// Trigger mission 3: "Pest Removal Ain't Easy..."
 :Affairs
 script_name 'Affairs'
 
@@ -557,7 +557,7 @@ else
     goto @Affairs_Loop
 end
 
-/// Trigger mission 5: "Border Smugglers..."
+/// Trigger mission 4: "Border Smugglers..."
 :Smuggle
 script_name 'Smuggle'
 
@@ -613,7 +613,7 @@ else
     goto @Smuggle_Loop
 end
 
-/// Trigger mission 6: "The Living Statue..."
+/// Trigger mission 5: "The Living Statue..."
 :Kenji
 script_name 'Kenji'
 
@@ -668,7 +668,7 @@ else
     goto @Kenji_Loop
 end
 
-/// Trigger mission 7: "Digging for Sap..."
+/// Trigger mission 6: "Digging for Sap..."
 :Sap
 script_name 'Sap'
 
@@ -732,7 +732,7 @@ else
     goto @Sap_Loop
 end
 
-/// Trigger mission 8: "Ashes to Ashes, Dust to Dust..."
+/// Trigger mission 7: "Ashes to Ashes, Dust to Dust..."
 :Ashes
 script_name 'Ashes'
 
@@ -787,7 +787,7 @@ else
     goto @Ashes_Loop
 end
 
-/// Trigger mission 9 (Portland Finale): "The Bleeding Edge..."
+/// Trigger mission 8 (Portland Finale): "The Bleeding Edge..."
 :Bleed
 script_name 'Bleed'
 

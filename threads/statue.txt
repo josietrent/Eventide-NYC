@@ -8,7 +8,7 @@ var
     $MarieHealthBar: int
 end
 
-//-------------Mission 6 (triggered by :Kenji in main.txt)---------------
+//-------------Mission 5 (triggered by :Kenji in main.txt)---------------
 :Statue
 script_name 'Statue'
 
@@ -297,7 +297,6 @@ while MissionStage == 2
             Camera.SetFadingColor(40, 0, 70)
             Camera.DoFade(800, Fade.Out)
             wait 800
-            Text.Print('STAT9', 3000, 1)
             Char.SetObjEnterCarAsPassenger(Marie, MarieCar)
             wait 5000
             Camera.DoFade(800, Fade.In)
@@ -313,9 +312,6 @@ while MissionStage == 2
             MissionStage = 3
             break
         end
-    else
-        Text.Print('STAT8', 3000, 1)
-        wait 3000
     end
 end
 
@@ -487,7 +483,7 @@ wait 1000
 Text.PrintBigString("Mission Passed! $20000", 5000, TextStyle.Middle)
 Audio.PlayMissionPassedTune(1)
 Player.AddScore($player, 20000)
-Stat.RegisterMissionPassed('MIS6NAM')
+Stat.RegisterMissionPassed('MIS5NAM')
 Mission.Finish()
 $StatueMissionDone = 1
 $onmission = 0
