@@ -20,7 +20,7 @@ $CheetahGen = CarGenerator.Create(1243.45, -129.20, 14.63, 0, #CHEETAH, 25, 25, 
 CarGenerator.Switch($CheetahGen, 0)
 $KurumaGen = CarGenerator.Create(981.72, -66.34, 6.79, 269, #KURUMA, 58, 1, False, 20, 25, 0, 10000)
 CarGenerator.Switch($KurumaGen, 101)
-$MafiaGen = CarGenerator.Create(1403.76, -175.07, 50.00, 90.0, #MAFIA, -1, -1, False, 25, 40, 0, 10000)
+$MafiaGen = CarGenerator.Create(1403.76, -175.07, 50.00, 90.0, #MAFIA, -1, -1, False, 0, 0, 0, 10000)
 CarGenerator.Switch($MafiaGen, 101)
 $MafiaGen2 = CarGenerator.Create(1113.61, -1113.61, 11.86, 0.84, #MAFIA, -1, -1, False, 20, 30, 0, 10000)
 CarGenerator.Switch($MafiaGen2, 101)
@@ -55,5 +55,9 @@ CarGenerator.Switch(5@, 101)
 $LinerunDocksGen = CarGenerator.Create(1411.48, -803.43, 11.83, 270.0, 151, -1, -1, False, 0, 0, 0, 10000)
 CarGenerator.Switch($LinerunDocksGen, 101)
 $LinerunDocksCreated = 2
+// Staunton Island Newport Condo Stallion
+$StallionNewportGen = CarGenerator.Create(519.21, -660.87, 16.11, 180.0, #STALLION, -1, -1, False, 0, 0, 0, 10000)
+CarGenerator.Switch($StallionNewportGen, 101)
+$StallionNewportCreated = 1
 
 {$INCLUDE lot_cars.txt}
