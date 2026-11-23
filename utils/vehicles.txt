@@ -63,5 +63,9 @@ $StallionNewportCreated = 1
 $YakuzaNewportGen = CarGenerator.Create(517.32, -644.44, 16.14, 180.0, #YAKUZA, -1, -1, False, 0, 0, 0, 10000)
 CarGenerator.Switch($YakuzaNewportGen, 101)
 $YakuzaNewportCreated = 1
+// Staunton Island Newport Condo Infernus
+$InfernusNewportGen = CarGenerator.Create(487.88, -660.03, 16.12, 180.0, #INFERNUS, -1, -1, False, 0, 0, 0, 10000)
+CarGenerator.Switch($InfernusNewportGen, 101)
+$InfernusNewportCreated = 1
 
 {$INCLUDE lot_cars.txt}
