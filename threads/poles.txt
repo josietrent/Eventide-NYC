@@ -69,10 +69,10 @@ while true
         continue
     end
 
-    // Testing gate: activate once 'BEACH' prints ($ColdOpenDone == 1) and not on a mission
-    // (Restore to $BleedMissionDone == 1 and $Intro_Passed == 1 after testing)
+    // Activate traffic-law enforcement once Staunton is finished ($BarrierCOM == 0), intro is passed, and not on a mission
     if and
-        $ColdOpenDone == 1
+        $BarrierCOM == 0
+        $Intro_Passed == 1
         $onmission == 0
     then
         $TrafficLawActive = 1
