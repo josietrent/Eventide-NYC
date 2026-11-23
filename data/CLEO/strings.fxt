@@ -217,6 +217,7 @@ POLE2	Traffic signal down! ~g~+$~1~
 POLE3	Double streetlamp down! ~g~+$~1~
 POLE4	Park light down! ~g~+$~1~
 POLE5	Double park light down! ~g~+$~1~
+POLE6	Fire hydrant down! ~g~+$~1~
 POLEC	~y~Pole Combo x~1~! ~g~+$~1~
 TLAW1	~r~Property Damage! ~w~Cop saw hydrant hit - ~r~-$~1~
 TLAW2	~r~Property Damage! ~w~Cop saw pole destroyed - ~r~-$~1~

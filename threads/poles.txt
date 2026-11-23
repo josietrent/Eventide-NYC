@@ -193,6 +193,7 @@ while true
 
     modelId = $PoleKnockLastModel
     if or
+        modelId == 1322 // fire_hydrant
         modelId == 1394 // doublestreetlght1
         modelId == 1405 // trafficlight1
         modelId == 1352 // Streetlamp2 (double park light)
@@ -231,23 +232,28 @@ while true
     then
         Text.PrintWith2NumbersNow('POLEC', mult, payout, 2500, 1)
     else
-        if modelId == 1405
+        if modelId == 1322
         then
-            Text.PrintWithNumberNow('POLE2', payout, 2500, 1)
+            Text.PrintWithNumberNow('POLE6', payout, 2500, 1)
         else
-            if modelId == 1394
+            if modelId == 1405
             then
-                Text.PrintWithNumberNow('POLE3', payout, 2500, 1)
+                Text.PrintWithNumberNow('POLE2', payout, 2500, 1)
             else
-                if modelId == 1352
+                if modelId == 1394
                 then
-                    Text.PrintWithNumberNow('POLE5', payout, 2500, 1)
+                    Text.PrintWithNumberNow('POLE3', payout, 2500, 1)
                 else
-                    if modelId == 1353
+                    if modelId == 1352
                     then
-                        Text.PrintWithNumberNow('POLE4', payout, 2500, 1)
+                        Text.PrintWithNumberNow('POLE5', payout, 2500, 1)
                     else
-                        Text.PrintWithNumberNow('POLE1', payout, 2500, 1)
+                        if modelId == 1353
+                        then
+                            Text.PrintWithNumberNow('POLE4', payout, 2500, 1)
+                        else
+                            Text.PrintWithNumberNow('POLE1', payout, 2500, 1)
+                        end
                     end
                 end
             end
