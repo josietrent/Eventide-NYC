@@ -47,11 +47,17 @@ $WangHealth = Pickup.Create(#HEALTH, PickupType.OnStreet, 1325.83, 1674.62, 131.
 
 // All the gunz! 🔫
 $PistolSpawn = Pickup.CreateWithAmmo(#colt45, PickupType.OnStreet, 250, 1400.68, -857.80, 12.01)
+$PistolBlipIND = 0
 $Shotgun = Pickup.CreateWithAmmo(#SHOTGUN, PickupType.OnStreet, 48, 1093.14, -239.40, 9.16)
+$ShotgunBlipIND = 0
 $ShotgunSiloSpawn = Pickup.CreateWithAmmo(#SHOTGUN, PickupType.OnStreet, 48, 1514.21, -856.59, 27.41)
+$ShotgunSiloBlipIND = 0
 $UziSpawn = Pickup.CreateWithAmmo(#UZI, PickupType.OnStreet, 250, 1143.10, -106.37, 7.47)
+$UziBlipIND = 0
 $AK47Spawn = Pickup.CreateWithAmmo(#AK47, PickupType.OnStreet, 150, 85.13, -986.52, 26.17)
+$AK47BlipCOM = 0
 $AK47RoofSpawn = Pickup.CreateWithAmmo(#AK47, PickupType.OnStreet, 150, 1019.40, -26.80, 20.35)
+$AK47RoofBlipIND = 0
 wait 0
 
 {$INCLUDE zones.txt}
