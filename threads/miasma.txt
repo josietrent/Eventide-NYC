@@ -25,6 +25,13 @@ while true
         continue
     end
 
+    // Turn off once Staunton is unlocked
+    if $BarrierIND == 0
+    then
+        Camera.Shake(0)
+        terminate_this_custom_script
+    end
+
     Player.GetHealth($player, health)
     if
         health <= 0
