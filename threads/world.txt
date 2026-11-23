@@ -72,6 +72,14 @@ then
     $LinerunDocksCreated = 2
 end
 
+// Ensure Newport Condo Stallion exists on older savegames too
+if $StallionNewportCreated == 0
+then
+    $StallionNewportGen = CarGenerator.Create(519.21, -660.87, 16.11, 180.0, #STALLION, -1, -1, False, 0, 0, 0, 10000)
+    CarGenerator.Switch($StallionNewportGen, 101)
+    $StallionNewportCreated = 1
+end
+
 // Ensure Staunton Newport Pay 'n' Spray exists on older savegames too
 if $SprayGarageCOMCreated == 0
 then
