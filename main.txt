@@ -232,10 +232,7 @@ Streaming.LoadAllModelsNow()
 wait 0
 World.ClearArea(935.2039, -218.0919, 4.956, 6.0, True)
 $Canyonero = Car.Create(#LANDSTAL, 935.2039, -218.0919, 4.956)
-// FIXME: The car ought point West
 Car.SetHeading($Canyonero, 110)
-
-// FIXME: Blip and Sphere are not on mini-map.
 $MissionTriggerBlip = Blip.AddForCoord(774.45, -880.88, 14.74)
 $MissionTriggerSphere = Sphere.Create(774.45, -880.88, 14.74, 3.0)
 return
@@ -329,14 +326,6 @@ while $OnCarMission == 0
         then
             Text.Print('MARKERW', 3000, 0) // Walk into the blue marker to continue.
             0@ = 1
-        end
-    else
-        if and
-            $onmission == 1
-            Player.LocateOnFoot3D($player, 774.45, -880.88, 14.74, 3.0, 3.0, 3.0, False)
-        then
-            Text.Print('FUCKOFF', 4000, 1)
-            wait 5000
         end
     end
 end

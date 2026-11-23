@@ -51,11 +51,22 @@ then
     end
 end
 
+TIMERA = 5000
+
 while true
     wait 0
     if not Player.IsPlaying($player)
     then
         continue
+    end
+    if and
+        $Intro_Passed == 1
+        not Camera.GetFadingStatus()
+        TIMERA >= 5000
+        Player.LocateOnFoot3D($player, 1233.78, -129.02, 15.05, 3.0, 3.0, 3.0, False)
+    then
+        Text.Print('FUCKOFF', 4000, 1)
+        TIMERA = 0
     end
     if Pad.IsKeyPressed(KeyCode.Oem5)
     then
