@@ -1650,7 +1650,8 @@ bool __fastcall Hook_ApplyCollision(void *self, uintptr_t, void *entityB,
             QueueTrafficLawBanner(evt, fine, 0);
             GiveWantedStarAtLeast1(playerPed);
           }
-        } else if (IsTargetPoleModel(propModel) &&
+        } else if ((IsTargetPoleModel(propModel) ||
+                    propModel == MI_FIRE_HYDRANT) &&
                    *ScriptGlobalPtr(SLOT_POLE_ENABLED) != POLE_MODE_DISABLED) {
           *ScriptGlobalPtr(SLOT_POLE_TOTAL) += 1;
           *ScriptGlobalPtr(SLOT_POLE_LAST_MODEL) =
