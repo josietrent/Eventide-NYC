@@ -4,6 +4,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
 #include <string>
 #include <vector>
@@ -12,32 +13,86 @@
 namespace {
 
 // GTA III v1.0 globals and pools (verified against gta3.exe)
-constexpr uintptr_t ADDR_SCRIPT_SPACE = 0x74B248;    // CTheScripts::ScriptSpace
+constexpr uintptr_t ADDR_THE_CAMERA = 0x6FACF8;   // CCamera TheCamera
+constexpr uintptr_t ADDR_SCRIPT_SPACE = 0x74B248; // CTheScripts::ScriptSpace
+constexpr uintptr_t ADDR_MODEL_INFO_PTRS =
+    0x83D408; // CModelInfo::ms_modelInfoPtrs
+constexpr uintptr_t ADDR_CULL_INDICES = 0x847330; // CCullZones::aIndices
+constexpr uintptr_t ADDR_BIG_BLD_FOR_BLD =
+    0x86C9D0; // aPointersToBigBuildingsForBuildings
 constexpr uintptr_t ADDR_OBJECT_POOL_PTR = 0x880E28; // CPools::ms_pObjectPool
 constexpr uintptr_t ADDR_TIME_MS = 0x885B48; // CTimer::m_snTimeInMilliseconds
-constexpr uintptr_t ADDR_PED_POOL_PTR = 0x8F2C60; // CPools::ms_pPedPool
-constexpr uintptr_t ADDR_VEH_POOL_PTR = 0x9430DC; // CPools::ms_pVehiclePool
+constexpr uintptr_t ADDR_BIG_BLD_FOR_TREAD =
+    0x8F1B8C; // aPointersToBigBuildingsForTreadables
+constexpr uintptr_t ADDR_BUILDING_POOL_PTR =
+    0x8F2C04;                                      // CPools::ms_pBuildingPool
+constexpr uintptr_t ADDR_PED_POOL_PTR = 0x8F2C60;  // CPools::ms_pPedPool
+constexpr uintptr_t ADDR_RS_MAX_WIDTH = 0x8F436C;  // RsGlobal.maximumWidth
+constexpr uintptr_t ADDR_RS_MAX_HEIGHT = 0x8F4370; // RsGlobal.maximumHeight
+constexpr uintptr_t ADDR_VEH_POOL_PTR = 0x9430DC;  // CPools::ms_pVehiclePool
+constexpr uintptr_t ADDR_REPLAY_MODE = 0x95CD5B;   // CReplay::Mode
+constexpr uintptr_t ADDR_USER_PAUSE = 0x95CD7C;    // CTimer::m_UserPause
+constexpr uintptr_t ADDR_PREFS_SHOW_HUD =
+    0x95CD89; // FrontEndMenuManager.m_PrefsShowHud
+constexpr uintptr_t ADDR_CODE_PAUSE = 0x95CDB1; // CTimer::m_CodePause
+
+// Pool capacity push-imm32 immediates inside CPools::Initialise (0x4A1770)
+constexpr uintptr_t ADDR_OBJECT_POOL_LIMIT_IMM = 0x4A182A; // stock: 450 (0x1C2)
+constexpr uintptr_t ADDR_DUMMY_POOL_LIMIT_IMM = 0x4A1847; // stock: 2802 (0xAF2)
+constexpr uint32_t STOCK_OBJECT_POOL_LIMIT = 450;
+constexpr uint32_t STOCK_DUMMY_POOL_LIMIT = 2802;
+constexpr uint32_t TARGET_OBJECT_POOL_LIMIT = 1000;
+constexpr uint32_t TARGET_DUMMY_POOL_LIMIT = 8192;
 
 // GTA III v1.0 functions (verified against gta3.exe)
+constexpr uintptr_t ADDR_BUILDING_NEW = 0x405820;
 constexpr uintptr_t ADDR_SCRIPTS_PROCESS = 0x439040;
 constexpr uintptr_t ADDR_LIGHT_FOR_CARS1 = 0x455760;
 constexpr uintptr_t ADDR_LIGHT_FOR_CARS2 = 0x455790;
 constexpr uintptr_t ADDR_FIND_TRAFFIC_LIGHT_TYPE = 0x4564A0;
 constexpr uintptr_t ADDR_SHOULD_CAR_STOP_FOR_LIGHT = 0x456460;
+constexpr uintptr_t ADDR_LOAD_OBJECT_INSTANCE = 0x4786B0;
 constexpr uintptr_t ADDR_PHYSICAL_APPLY_COLLISION = 0x4973A0;
 constexpr uintptr_t ADDR_FIND_PLAYER_VEHICLE = 0x4A10C0;
 constexpr uintptr_t ADDR_FIND_PLAYER_PED = 0x4A1150;
 constexpr uintptr_t ADDR_WANTED_SET_NO_DROP = 0x4ADAC0;
+constexpr uintptr_t ADDR_FONT_PRINT_STRING = 0x500F50;
+constexpr uintptr_t ADDR_FONT_DRAW_FONTS = 0x501B50;
+constexpr uintptr_t ADDR_FONT_SET_SCALE = 0x501B80;
+constexpr uintptr_t ADDR_FONT_SET_COLOR = 0x501BD0;
+constexpr uintptr_t ADDR_FONT_SET_JUSTIFY_OFF = 0x501C80;
+constexpr uintptr_t ADDR_FONT_SET_CENTRE_OFF = 0x501CB0;
+constexpr uintptr_t ADDR_FONT_SET_BACKGROUND_OFF = 0x501CF0;
+constexpr uintptr_t ADDR_FONT_SET_RIGHT_JUSTIFY_ON = 0x501D50;
+constexpr uintptr_t ADDR_FONT_SET_RIGHT_JUSTIFY_OFF = 0x501D70;
+constexpr uintptr_t ADDR_FONT_SET_PROP_ON = 0x501DA0;
+constexpr uintptr_t ADDR_FONT_SET_FONT_STYLE = 0x501DB0;
+constexpr uintptr_t ADDR_FONT_SET_RIGHT_JUSTIFY_WRAP = 0x501DC0;
+constexpr uintptr_t ADDR_FONT_SET_DROP_SHADOW_POS = 0x501E70;
+constexpr uintptr_t ADDR_HUD_DRAW = 0x5052A0;
+constexpr uintptr_t ADDR_LOAD_CULL_ZONE_DATA = 0x524EC0;
+constexpr uintptr_t ADDR_CLEAR_BLD_CULL_FLAG = 0x525680;
+constexpr uintptr_t ADDR_SET_BLD_CULL_FLAG = 0x5258A0;
 constexpr uintptr_t ADDR_AUTOMOBILE_PROCESS_CONTROL = 0x531470;
 constexpr uintptr_t ADDR_MUSIC_INITIALISE = 0x57CF70;
 
-// CPool layout & pool strides (verified at 0x43EAB0..0x43EB60)
+// CPool layout & pool strides (verified at 0x43EAB0..0x43EB60,
+// 0x4A17E0..0x4A1840)
 constexpr size_t OFF_POOL_OBJECTS = 0x00;
 constexpr size_t OFF_POOL_BYTEMAP = 0x04;
 constexpr size_t OFF_POOL_SIZE = 0x08;
+constexpr size_t BUILDING_POOL_STRIDE = 0x64;
 constexpr size_t OBJECT_POOL_STRIDE = 0x19C;
 constexpr size_t VEHICLE_POOL_STRIDE = 0x5A8;
 constexpr size_t PED_POOL_STRIDE = 0x5F0;
+constexpr int32_t BUILDING_POOL_SIZE = 5500;
+constexpr int32_t TREADABLE_POOL_SIZE = 1214;
+constexpr uint16_t CULL_TREE_BASE = 6000;
+
+// CCamera / HUD constants
+constexpr size_t OFF_CAM_WIDESCREEN = 0x70;
+constexpr uint8_t REPLAY_MODE_PLAYBACK = 1;
+constexpr int16_t FONT_HEADING = 2;
 
 // CEntity / CPhysical / CObject offsets
 constexpr size_t OFF_ENTITY_RIGHT = 0x04;        // float[3] m_matrix.right
@@ -45,6 +100,7 @@ constexpr size_t OFF_ENTITY_FWD = 0x14;          // float[3] m_matrix.up
 constexpr size_t OFF_ENTITY_POS = 0x34;          // float[3] m_matrix.pos
 constexpr size_t OFF_ENTITY_FLAGS_50 = 0x50;     // m_nType:3 | m_nStatus:5
 constexpr size_t OFF_ENTITY_FLAGS_51 = 0x51;     // bit 2 (0x04) = bIsStatic
+constexpr size_t OFF_ENTITY_FLAGS_53 = 0x53;     // bit 6 (0x40) = bCullHidden
 constexpr size_t OFF_ENTITY_MODEL_INDEX = 0x5C;  // int16_t
 constexpr size_t OFF_PHYSICAL_MOVE_SPEED = 0x78; // float[3]
 constexpr size_t OFF_OBJECT_FLAGS_175 = 0x175; // bit 3 (0x08) = bHasBeenDamaged
@@ -98,6 +154,9 @@ constexpr uint32_t PEDTYPE_COP = 6;
 
 // CTrafficLights constants
 constexpr uint8_t LIGHT_RED = 2;
+
+// object.dat shift model IDs relative to stock GTA III
+constexpr int16_t MI_VHEISTLOCDOOR = 1333;
 
 // Streetlight & traffic signal model IDs (generic.IDE / object.dat)
 constexpr int16_t MI_LAMPOST_COAST = 1342;
@@ -166,7 +225,19 @@ constexpr uint32_t CRASH_PENALTY_COOLDOWN_MS = 4000;
 constexpr uint32_t CAMERA_STRIKE_WINDOW_MS = 90000;
 constexpr size_t CAMERA_STRIKE_ESCALATION_COUNT = 3;
 
+struct CRGBA {
+  uint8_t r;
+  uint8_t g;
+  uint8_t b;
+  uint8_t a;
+};
+
 using MusicBoolFn = bool(__thiscall *)(void *self);
+using BuildingNewFn = void *(__cdecl *)(uint32_t size);
+using LoadObjectInstanceFn = void(__cdecl *)(const char *line);
+using LoadCullZoneDataFn = void(__cdecl *)();
+using BuildingCullFlagFn = void(__cdecl *)(uint32_t stockIdx);
+using HudDrawFn = void(__cdecl *)();
 using ScriptsProcessFn = void(__cdecl *)();
 using ApplyCollisionFn = bool(__thiscall *)(void *self, void *entityB,
                                             void *colPoint, float *impulseA,
@@ -178,6 +249,13 @@ using LightStateFn = uint8_t(__cdecl *)();
 using FindTrafficLightTypeFn = int32_t(__cdecl *)(void *entity);
 using ShouldCarStopForLightFn = bool(__cdecl *)(void *veh);
 using WantedSetLevelNoDropFn = void(__thiscall *)(void *wanted, int32_t level);
+using FontVoidFn = void(__cdecl *)();
+using FontScaleFn = void(__cdecl *)(float w, float h);
+using FontColorFn = void(__cdecl *)(const CRGBA *color);
+using FontFloatFn = void(__cdecl *)(float val);
+using FontStyleFn = void(__cdecl *)(int16_t style);
+using FontDropShadowFn = void(__cdecl *)(int16_t pos);
+using FontPrintStringFn = void(__cdecl *)(float x, float y, const wchar_t *s);
 
 struct HookEntry {
   uintptr_t addr = 0;
@@ -214,9 +292,25 @@ std::vector<HookEntry> g_hooks;
 bool g_deferredInstalled = false;
 
 MusicBoolFn g_origInitialise = nullptr;
+BuildingNewFn g_origBuildingNew = nullptr;
+LoadObjectInstanceFn g_origLoadObjectInstance = nullptr;
+LoadCullZoneDataFn g_origLoadCullZoneData = nullptr;
+BuildingCullFlagFn g_origClearBldCullFlag = nullptr;
+BuildingCullFlagFn g_origSetBldCullFlag = nullptr;
+HudDrawFn g_origHudDraw = nullptr;
 ScriptsProcessFn g_origScriptsProcess = nullptr;
 ApplyCollisionFn g_origApplyCollision = nullptr;
 AutomobileProcessControlFn g_origAutomobileProcessControl = nullptr;
+
+// Stock ms_pBuildingPool index -> actual runtime ms_pBuildingPool index
+// (compensates for Streetlamp1/Streetlamp2/lampost_coast becoming
+// CDummyObjects)
+int16_t g_oldToNewBuilding[BUILDING_POOL_SIZE] = {};
+int32_t g_stockBuildingIdx = 0;
+int32_t g_actualBuildingCount = 0;
+uintptr_t g_trackedBuildingPoolPtr = 0;
+bool g_inLoadObjectInstance = false;
+int32_t g_lastNewBuildingIdx = -1;
 
 std::vector<CountedObject> g_countedObjects;
 std::vector<BumpedVehicle> g_bumpedVehicles;
@@ -265,6 +359,50 @@ void InitLogPath(HMODULE hModule) {
   if (f != INVALID_HANDLE_VALUE) {
     CloseHandle(f);
   }
+}
+
+void RaisePoolLimitImm(uintptr_t addr, uint32_t expectedMin, uint32_t target,
+                       const char *label) {
+  const uint32_t cur = *reinterpret_cast<const uint32_t *>(addr);
+  if (cur >= target) {
+    char msg[128] = {};
+    std::snprintf(msg, sizeof(msg), "%s already >= %u (%u)", label, target,
+                  cur);
+    WriteLog(msg);
+    return;
+  }
+  if (cur < expectedMin) {
+    char msg[128] = {};
+    std::snprintf(msg, sizeof(msg), "%s unexpected immediate %u at 0x%08X",
+                  label, cur, static_cast<unsigned>(addr));
+    WriteLog(msg);
+    return;
+  }
+
+  DWORD oldProt = 0;
+  if (VirtualProtect(reinterpret_cast<void *>(addr), sizeof(uint32_t),
+                     PAGE_EXECUTE_READWRITE, &oldProt)) {
+    *reinterpret_cast<uint32_t *>(addr) = target;
+    VirtualProtect(reinterpret_cast<void *>(addr), sizeof(uint32_t), oldProt,
+                   &oldProt);
+    FlushInstructionCache(GetCurrentProcess(), reinterpret_cast<void *>(addr),
+                          sizeof(uint32_t));
+    char msg[128] = {};
+    std::snprintf(msg, sizeof(msg), "%s raised %u -> %u", label, cur, target);
+    WriteLog(msg);
+  } else {
+    WriteLog("VirtualProtect failed while raising pool limit");
+  }
+}
+
+void ApplyPoolLimits() {
+  // Adding Streetlamp1/Streetlamp2/lampost_coast to object.dat converts
+  // hundreds of map props into CDummyObject entries and overflows stock
+  // DummyPool (2802).
+  RaisePoolLimitImm(ADDR_OBJECT_POOL_LIMIT_IMM, STOCK_OBJECT_POOL_LIMIT,
+                    TARGET_OBJECT_POOL_LIMIT, "ObjectPool");
+  RaisePoolLimitImm(ADDR_DUMMY_POOL_LIMIT_IMM, STOCK_DUMMY_POOL_LIMIT,
+                    TARGET_DUMMY_POOL_LIMIT, "DummyPool");
 }
 
 size_t DecodeX86InsnLen(const uint8_t *p) {
@@ -543,6 +681,177 @@ inline int32_t *ScriptGlobalPtr(size_t slot) {
 
 inline uint32_t TimeMs() {
   return *reinterpret_cast<const uint32_t *>(ADDR_TIME_MS);
+}
+
+// ============================================================================
+// CCullZones / ms_pBuildingPool Index Remapping
+// Moving Streetlamp1/Streetlamp2/lampost_coast into object.dat turns them into
+// CDummyObjects instead of CBuildings, shifting subsequent ms_pBuildingPool
+// slots relative to Rockstar's pre-baked data/cullzone.dat.
+// ============================================================================
+void ResetBuildingRemap(uintptr_t pool) {
+  std::fill(std::begin(g_oldToNewBuilding), std::end(g_oldToNewBuilding),
+            int16_t{-1});
+  g_stockBuildingIdx = 0;
+  g_actualBuildingCount = 0;
+  g_trackedBuildingPoolPtr = pool;
+}
+
+void *__cdecl Hook_BuildingNew(uint32_t size) {
+  void *ptr = g_origBuildingNew(size);
+  if (g_inLoadObjectInstance && ptr) {
+    const uintptr_t pool =
+        *reinterpret_cast<const uintptr_t *>(ADDR_BUILDING_POOL_PTR);
+    if (pool) {
+      const uintptr_t objectsBase = FieldAt<uintptr_t>(
+          reinterpret_cast<const void *>(pool), OFF_POOL_OBJECTS);
+      const uintptr_t p = reinterpret_cast<uintptr_t>(ptr);
+      if (objectsBase && p >= objectsBase) {
+        const uintptr_t diff = p - objectsBase;
+        if (diff % BUILDING_POOL_STRIDE == 0) {
+          const int32_t idx = static_cast<int32_t>(diff / BUILDING_POOL_STRIDE);
+          if (idx >= 0 && idx < BUILDING_POOL_SIZE) {
+            g_lastNewBuildingIdx = idx;
+          }
+        }
+      }
+    }
+  }
+  return ptr;
+}
+
+void __cdecl Hook_LoadObjectInstance(const char *line) {
+  const uintptr_t pool =
+      *reinterpret_cast<const uintptr_t *>(ADDR_BUILDING_POOL_PTR);
+  if (pool) {
+    const uint8_t *byteMap = FieldAt<const uint8_t *>(
+        reinterpret_cast<const void *>(pool), OFF_POOL_BYTEMAP);
+    if (pool != g_trackedBuildingPoolPtr ||
+        (g_actualBuildingCount > 0 && byteMap && (byteMap[0] & 0x80) != 0)) {
+      ResetBuildingRemap(pool);
+    }
+  }
+
+  int32_t modelId = -1;
+  if (line) {
+    char *endPtr = nullptr;
+    const long parsed = std::strtol(line, &endPtr, 10);
+    if (endPtr != line) {
+      modelId = static_cast<int32_t>(parsed);
+    }
+  }
+
+  g_inLoadObjectInstance = true;
+  g_lastNewBuildingIdx = -1;
+  g_origLoadObjectInstance(line);
+  g_inLoadObjectInstance = false;
+
+  if (g_lastNewBuildingIdx >= 0) {
+    ++g_actualBuildingCount;
+    if (modelId != MI_VHEISTLOCDOOR &&
+        g_stockBuildingIdx < BUILDING_POOL_SIZE) {
+      g_oldToNewBuilding[g_stockBuildingIdx++] =
+          static_cast<int16_t>(g_lastNewBuildingIdx);
+    }
+  } else if (modelId == MI_LAMPOST_COAST || modelId == MI_STREETLAMP2 ||
+             modelId == MI_STREETLAMP1) {
+    void *const *modelInfoPtrs =
+        reinterpret_cast<void *const *>(ADDR_MODEL_INFO_PTRS);
+    if (modelInfoPtrs[modelId] != nullptr &&
+        g_stockBuildingIdx < BUILDING_POOL_SIZE) {
+      g_oldToNewBuilding[g_stockBuildingIdx++] = -1;
+    }
+  }
+}
+
+void SetOrClearSingleBuildingCullFlag(int32_t poolIdx, bool setFlag) {
+  if (poolIdx < 0 || poolIdx >= BUILDING_POOL_SIZE) {
+    return;
+  }
+  const uintptr_t pool =
+      *reinterpret_cast<const uintptr_t *>(ADDR_BUILDING_POOL_PTR);
+  if (!pool) {
+    return;
+  }
+  const uintptr_t objectsBase = FieldAt<uintptr_t>(
+      reinterpret_cast<const void *>(pool), OFF_POOL_OBJECTS);
+  const uint8_t *byteMap = FieldAt<const uint8_t *>(
+      reinterpret_cast<const void *>(pool), OFF_POOL_BYTEMAP);
+  const int32_t poolSize =
+      FieldAt<int32_t>(reinterpret_cast<const void *>(pool), OFF_POOL_SIZE);
+  if (!objectsBase || !byteMap || poolIdx >= poolSize) {
+    return;
+  }
+  if ((byteMap[poolIdx] & 0x80) != 0) {
+    return;
+  }
+  uint8_t &flags53 = FieldAt<uint8_t>(
+      reinterpret_cast<void *>(objectsBase + static_cast<uintptr_t>(poolIdx) *
+                                                 BUILDING_POOL_STRIDE),
+      OFF_ENTITY_FLAGS_53);
+  if (setFlag) {
+    flags53 = (flags53 & 0xBF) | 0x40;
+  } else {
+    flags53 &= 0xBF;
+  }
+}
+
+void ApplyBuildingCullFlag(uint16_t stockIdx, bool setFlag) {
+  if (stockIdx >= CULL_TREE_BASE) {
+    const uint16_t *indices =
+        reinterpret_cast<const uint16_t *>(ADDR_CULL_INDICES);
+    const uint32_t base = static_cast<uint32_t>(stockIdx - CULL_TREE_BASE);
+    ApplyBuildingCullFlag(indices[base], setFlag);
+    ApplyBuildingCullFlag(indices[base + 1], setFlag);
+    ApplyBuildingCullFlag(indices[base + 2], setFlag);
+    return;
+  }
+
+  if (stockIdx < BUILDING_POOL_SIZE) {
+    const int16_t newIdx = g_oldToNewBuilding[stockIdx];
+    if (newIdx >= 0) {
+      SetOrClearSingleBuildingCullFlag(newIdx, setFlag);
+    }
+    const int16_t *bigBld =
+        reinterpret_cast<const int16_t *>(ADDR_BIG_BLD_FOR_BLD);
+    const int16_t stockBig = bigBld[stockIdx];
+    if (stockBig >= 0 && stockBig < BUILDING_POOL_SIZE) {
+      const int16_t newBig = g_oldToNewBuilding[stockBig];
+      if (newBig >= 0) {
+        SetOrClearSingleBuildingCullFlag(newBig, setFlag);
+      }
+    }
+  }
+}
+
+void __cdecl Hook_ClearBuildingCullFlag(uint32_t stockIdx) {
+  ApplyBuildingCullFlag(static_cast<uint16_t>(stockIdx), false);
+}
+
+void __cdecl Hook_SetBuildingCullFlag(uint32_t stockIdx) {
+  ApplyBuildingCullFlag(static_cast<uint16_t>(stockIdx), true);
+}
+
+void __cdecl Hook_LoadCullZoneData() {
+  g_origLoadCullZoneData();
+  int16_t *bigTread = reinterpret_cast<int16_t *>(ADDR_BIG_BLD_FOR_TREAD);
+  int32_t remappedTread = 0;
+  for (int32_t i = 0; i < TREADABLE_POOL_SIZE; ++i) {
+    const int16_t oldIdx = bigTread[i];
+    if (oldIdx >= 0 && oldIdx < BUILDING_POOL_SIZE) {
+      bigTread[i] = g_oldToNewBuilding[oldIdx];
+      ++remappedTread;
+    } else {
+      bigTread[i] = -1;
+    }
+  }
+
+  char msg[160] = {};
+  std::snprintf(
+      msg, sizeof(msg),
+      "LoadCullZoneData: stockBlds=%d actualBlds=%d remappedBigTread=%d",
+      g_stockBuildingIdx, g_actualBuildingCount, remappedTread);
+  WriteLog(msg);
 }
 
 inline Vec3 GetEntityPos(const void *entity) {
@@ -928,7 +1237,7 @@ void __fastcall Hook_AutomobileProcessControl(void *self, uintptr_t) {
 }
 
 // ============================================================================
-// Post-Story "Be Good" Traffic Law Checks
+// Post-Story "Be Good" Traffic Law Checks + Bottom-Right Speedometer
 // ============================================================================
 inline bool IsHighwayOrTunnel(float x, float y, float z) {
   // Porter Tunnel underground roadways
@@ -946,6 +1255,107 @@ inline bool IsHighwayOrTunnel(float x, float y, float z) {
     return true;
   }
   return false;
+}
+
+void DrawSpeedometer() {
+  if (*reinterpret_cast<const uint8_t *>(ADDR_REPLAY_MODE) ==
+          REPLAY_MODE_PLAYBACK ||
+      *reinterpret_cast<const uint8_t *>(ADDR_PREFS_SHOW_HUD) == 0 ||
+      *reinterpret_cast<const uint8_t *>(ADDR_USER_PAUSE) != 0 ||
+      *reinterpret_cast<const uint8_t *>(ADDR_CODE_PAUSE) != 0 ||
+      *reinterpret_cast<const uint8_t *>(ADDR_THE_CAMERA +
+                                         OFF_CAM_WIDESCREEN) != 0) {
+    return;
+  }
+
+  auto findPlayerPed = reinterpret_cast<FindPlayerPedFn>(ADDR_FIND_PLAYER_PED);
+  auto findPlayerVeh =
+      reinterpret_cast<FindPlayerVehicleFn>(ADDR_FIND_PLAYER_VEHICLE);
+  void *playerPed = findPlayerPed();
+  void *playerVeh = findPlayerVeh();
+  if (!playerPed || !playerVeh ||
+      FieldAt<void *>(playerVeh, OFF_VEH_DRIVER) != playerPed) {
+    return;
+  }
+
+  const int32_t screenW = *reinterpret_cast<const int32_t *>(ADDR_RS_MAX_WIDTH);
+  const int32_t screenH =
+      *reinterpret_cast<const int32_t *>(ADDR_RS_MAX_HEIGHT);
+  if (screenW <= 0 || screenH <= 0) {
+    return;
+  }
+
+  const float *vel = &FieldAt<float>(playerVeh, OFF_PHYSICAL_MOVE_SPEED);
+  const float speed2D = std::sqrt(vel[0] * vel[0] + vel[1] * vel[1]);
+  const float mph = speed2D * SPEED_TO_MPH;
+  const int32_t mphRounded = static_cast<int32_t>(mph + 0.5f);
+
+  wchar_t label[32] = {};
+  std::swprintf(label, sizeof(label) / sizeof(label[0]), L"%d MPH", mphRounded);
+
+  CRGBA fg{147, 196, 211, 255};
+  if (IsPostStoryTrafficLawActive() &&
+      FieldAt<uint32_t>(playerVeh, OFF_VEH_CLASS) == VEHICLE_AUTOMOBILE &&
+      FieldAt<uint8_t>(playerVeh, OFF_VEH_SIREN_OR_ALARM) == 0) {
+    const Vec3 vehPos = GetEntityPos(playerVeh);
+    const float limitMph = IsHighwayOrTunnel(vehPos.x, vehPos.y, vehPos.z)
+                               ? SPEED_LIMIT_HIGHWAY_MPH
+                               : SPEED_LIMIT_STREET_MPH;
+    if (mph > limitMph) {
+      fg = CRGBA{228, 74, 74, 255};
+    } else if (mph >= limitMph - 5.0f) {
+      fg = CRGBA{235, 198, 72, 255};
+    }
+  }
+
+  const float scaleX = static_cast<float>(screenW) / 640.0f;
+  const float scaleY = static_cast<float>(screenH) / 448.0f;
+  const float posX = static_cast<float>(screenW) - 24.0f * scaleX;
+  const float posY = static_cast<float>(screenH) - 64.0f * scaleY;
+
+  auto setJustifyOff = reinterpret_cast<FontVoidFn>(ADDR_FONT_SET_JUSTIFY_OFF);
+  auto setCentreOff = reinterpret_cast<FontVoidFn>(ADDR_FONT_SET_CENTRE_OFF);
+  auto setBgOff = reinterpret_cast<FontVoidFn>(ADDR_FONT_SET_BACKGROUND_OFF);
+  auto setRightOn =
+      reinterpret_cast<FontVoidFn>(ADDR_FONT_SET_RIGHT_JUSTIFY_ON);
+  auto setRightOff =
+      reinterpret_cast<FontVoidFn>(ADDR_FONT_SET_RIGHT_JUSTIFY_OFF);
+  auto setRightWrap =
+      reinterpret_cast<FontFloatFn>(ADDR_FONT_SET_RIGHT_JUSTIFY_WRAP);
+  auto setScale = reinterpret_cast<FontScaleFn>(ADDR_FONT_SET_SCALE);
+  auto setPropOn = reinterpret_cast<FontVoidFn>(ADDR_FONT_SET_PROP_ON);
+  auto setFontStyle = reinterpret_cast<FontStyleFn>(ADDR_FONT_SET_FONT_STYLE);
+  auto setDropShadow =
+      reinterpret_cast<FontDropShadowFn>(ADDR_FONT_SET_DROP_SHADOW_POS);
+  auto setColor = reinterpret_cast<FontColorFn>(ADDR_FONT_SET_COLOR);
+  auto printString =
+      reinterpret_cast<FontPrintStringFn>(ADDR_FONT_PRINT_STRING);
+  auto drawFonts = reinterpret_cast<FontVoidFn>(ADDR_FONT_DRAW_FONTS);
+
+  setJustifyOff();
+  setCentreOff();
+  setBgOff();
+  setRightOn();
+  setRightWrap(0.0f);
+  setScale(0.72f * scaleX, 1.25f * scaleY);
+  setPropOn();
+  setFontStyle(FONT_HEADING);
+  setDropShadow(0);
+
+  const CRGBA shadow{0, 0, 0, 255};
+  setColor(&shadow);
+  printString(posX + 2.0f, posY + 2.0f, label);
+
+  setColor(&fg);
+  printString(posX, posY, label);
+
+  setRightOff();
+  drawFonts();
+}
+
+void __cdecl Hook_HudDraw() {
+  g_origHudDraw();
+  DrawSpeedometer();
 }
 
 void ResetContinuousTrafficState() {
@@ -1292,7 +1702,23 @@ void InstallDeferredHooks() {
     return;
   }
   g_deferredInstalled = true;
+  ResetBuildingRemap(0);
 
+  const bool okBldNew =
+      InstallDetour(ADDR_BUILDING_NEW, &Hook_BuildingNew, &g_origBuildingNew);
+  const bool okLoadInst =
+      InstallDetour(ADDR_LOAD_OBJECT_INSTANCE, &Hook_LoadObjectInstance,
+                    &g_origLoadObjectInstance);
+  const bool okLoadCull =
+      InstallDetour(ADDR_LOAD_CULL_ZONE_DATA, &Hook_LoadCullZoneData,
+                    &g_origLoadCullZoneData);
+  const bool okClearCull =
+      InstallDetour(ADDR_CLEAR_BLD_CULL_FLAG, &Hook_ClearBuildingCullFlag,
+                    &g_origClearBldCullFlag);
+  const bool okSetCull = InstallDetour(
+      ADDR_SET_BLD_CULL_FLAG, &Hook_SetBuildingCullFlag, &g_origSetBldCullFlag);
+  const bool okHudDraw =
+      InstallDetour(ADDR_HUD_DRAW, &Hook_HudDraw, &g_origHudDraw);
   const bool okCol = InstallDetour(ADDR_PHYSICAL_APPLY_COLLISION,
                                    &Hook_ApplyCollision, &g_origApplyCollision);
   const bool okScr = InstallDetour(ADDR_SCRIPTS_PROCESS, &Hook_ScriptsProcess,
@@ -1301,6 +1727,18 @@ void InstallDeferredHooks() {
                                    &Hook_AutomobileProcessControl,
                                    &g_origAutomobileProcessControl);
 
+  WriteLog(okBldNew ? "BuildingNew hook (0x405820) OK"
+                    : "BuildingNew hook (0x405820) FAILED");
+  WriteLog(okLoadInst ? "LoadObjectInstance hook (0x4786B0) OK"
+                      : "LoadObjectInstance hook (0x4786B0) FAILED");
+  WriteLog(okLoadCull ? "LoadCullZoneData hook (0x524EC0) OK"
+                      : "LoadCullZoneData hook (0x524EC0) FAILED");
+  WriteLog(okClearCull ? "ClearBuildingCullFlag hook (0x525680) OK"
+                       : "ClearBuildingCullFlag hook (0x525680) FAILED");
+  WriteLog(okSetCull ? "SetBuildingCullFlag hook (0x5258A0) OK"
+                     : "SetBuildingCullFlag hook (0x5258A0) FAILED");
+  WriteLog(okHudDraw ? "HudDraw hook (0x5052A0) OK"
+                     : "HudDraw hook (0x5052A0) FAILED");
   WriteLog(okCol ? "ApplyCollision hook (0x4973A0) OK"
                  : "ApplyCollision hook (0x4973A0) FAILED");
   WriteLog(okScr ? "ScriptsProcess hook (0x439040) OK"
@@ -1316,6 +1754,7 @@ bool __fastcall Hook_Initialise(void *self, uintptr_t) {
 }
 
 bool InstallBootHook() {
+  ApplyPoolLimits();
   const bool ok =
       InstallDetour(ADDR_MUSIC_INITIALISE, &Hook_Initialise, &g_origInitialise);
   WriteLog(ok ? "Boot hook (cMusicManager::Initialise) OK"
