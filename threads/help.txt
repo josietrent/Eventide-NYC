@@ -272,6 +272,13 @@ return
     end
     Text.PrintHelp('DRIVE4')
     wait 5000
+    if not Player.IsInAnyCar($player)
+    then
+        Text.ClearHelp()
+        return
+    end
+    Text.PrintHelp('DRIVE5')
+    wait 5000
     Text.ClearHelp()
 return
 
