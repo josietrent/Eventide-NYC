@@ -15,6 +15,8 @@ Blip TargetBlip = 0
 Blip LuigiBlip = 0
 int RouteState = 0
 int SkipArmed = 0
+int PursuitReady = 0
+int FarWarningActive = 0
 
 $onmission = 1
 $OnProtectionMission = 1
@@ -83,13 +85,18 @@ Char.SetObjGotoCoordOnFoot(Luigi, 1219.74, -325.69)
 
 // Monitor Louie's movement until he arrives at the base of the stairs
 :Louie_Stairs_Loop
-while not Char.LocateAnyMeans2D(Luigi, 1219.74, -325.69, 0.5, 0.5, False)
+while true
     wait 0
     if or
         not Player.IsPlaying($player)
         not Char.IsStillAlive(Luigi)
     then
         jump @Protection_Fail
+    end
+    if
+        Char.LocateAnyMeans2D(Luigi, 1219.74, -325.69, 0.5, 0.5, False)
+    then
+        break
     end
     if or
         Pad.IsKeyPressed(KeyCode.LeftShift)
@@ -216,7 +223,7 @@ TargetBlip = Blip.AddForChar(Deadbeat)
 Blip.ChangeColor(TargetBlip, BlipColor.Green)
 
 :Protection_Approach
-while not Player.LocateAnyMeansChar3D($player, Deadbeat, 10.0, 10.0, 10.0, False)
+while true
     wait 0
     if
         not Player.IsPlaying($player)
@@ -235,6 +242,11 @@ while not Player.LocateAnyMeansChar3D($player, Deadbeat, 10.0, 10.0, 10.0, False
         Text.PrintString("Louie's dead!", 5000)
         Char.RemoveElegantly(Luigi)
         jump @Protection_Fail
+    end
+    if
+        Player.LocateAnyMeansChar3D($player, Deadbeat, 10.0, 10.0, 10.0, False)
+    then
+        break
     end
 end
 
@@ -295,7 +307,7 @@ Camera.RestoreJumpcut()
 Player.SetControl($player, True)
 Text.PrintString("He's running for it!", 5000)
 
-while not Char.LocateAnyMeans2D(Deadbeat, 1199.00, -438.00, 4.0, 4.0, False)
+while true
     wait 0
     if
         not Player.IsPlaying($player)
@@ -311,6 +323,11 @@ while not Char.LocateAnyMeans2D(Deadbeat, 1199.00, -438.00, 4.0, 4.0, False)
     then
         Text.PrintString("You wrecked his car before getting Louie's money!", 5000)
         jump @Protection_Fail
+    end
+    if
+        Char.LocateAnyMeans2D(Deadbeat, 1199.00, -438.00, 4.0, 4.0, False)
+    then
+        break
     end
     if
         not Char.LocateAnyMeansChar3D(Deadbeat, $scplayer, 65.0, 65.0, 65.0, False)
@@ -332,7 +349,7 @@ Char.SetObjNoObj(Deadbeat)
 Char.SetObjEnterCarAsDriver(Deadbeat, DeadbeatCar)
 Char.SetRunning(Deadbeat, True)
 
-while not Char.IsInCar(Deadbeat, DeadbeatCar)
+while true
     wait 0
     if
         not Player.IsPlaying($player)
@@ -348,6 +365,11 @@ while not Char.IsInCar(Deadbeat, DeadbeatCar)
     then
         Text.PrintString("You wrecked his car before getting Louie's money!", 5000)
         jump @Protection_Fail
+    end
+    if
+        Char.IsInCar(Deadbeat, DeadbeatCar)
+    then
+        break
     end
     if
         not Char.LocateAnyMeansChar3D(Deadbeat, $scplayer, 65.0, 65.0, 65.0, False)
@@ -375,6 +397,8 @@ Car.SetCruiseSpeed(DeadbeatCar, 95.0)
 Car.GotoCoordinates(DeadbeatCar, 1193.61, -491.55, 24.41)
 Text.PrintString("Stop him before he gets away!", 4000)
 RouteState = 1
+PursuitReady = 0
+FarWarningActive = 0
 TIMERA = 0
 TIMERB = 0
 
@@ -388,37 +412,17 @@ while true
         jump @Protection_Fail
     end
 
-    // Check if player is falling behind
-    if
-        not Char.LocateAnyMeansChar2D(Deadbeat, $scplayer, 50.0, 50.0, False)
-    then
-        Text.PrintString("You're too far away! Stay close to him!", 5000)
-        wait 5000
-
-        if or
-            not Player.IsPlaying($player)
-            Car.IsDead(DeadbeatCar)
-            Char.IsDead(Deadbeat)
-        then
-            Text.PrintString("Oh shit, he's dead! Now how is Louie supposed to get his money?", 5000)
-            jump @Protection_Fail
-        end
-
-        // Final warning check
-        if not Char.LocateAnyMeansChar2D(Deadbeat, $scplayer, 50.0, 50.0, False)
-        then
-            Text.PrintString("You lost him!", 5000)
-            jump @Protection_Fail
-        end
-        TIMERA = 0
-    end
-
-    // Check if the vehicle is totaled or he's dead
+    // Check if the vehicle is totaled or he's dead BEFORE any ped/car locate commands
     if or
         Car.IsDead(DeadbeatCar)
         Char.IsDead(Deadbeat)
     then
-        Text.PrintString("Oh shit, he's dead?!", 5000)
+        if FarWarningActive == 1
+        then
+            Text.PrintString("Oh shit, he's dead! Now how is Louie supposed to get his money?", 5000)
+        else
+            Text.PrintString("Oh shit, he's dead?!", 5000)
+        end
         jump @Protection_Fail
     end
 
@@ -438,8 +442,40 @@ while true
         jump @Protection_FleeOnFoot
     end
 
-    if
+    if and
+        PursuitReady == 0
         TIMERB >= 3500
+    then
+        PursuitReady = 1
+    end
+
+    // Non-blocking distance warning so flipped/burning/dead checks still run every frame
+    if
+        not Char.LocateAnyMeansChar2D(Deadbeat, $scplayer, 50.0, 50.0, False)
+    then
+        if FarWarningActive == 0
+        then
+            FarWarningActive = 1
+            PursuitReady = 1
+            TIMERB = 0
+            Text.PrintString("You're too far away! Stay close to him!", 5000)
+        else
+            if TIMERB >= 5000
+            then
+                Text.PrintString("You lost him!", 5000)
+                jump @Protection_Fail
+            end
+        end
+    else
+        if FarWarningActive == 1
+        then
+            FarWarningActive = 0
+            TIMERA = 0
+        end
+    end
+
+    if
+        PursuitReady == 1
     then
         if
             Car.IsStopped(DeadbeatCar)
@@ -584,27 +620,45 @@ then
     if Car.IsStillAlive(DeadbeatCar)
     then
         Car.LockDoors(DeadbeatCar, CarLock.Unlocked)
-    end
-end
-if
-    Char.IsInCar(Deadbeat, DeadbeatCar)
-then
-    Char.SetObjLeaveCar(Deadbeat, DeadbeatCar)
-    while Char.IsInCar(Deadbeat, DeadbeatCar)
-        wait 0
-        if or
-            not Player.IsPlaying($player)
-            not Char.IsStillAlive(Deadbeat)
+        if
+            Char.IsInCar(Deadbeat, DeadbeatCar)
         then
-            jump @Protection_Fail
+            Char.SetObjLeaveCar(Deadbeat, DeadbeatCar)
+            while true
+                wait 0
+                if or
+                    not Player.IsPlaying($player)
+                    not Char.IsStillAlive(Deadbeat)
+                then
+                    jump @Protection_Fail
+                end
+                if not Car.IsStillAlive(DeadbeatCar)
+                then
+                    break
+                end
+                if not Char.IsInCar(Deadbeat, DeadbeatCar)
+                then
+                    break
+                end
+            end
         end
     end
+end
+if not Char.IsStillAlive(Deadbeat)
+then
+    Text.PrintString("Oh shit, he's dead?!", 5000)
+    jump @Protection_Fail
 end
 Char.SetObjGotoCoordOnFoot(Deadbeat, 1286.58, -327.17)
 Char.SetRunning(Deadbeat, True)
 
 :Protection_Confrontation
 wait 0
+if not Char.IsStillAlive(Deadbeat)
+then
+    Text.PrintString("You killed him before getting the money!", 5000)
+    jump @Protection_Fail
+end
 Blip.Remove(TargetBlip)
 TargetBlip = Blip.AddForChar(Deadbeat)
 Blip.ChangeColor(TargetBlip, BlipColor.Green)
@@ -619,10 +673,10 @@ while not Char.IsDead(Deadbeat)
     then
         jump @Protection_Fail
     end
-    Char.GetHealth(Deadbeat, $DeadbeatHealthBar)
     if
         Char.IsStillAlive(Deadbeat)
     then
+        Char.GetHealth(Deadbeat, $DeadbeatHealthBar)
         if
             $DeadbeatHealthBar < 50 // Handed over the cash
         then
@@ -658,11 +712,18 @@ Text.PrintString("You killed him before getting the money!", 5000)
 jump @Protection_Fail
 
 :Protection_Finish
-while not Player.LocateOnFootChar3D($player, Luigi, 5.0, 5.0, 0.75, False)
+while true
     wait 0
     if
         not Player.IsPlaying($player)
     then
+        jump @Protection_Fail
+    end
+    if
+        Char.IsDead(Luigi)
+    then
+        Text.PrintString("Louie's dead!", 5000)
+        Char.RemoveElegantly(Luigi)
         jump @Protection_Fail
     end
     if
@@ -747,13 +808,6 @@ while not Player.LocateOnFootChar3D($player, Luigi, 5.0, 5.0, 0.75, False)
             RouteState = 1
         end
         jump @Protection_Success
-    end
-    if
-        Char.IsDead(Luigi)
-    then
-        Text.PrintString("Louie's dead!", 5000)
-        Char.RemoveElegantly(Luigi)
-        jump @Protection_Fail
     end
 end
 
