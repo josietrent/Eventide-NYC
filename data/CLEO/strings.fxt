@@ -17,6 +17,7 @@ DRIVE   Press the ~k~~VEHICLE_ENTER_EXIT~ ~w~key to enter or exit a vehicle.
 DRIVE2  Press the ~k~~VEHICLE_ACCELERATE~ ~w~key to drive forwards.
 DRIVE3  Press the ~k~~VEHICLE_BRAKE~ ~w~key to apply the brakes. The vehicle will reverse when stopped.
 DRIVE4	Press the A or D Keys to steer.
+DRIVE5  Your vehicle's ~b~speed~w~ is indicated in the bottom right.
 DRUNK	Wow... She's so drunk she can't even find her way home!
 HEAT	Lose the ~r~heat!
 INCAR	Get back in the car!
