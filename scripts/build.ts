@@ -985,6 +985,17 @@ if (shouldRun(23, "shortrangeblips")) {
   say.done(`  Packaged modloader/${modName}/${basename(asiOutput)}`);
 }
 
+// Step 24: BatMove ASI Plugin
+if (shouldRun(24, "batmove")) {
+  say.heading("Step 24 (batmove): Compiling BatMove.asi...");
+  const asiInput = join(cwd, "plugins", "BatMove", "BatMove.cpp");
+  const asiOutput = join(cwd, "plugins", "BatMove", "BatMove.asi");
+  await compileAsiIfChanged(asiInput, asiOutput, join(stagingDir, "obj"));
+
+  await Deno.copyFile(asiOutput, join(modStagingDir, basename(asiOutput)));
+  say.done(`  Packaged modloader/${modName}/${basename(asiOutput)}`);
+}
+
 // Step 18: Custom Map Overrides (IPL/IDE)
 if (shouldRun(18, "map")) {
   const mapsSrcDir = join(cwd, "data", "maps");
