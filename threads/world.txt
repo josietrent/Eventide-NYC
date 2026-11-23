@@ -80,6 +80,14 @@ then
     $StallionNewportCreated = 1
 end
 
+// Ensure Newport Condo Yakuza Stinger exists on older savegames too
+if $YakuzaNewportCreated == 0
+then
+    $YakuzaNewportGen = CarGenerator.Create(517.32, -644.44, 16.14, 180.0, #YAKUZA, -1, -1, False, 0, 0, 0, 10000)
+    CarGenerator.Switch($YakuzaNewportGen, 101)
+    $YakuzaNewportCreated = 1
+end
+
 // Ensure Staunton Newport Pay 'n' Spray exists on older savegames too
 if $SprayGarageCOMCreated == 0
 then
