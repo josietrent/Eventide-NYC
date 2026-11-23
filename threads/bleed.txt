@@ -835,18 +835,108 @@ while true
     end
 end
 
-// Finale Arrival Cutscene (skippable)
+// Finale Arrival Cutscene: Staunton welcome & Newport Condo Safehouse tour (skippable)
 Player.SetControl($player, False)
 Hud.SwitchWidescreen(True)
+RoadblockAggro = 0
+
+// Wait for any held sprint/brake/exit key to release before arming skip
+while true
+    if or
+        Pad.IsKeyPressed(KeyCode.Space)
+        Pad.IsKeyPressed(KeyCode.Return)
+        Pad.IsKeyPressed(KeyCode.LeftShift)
+        Pad.IsKeyPressed(KeyCode.F)
+    then
+        wait 0
+    else
+        break
+    end
+end
+
+// Shot 1: Staunton bridgehead landing
 Camera.SetFixedPosition(139.00, -923.00, 27.50, 0.0, 0.0, 0.0)
 Camera.PointAtChar($scplayer, CameraMode.FollowPed, SwitchType.JumpCut)
-Text.Print('BLEEDC', 4000, 1)
+Text.Print('STAU1', 4500, 1)
 TIMERA = 0
-while TIMERA < 4000
+while TIMERA < 4500
     wait 0
     if or
         Pad.IsKeyPressed(KeyCode.LeftShift)
         Pad.IsKeyPressed(KeyCode.Space)
+        Pad.IsKeyPressed(KeyCode.Return)
+        Pad.IsKeyPressed(KeyCode.F)
+    then
+        jump @Bleed_Outro_Skip
+    end
+end
+
+Text.Print('STAU2', 5500, 1)
+TIMERA = 0
+while TIMERA < 5500
+    wait 0
+    if or
+        Pad.IsKeyPressed(KeyCode.LeftShift)
+        Pad.IsKeyPressed(KeyCode.Space)
+        Pad.IsKeyPressed(KeyCode.Return)
+        Pad.IsKeyPressed(KeyCode.F)
+    then
+        jump @Bleed_Outro_Skip
+    end
+end
+
+Text.Print('STAU3', 5500, 1)
+TIMERA = 0
+while TIMERA < 5500
+    wait 0
+    if or
+        Pad.IsKeyPressed(KeyCode.LeftShift)
+        Pad.IsKeyPressed(KeyCode.Space)
+        Pad.IsKeyPressed(KeyCode.Return)
+        Pad.IsKeyPressed(KeyCode.F)
+    then
+        jump @Bleed_Outro_Skip
+    end
+end
+
+// Shot 2: Aspatria / Newport Condo Safehouse overview
+Text.ClearPrints()
+Camera.SetFadingColor(40, 0, 70)
+Camera.DoFade(350, Fade.Out)
+wait 350
+RoadblockAggro = 1
+Streaming.LoadScene(513.55, -627.24, 16.66)
+MainSphere = Sphere.Create(513.55, -627.24, 16.66, 1.8)
+Camera.SetFixedPosition(492.00, -650.00, 21.00, 0.0, 0.0, 0.0)
+Camera.PointAtPoint(513.55, -627.24, 16.66, SwitchType.JumpCut)
+Camera.DoFade(400, Fade.In)
+wait 400
+Camera.SetInterpolationParameters(0.0, 5000)
+Camera.SetFixedPosition(500.00, -641.00, 19.00, 0.0, 0.0, 0.0)
+Camera.PointAtPoint(513.55, -627.24, 16.66, SwitchType.Interpolation)
+
+Text.Print('STAU4', 5500, 1)
+TIMERA = 0
+while TIMERA < 5500
+    wait 0
+    if or
+        Pad.IsKeyPressed(KeyCode.LeftShift)
+        Pad.IsKeyPressed(KeyCode.Space)
+        Pad.IsKeyPressed(KeyCode.Return)
+        Pad.IsKeyPressed(KeyCode.F)
+    then
+        jump @Bleed_Outro_Skip
+    end
+end
+
+Text.Print('STAU5', 5500, 1)
+TIMERA = 0
+while TIMERA < 5500
+    wait 0
+    if or
+        Pad.IsKeyPressed(KeyCode.LeftShift)
+        Pad.IsKeyPressed(KeyCode.Space)
+        Pad.IsKeyPressed(KeyCode.Return)
         Pad.IsKeyPressed(KeyCode.F)
     then
         jump @Bleed_Outro_Skip
@@ -854,10 +944,27 @@ while TIMERA < 4000
 end
 
 :Bleed_Outro_Skip
-Game.SetMaxWantedLevel(4)
 Text.ClearPrints()
-Camera.RestoreJumpcut()
-Hud.SwitchWidescreen(False)
+if not MainSphere == 0
+then
+    Sphere.Remove(MainSphere)
+    MainSphere = 0
+end
+if RoadblockAggro == 1
+then
+    Camera.SetFadingColor(40, 0, 70)
+    Camera.DoFade(300, Fade.Out)
+    wait 300
+    Streaming.LoadScene(130.00, -932.00, 25.00)
+    Camera.RestoreJumpcut()
+    Hud.SwitchWidescreen(False)
+    Camera.DoFade(400, Fade.In)
+    wait 400
+else
+    Camera.RestoreJumpcut()
+    Hud.SwitchWidescreen(False)
+end
+Game.SetMaxWantedLevel(4)
 Player.SetControl($player, True)
 stop_audio_stream_1channel
 
