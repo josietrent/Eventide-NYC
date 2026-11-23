@@ -7,6 +7,7 @@
     "jsr:@hono/hono@^4.8.3": "4.13.13",
     "jsr:@hono/valibot-validator@~0.6.1": "0.6.1",
     "jsr:@std/csv@*": "1.0.6",
+    "jsr:@std/dotenv@*": "0.225.8",
     "jsr:@std/fmt@^1.0.10": "1.0.10",
     "jsr:@std/fs@*": "1.0.24",
     "jsr:@std/fs@1": "1.0.24",
@@ -65,6 +66,9 @@
       "dependencies": [
         "jsr:@std/streams"
       ]
+    },
+    "@std/dotenv@0.225.8": {
+      "integrity": "27b8c1a9d00cbf938345a5924487c04d9b27bdd7e7bd1983f54bcf76d0a0174a"
     },
     "@std/fmt@1.0.10": {
       "integrity": "90dfba288802ac6de82fb31d0917eb9e4450b9925b954d5e51fc29ac07419db5"
