@@ -156,6 +156,7 @@ constexpr uint32_t PEDTYPE_COP = 6;
 constexpr uint8_t LIGHT_RED = 2;
 
 // object.dat shift model IDs relative to stock GTA III
+constexpr int16_t MI_FENCESMALLB = 1279;
 constexpr int16_t MI_VHEISTLOCDOOR = 1333;
 
 // Streetlight & traffic signal model IDs (generic.IDE / object.dat)
@@ -186,11 +187,10 @@ constexpr int16_t MI_PARKBENCH1 = 1398;
 // Pinned global variable slots in utils/globals.txt
 constexpr size_t SLOT_ON_MISSION = 5002;
 constexpr size_t SLOT_INTRO_PASSED = 5005;
-constexpr size_t SLOT_BLEED_DONE = 5118;
+constexpr size_t SLOT_BARRIER_COM = 5038;
 constexpr size_t SLOT_POLE_TOTAL = 5146;
 constexpr size_t SLOT_POLE_LAST_MODEL = 5147;
 constexpr size_t SLOT_POLE_ENABLED = 5148;
-constexpr size_t SLOT_COLD_OPEN_DONE = 5149;
 constexpr size_t SLOT_TRAFFIC_LAW_ACTIVE = 5153;
 constexpr size_t SLOT_TRAFFIC_LAW_EVENT = 5154;
 constexpr size_t SLOT_TRAFFIC_LAW_FINE = 5155;
@@ -303,7 +303,7 @@ ApplyCollisionFn g_origApplyCollision = nullptr;
 AutomobileProcessControlFn g_origAutomobileProcessControl = nullptr;
 
 // Stock ms_pBuildingPool index -> actual runtime ms_pBuildingPool index
-// (compensates for Streetlamp1/Streetlamp2/lampost_coast becoming
+// (compensates for Streetlamp1/Streetlamp2/lampost_coast/fencesmallb becoming
 // CDummyObjects)
 int16_t g_oldToNewBuilding[BUILDING_POOL_SIZE] = {};
 int32_t g_stockBuildingIdx = 0;
@@ -396,9 +396,9 @@ void RaisePoolLimitImm(uintptr_t addr, uint32_t expectedMin, uint32_t target,
 }
 
 void ApplyPoolLimits() {
-  // Adding Streetlamp1/Streetlamp2/lampost_coast to object.dat converts
-  // hundreds of map props into CDummyObject entries and overflows stock
-  // DummyPool (2802).
+  // Adding Streetlamp1/Streetlamp2/lampost_coast/fencesmallb to object.dat
+  // converts hundreds of map props into CDummyObject entries and overflows
+  // stock DummyPool (2802).
   RaisePoolLimitImm(ADDR_OBJECT_POOL_LIMIT_IMM, STOCK_OBJECT_POOL_LIMIT,
                     TARGET_OBJECT_POOL_LIMIT, "ObjectPool");
   RaisePoolLimitImm(ADDR_DUMMY_POOL_LIMIT_IMM, STOCK_DUMMY_POOL_LIMIT,
@@ -685,9 +685,9 @@ inline uint32_t TimeMs() {
 
 // ============================================================================
 // CCullZones / ms_pBuildingPool Index Remapping
-// Moving Streetlamp1/Streetlamp2/lampost_coast into object.dat turns them into
-// CDummyObjects instead of CBuildings, shifting subsequent ms_pBuildingPool
-// slots relative to Rockstar's pre-baked data/cullzone.dat.
+// Moving Streetlamp1/Streetlamp2/lampost_coast/fencesmallb into object.dat
+// turns them into CDummyObjects instead of CBuildings, shifting subsequent
+// ms_pBuildingPool slots relative to Rockstar's pre-baked data/cullzone.dat.
 // ============================================================================
 void ResetBuildingRemap(uintptr_t pool) {
   std::fill(std::begin(g_oldToNewBuilding), std::end(g_oldToNewBuilding),
@@ -754,7 +754,7 @@ void __cdecl Hook_LoadObjectInstance(const char *line) {
           static_cast<int16_t>(g_lastNewBuildingIdx);
     }
   } else if (modelId == MI_LAMPOST_COAST || modelId == MI_STREETLAMP2 ||
-             modelId == MI_STREETLAMP1) {
+             modelId == MI_STREETLAMP1 || modelId == MI_FENCESMALLB) {
     void *const *modelInfoPtrs =
         reinterpret_cast<void *const *>(ADDR_MODEL_INFO_PTRS);
     if (modelInfoPtrs[modelId] != nullptr &&
@@ -907,13 +907,13 @@ inline bool IsTargetPoleModel(int16_t modelIndex) {
 }
 
 inline bool IsOtherCityPropertyModel(int16_t modelIndex) {
-  return modelIndex == MI_FIRE_HYDRANT || modelIndex == MI_BOLLARDLIGHT ||
-         modelIndex == MI_PARKINGMETER || modelIndex == MI_BIN1 ||
-         modelIndex == MI_ROADWORKBARRIER1 || modelIndex == MI_BUSSIGN1 ||
-         modelIndex == MI_NOPARKINGSIGN1 || modelIndex == MI_PHONESIGN ||
-         modelIndex == MI_WASTEBIN || modelIndex == MI_STRTBARRIER01 ||
-         modelIndex == MI_TRAFFICCONE || modelIndex == MI_POSTBOX1 ||
-         modelIndex == MI_PARKBENCH1;
+  return modelIndex == MI_FIRE_HYDRANT || modelIndex == MI_FENCESMALLB ||
+         modelIndex == MI_BOLLARDLIGHT || modelIndex == MI_PARKINGMETER ||
+         modelIndex == MI_BIN1 || modelIndex == MI_ROADWORKBARRIER1 ||
+         modelIndex == MI_BUSSIGN1 || modelIndex == MI_NOPARKINGSIGN1 ||
+         modelIndex == MI_PHONESIGN || modelIndex == MI_WASTEBIN ||
+         modelIndex == MI_STRTBARRIER01 || modelIndex == MI_TRAFFICCONE ||
+         modelIndex == MI_POSTBOX1 || modelIndex == MI_PARKBENCH1;
 }
 
 inline bool IsTrackedCityPropertyModel(int16_t modelIndex) {
@@ -947,9 +947,9 @@ bool IsIntactCityProperty(const void *entity, int16_t *outModel,
 }
 
 inline bool IsPostStoryTrafficLawActive() {
-  // Testing gate: enabled as soon as 'BEACH' prints ($ColdOpenDone == 1).
-  // Restore to SLOT_BLEED_DONE != 0 && SLOT_INTRO_PASSED != 0 after testing.
-  return *ScriptGlobalPtr(SLOT_COLD_OPEN_DONE) != 0 &&
+  // Post-Staunton gate: active once Staunton is completed ($BarrierCOM == 0).
+  return *ScriptGlobalPtr(SLOT_BARRIER_COM) == 0 &&
+         *ScriptGlobalPtr(SLOT_INTRO_PASSED) != 0 &&
          *ScriptGlobalPtr(SLOT_ON_MISSION) == 0 &&
          *ScriptGlobalPtr(SLOT_TRAFFIC_LAW_ACTIVE) != 0;
 }
