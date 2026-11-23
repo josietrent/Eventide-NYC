@@ -15,4 +15,10 @@ Garage.SetRotatingDoor($SprayGarageCOM)
 Garage.Deactivate($SprayGarageCOM)
 $SprayGarageCOMCreated = 1
 $SprayCOMActive = 0
+// Portland Harwood 8-Ball Bomb Shop (mak_bomb01 @ 1282.63, -101.70, 15.45; open bay); activated once $SmuggleMissionDone == 1
+$BombGarageIND = Garage.Create(1278.5, -110.75, 13.5, 1285.25, -99.5, 17.5, GarageType.BombShop1)
+Garage.Deactivate($BombGarageIND)
+$BombGarageINDCreated = 1
+$BombINDActive = 0
+$BombBlipIND = 0
 wait 0
