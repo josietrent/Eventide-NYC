@@ -1,4 +1,4 @@
-// Staunton Island Condo hideout save pickup thread
+// Staunton Island Condo hideout save pickup & cross-island Savehouse blip visibility thread
 {$CLEO .cs}
 {$USE CLEO}
 {$INCLUDE ../utils/globals.txt}
@@ -31,9 +31,29 @@ while true
         continue
     end
 
+    // Portland Savehouse blip: visible only while Industrial collision is loaded (and Commercial is not)
+    if and
+        $Intro_Passed == 1
+        Streaming.IsCollisionInMemory(LevelName.Industrial)
+        not Streaming.IsCollisionInMemory(LevelName.Commercial)
+    then
+        if $SafeBlip == 0
+        then
+            $SafeBlip = Blip.AddSpriteForContactPoint(1454.08, -173.18, 55.77, RadarSprite.Savehouse)
+        end
+    else
+        if not $SafeBlip == 0
+        then
+            Blip.Remove($SafeBlip)
+            $SafeBlip = 0
+        end
+    end
+
+    // Staunton Savehouse blip: visible only while Staunton is unlocked and Commercial collision is loaded (and Industrial is not)
     if and
         $BarrierIND == 0
         Streaming.IsCollisionInMemory(LevelName.Commercial)
+        not Streaming.IsCollisionInMemory(LevelName.Industrial)
     then
         if $SafeBlipST == 0
         then
