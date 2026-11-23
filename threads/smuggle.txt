@@ -254,6 +254,14 @@ Player.AddScore($player, 15000)
 Stat.RegisterMissionPassed('MIS4NAM')
 Mission.Finish()
 $SmuggleMissionDone = 1
+if and
+    $BombGarageINDCreated == 1
+    $BombINDActive == 0
+then
+    Garage.Activate($BombGarageIND)
+    $BombINDActive = 1
+    Text.PrintHelpString("8-Ball's Bomb Shop in Harwood is now open! Check your radar for the Bomb icon.")
+end
 $onmission = 0
 
 // Cleanup
