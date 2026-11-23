@@ -9,7 +9,6 @@ Garage.SetRotatingDoor(5@)
 Garage.SetRotatingDoor(5@)
 5@ = Garage.Create(1785.8125, 1517.1875, 125.75, 1793.0, 1522.375, 129.4375, GarageType.BombShop3)
 5@ = Garage.Create(1428.75, -187.0, 49.6875, 1442.5, -179.875, 54.6875, GarageType.HideoutOne)
-Garage.SetRotatingDoor(5@)
 // Staunton Island Newport Pay 'n' Spray (door4_garage @ 376.02, -494.61, 27.06); activated once $BarrierIND == 0
 $SprayGarageCOM = Garage.Create(376.25, -496.5, 24.8, 385.6, -490.8, 29.0, GarageType.Respray)
 Garage.SetRotatingDoor($SprayGarageCOM)
