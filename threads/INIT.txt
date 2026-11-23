@@ -664,6 +664,8 @@ wait 2000
 $CarDealerBlip = Blip.AddSpriteForContactPoint(1233.78, -129.02, 15.05, RadarSprite.Tony)
 Text.Print('TOMMY', 5000, 1)
 wait 4000
+Text.PrintHelp('POLEH')
+wait 5000
 
 Stat.RegisterMissionPassed('MIS0NAM')
 Mission.Finish()
