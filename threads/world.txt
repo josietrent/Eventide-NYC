@@ -88,13 +88,28 @@ then
     end
 end
 
+// Ensure Portland Harwood 8-Ball Bomb Shop exists on older savegames too
+if $BombGarageINDCreated == 0
+then
+    $BombGarageIND = Garage.Create(1278.5, -110.75, 13.5, 1285.25, -99.5, 17.5, GarageType.BombShop1)
+    $BombGarageINDCreated = 1
+    if $SmuggleMissionDone == 1
+    then
+        Garage.Activate($BombGarageIND)
+        $BombINDActive = 1
+    else
+        Garage.Deactivate($BombGarageIND)
+        $BombINDActive = 0
+    end
+end
+
 // Ensure Aspatria stadium parking lot cars exist on older savegames too (< 2 upgrades saves from Z=15.13->15.125)
 if $LotCarsCreated < 2
 then
     {$INCLUDE ../utils/lot_cars.txt}
 end
 
-// Keep density multipliers, Staunton Pay 'n' Spray state, Act 2 contact markers, and Noodle Shop healing active
+// Keep density multipliers, Staunton Pay 'n' Spray state, Harwood Bomb Shop state, short-range Portland/Staunton blips, Act 2 contact markers, and Noodle Shop healing active
 while true
     wait 1000
     if Player.IsPlaying($player)
@@ -140,6 +155,108 @@ while true
             then
                 Garage.Deactivate($SprayGarageCOM)
                 $SprayCOMActive = 0
+            end
+        end
+
+        if $SmuggleMissionDone == 1
+        then
+            if $BombINDActive == 0
+            then
+                Garage.Activate($BombGarageIND)
+                $BombINDActive = 1
+            end
+        else
+            if $BombINDActive == 1
+            then
+                Garage.Deactivate($BombGarageIND)
+                $BombINDActive = 0
+            end
+        end
+
+        if and
+            $BombINDActive == 1
+            Streaming.IsCollisionInMemory(LevelName.Industrial)
+            not Streaming.IsCollisionInMemory(LevelName.Commercial)
+        then
+            if $BombBlipIND == 0
+            then
+                $BombBlipIND = Blip.AddSpriteForCoord(1282.0, -104.5, 14.5, RadarSprite.Bomb)
+            end
+        else
+            if not $BombBlipIND == 0
+            then
+                Blip.Remove($BombBlipIND)
+                $BombBlipIND = 0
+            end
+        end
+
+        // Portland street weapon pickup short-range blips (filtered by ShortRangeBlips.asi; excludes package rewards)
+        if and
+            Streaming.IsCollisionInMemory(LevelName.Industrial)
+            not Streaming.IsCollisionInMemory(LevelName.Commercial)
+        then
+            if $PistolBlipIND == 0
+            then
+                $PistolBlipIND = Blip.AddSpriteForCoord(1400.68, -857.80, 12.01, RadarSprite.Weapon)
+            end
+            if $ShotgunBlipIND == 0
+            then
+                $ShotgunBlipIND = Blip.AddSpriteForCoord(1093.14, -239.40, 9.16, RadarSprite.Weapon)
+            end
+            if $ShotgunSiloBlipIND == 0
+            then
+                $ShotgunSiloBlipIND = Blip.AddSpriteForCoord(1514.21, -856.59, 27.41, RadarSprite.Weapon)
+            end
+            if $UziBlipIND == 0
+            then
+                $UziBlipIND = Blip.AddSpriteForCoord(1143.10, -106.37, 7.47, RadarSprite.Weapon)
+            end
+            if $AK47RoofBlipIND == 0
+            then
+                $AK47RoofBlipIND = Blip.AddSpriteForCoord(1019.40, -26.80, 20.35, RadarSprite.Weapon)
+            end
+        else
+            if not $PistolBlipIND == 0
+            then
+                Blip.Remove($PistolBlipIND)
+                $PistolBlipIND = 0
+            end
+            if not $ShotgunBlipIND == 0
+            then
+                Blip.Remove($ShotgunBlipIND)
+                $ShotgunBlipIND = 0
+            end
+            if not $ShotgunSiloBlipIND == 0
+            then
+                Blip.Remove($ShotgunSiloBlipIND)
+                $ShotgunSiloBlipIND = 0
+            end
+            if not $UziBlipIND == 0
+            then
+                Blip.Remove($UziBlipIND)
+                $UziBlipIND = 0
+            end
+            if not $AK47RoofBlipIND == 0
+            then
+                Blip.Remove($AK47RoofBlipIND)
+                $AK47RoofBlipIND = 0
+            end
+        end
+
+        // Staunton street weapon pickup short-range blip (filtered by ShortRangeBlips.asi; excludes package rewards)
+        if and
+            Streaming.IsCollisionInMemory(LevelName.Commercial)
+            not Streaming.IsCollisionInMemory(LevelName.Industrial)
+        then
+            if $AK47BlipCOM == 0
+            then
+                $AK47BlipCOM = Blip.AddSpriteForCoord(85.13, -986.52, 26.17, RadarSprite.Weapon)
+            end
+        else
+            if not $AK47BlipCOM == 0
+            then
+                Blip.Remove($AK47BlipCOM)
+                $AK47BlipCOM = 0
             end
         end
 
