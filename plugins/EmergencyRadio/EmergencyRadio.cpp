@@ -137,7 +137,7 @@ constexpr int16_t FONT_HEADING = 2;
 // 18:39 into GAME.wav (in milliseconds)
 constexpr int32_t EMERGENCY_GAME_FM_POS_MS = (18 * 60 + 39) * 1000;
 
-// WLSU 88.5 - Liberty Campus transmitter coordinates (centered on UNIVERS)
+// WLSU 88.5 transmitter coordinates (centered on Liberty Campus / UNIVERS)
 constexpr float WLSU_TX_X = 180.0f;
 constexpr float WLSU_TX_Y = -240.0f;
 
@@ -259,7 +259,7 @@ std::string g_wlsuStaticPath;
 
 const wchar_t kPoliceScannerLabel[] = L"Police Scanner";
 const wchar_t kRadioOffLabel[] = L"Radio Off";
-const wchar_t kWlsuLabel[] = L"WLSU 88.5 - Liberty Campus";
+const wchar_t kWlsuLabel[] = L"WLSU 88.5";
 
 void WriteLog(const char *line) {
   if (g_logPath.empty() || !line) {
@@ -899,6 +899,11 @@ inline float GetEntityPosY(const void *entity) {
                                           OFF_ENTITY_POS + sizeof(float));
 }
 
+inline float GetEntityPosZ(const void *entity) {
+  return *reinterpret_cast<const float *>(reinterpret_cast<uintptr_t>(entity) +
+                                          OFF_ENTITY_POS + 2 * sizeof(float));
+}
+
 inline uint8_t GetEntityStatus(const void *entity) {
   return static_cast<uint8_t>(
       *reinterpret_cast<const uint8_t *>(reinterpret_cast<uintptr_t>(entity) +
@@ -1020,7 +1025,7 @@ uint8_t __fastcall Hook_GetCarTuning(void *self, uintptr_t) {
       g_currentStation = station;
       return station;
     }
-    return RADIO_OFF;
+    return WLSU_RADIO;
   }
   return orig;
 }
@@ -1048,7 +1053,7 @@ uint8_t __fastcall Hook_GetNextCarTuning(void *, uintptr_t) {
     station = AdvanceRadioStation(WLSU_RADIO, 1, mp3Avail, false);
   }
   g_currentStation = station;
-  return (station == WLSU_RADIO) ? RADIO_OFF : station;
+  return station;
 }
 
 void __fastcall Hook_DisplayRadioStationName(void *self, uintptr_t) {
@@ -1224,6 +1229,106 @@ bool IsWlsuPausedByGameState() {
   return (userPause != 0) || (menuActive != 0);
 }
 
+constexpr float kWlsuTunnelKnee = 0.85f;
+
+float ComputeWlsuTunnelDepth(float x, float y, float z) {
+  // Staunton Porter Tunnel centerline from north portal opening (P0) down the
+  // ramp and underground loop to the Shoreside/Portland T-junction corner (P10)
+  // right beside $BarrierTunnelObj at (532.38, 99.51, -20.12).
+  struct TunnelPt {
+    float x;
+    float y;
+    float zDeck;
+  };
+  static constexpr TunnelPt kPts[] = {
+      {289.15f, 13.18f, 8.18f},     // P0: tunl_2_cus1 north portal opening
+      {377.30f, -166.21f, -21.03f}, // P1: bottom of straight ramp
+      {404.47f, -201.84f, -21.03f}, // P2: tunl_2_bend #1 apex
+      {443.10f, -224.40f, -21.03f}, // P3: tunl_2_bend #1 east exit
+      {530.88f, -219.05f, -21.03f}, // P4: tunl_2_bend #3 west entry
+      {566.46f, -191.92f, -21.03f}, // P5: tunl_2_bend #3 apex
+      {589.02f, -153.29f, -21.03f}, // P6: tunl_2 south end
+      {585.58f, 16.10f, -21.03f},   // P7: tunl_2_cus3 north end
+      {576.78f, 59.98f, -21.03f},   // P8: tunl_2_bend #2 apex
+      {551.91f, 97.21f, -21.03f},   // P9: tunl_t2 south stem
+      {541.21f, 108.08f, -21.03f},  // P10: tunl_t2 T-junction center
+  };
+  constexpr int kNumPts = static_cast<int>(sizeof(kPts) / sizeof(kPts[0]));
+  constexpr float kHalfWidth = 22.0f;
+  constexpr float kRampEndS = 715.0f;
+  constexpr float kCutoffS = 738.0f;
+
+  float bestDistSq = kHalfWidth * kHalfWidth;
+  float bestS = 0.0f;
+  bool inCorridor = false;
+
+  if (z <= 10.5f) {
+    float cumS = 0.0f;
+    for (int i = 0; i < kNumPts - 1; ++i) {
+      const float x0 = kPts[i].x;
+      const float y0 = kPts[i].y;
+      const float z0 = kPts[i].zDeck;
+      const float sx = kPts[i + 1].x - x0;
+      const float sy = kPts[i + 1].y - y0;
+      const float lenSq = sx * sx + sy * sy;
+      const float segLen = std::sqrt(lenSq);
+
+      float t = ((x - x0) * sx + (y - y0) * sy) / lenSq;
+      if (t < 0.0f) {
+        t = 0.0f;
+      } else if (t > 1.0f) {
+        t = 1.0f;
+      }
+
+      const float px = x0 + t * sx;
+      const float py = y0 + t * sy;
+      const float pzDeck = z0 + t * (kPts[i + 1].zDeck - z0);
+      const float dx = x - px;
+      const float dy = y - py;
+      const float dSq = dx * dx + dy * dy;
+
+      // Require elevation inside the tunnel tube so neither surface roads above
+      // nor the Shoreside Z=-21 crossover tunnel underneath match P0..P1.
+      if (dSq <= bestDistSq && z >= pzDeck - 2.5f && z <= pzDeck + 4.5f) {
+        bestDistSq = dSq;
+        bestS = cumS + t * segLen;
+        inCorridor = true;
+      }
+
+      cumS += segLen;
+    }
+  }
+
+  if (inCorridor) {
+    if (bestS <= 0.0f) {
+      return 0.0f;
+    }
+    if (bestS < kRampEndS) {
+      return kWlsuTunnelKnee * (bestS / kRampEndS);
+    }
+    if (bestS < kCutoffS) {
+      return kWlsuTunnelKnee +
+             (1.0f - kWlsuTunnelKnee) *
+                 ((bestS - kRampEndS) / (kCutoffS - kRampEndS));
+    }
+    return 1.0f;
+  }
+
+  // Fallback for other deep underground spaces (Subway tubes,
+  // Shoreside/Portland Porter Tunnel branches past the T-junction at Z = -21).
+  if (z < -2.5f) {
+    float d = (-2.5f - z) / 8.0f;
+    if (d < 0.0f) {
+      d = 0.0f;
+    } else if (d > 1.0f) {
+      d = 1.0f;
+    }
+    return d;
+  }
+
+  return 0.0f;
+}
+
 void ComputeWlsuSignalMix(float *outProgGain, float *outStaticGain) {
   auto findPlayerVeh =
       reinterpret_cast<FindPlayerVehicleFn>(ADDR_FIND_PLAYER_VEHICLE);
@@ -1239,32 +1344,61 @@ void ComputeWlsuSignalMix(float *outProgGain, float *outStaticGain) {
     return;
   }
 
-  const float dx = GetEntityPosX(entity) - WLSU_TX_X;
-  const float dy = GetEntityPosY(entity) - WLSU_TX_Y;
+  const float px = GetEntityPosX(entity);
+  const float py = GetEntityPosY(entity);
+  const float pz = GetEntityPosZ(entity);
+  const float dx = px - WLSU_TX_X;
+  const float dy = py - WLSU_TX_Y;
   const float dist = std::sqrt(dx * dx + dy * dy);
 
-  if (dist <= 350.0f) {
+  // 50W LPFM coverage profile centered on Liberty Campus (UNIVERS):
+  // crystal clear around Campus, gentle fringe hiss by Rockford/Newport,
+  // gritty/struggling signal (still audible) down at Love Media/Bedford Point.
+  if (dist <= 150.0f) {
     *outProgGain = 1.0f;
     *outStaticGain = 0.0f;
-  } else if (dist <= 400.0f) {
-    const float t = (dist - 350.0f) / 50.0f;
-    *outProgGain = 1.0f - 0.025f * t;
-    *outStaticGain = 0.10f * t;
-  } else if (dist <= 850.0f) {
-    const float t = (dist - 400.0f) / 450.0f;
-    *outProgGain = 0.975f - 0.225f * t;
-    *outStaticGain = 0.10f + 0.25f * t;
-  } else if (dist <= 1100.0f) {
-    const float t = (dist - 850.0f) / 250.0f;
-    *outProgGain = 0.75f - 0.60f * t;
-    *outStaticGain = 0.35f + 0.65f * t;
+  } else if (dist <= 350.0f) {
+    const float t = (dist - 150.0f) / 200.0f;
+    *outProgGain = 1.0f - 0.12f * t;
+    *outStaticGain = 0.30f * t;
+  } else if (dist <= 700.0f) {
+    const float t = (dist - 350.0f) / 350.0f;
+    *outProgGain = 0.88f - 0.22f * t;
+    *outStaticGain = 0.30f + 0.28f * t;
+  } else if (dist <= 1150.0f) {
+    const float t = (dist - 700.0f) / 450.0f;
+    *outProgGain = 0.66f - 0.38f * t;
+    *outStaticGain = 0.58f + 0.32f * t;
   } else {
-    float t = (dist - 1100.0f) / 150.0f;
+    float t = (dist - 1150.0f) / 200.0f;
     if (t > 1.0f) {
       t = 1.0f;
     }
-    *outProgGain = 0.15f * (1.0f - t);
-    *outStaticGain = 1.0f;
+    *outProgGain = 0.28f * (1.0f - t);
+    *outStaticGain = 0.90f + 0.10f * t;
+  }
+
+  // Porter Tunnel / underground fade: gradually ramps static and breaks up the
+  // broadcast from the Staunton portal mouth down the ramp and underground
+  // loop, then cuts to dead air at the Shoreside/Portland T-junction corner.
+  const float depth = ComputeWlsuTunnelDepth(px, py, pz);
+  if (depth > 0.0f) {
+    if (depth < kWlsuTunnelKnee) {
+      const float u = depth / kWlsuTunnelKnee;
+      *outProgGain *= (1.0f - u) * (1.0f - 0.25f * u);
+      *outStaticGain += 0.85f * (1.0f - (1.0f - u) * (1.0f - u));
+      if (*outStaticGain > 1.0f) {
+        *outStaticGain = 1.0f;
+      }
+    } else {
+      const float u = (depth - kWlsuTunnelKnee) / (1.0f - kWlsuTunnelKnee);
+      float staticAtKnee = *outStaticGain + 0.85f;
+      if (staticAtKnee > 1.0f) {
+        staticAtKnee = 1.0f;
+      }
+      *outProgGain = 0.0f;
+      *outStaticGain = staticAtKnee * (1.0f - u);
+    }
   }
 }
 
@@ -1690,6 +1824,18 @@ void __fastcall Hook_ServiceGameMode(void *self, uintptr_t) {
       presses = (presses + g_wrappedRetuneBonus) % stationCount;
     }
     g_wrappedRetuneBonus = 0;
+  }
+
+  static bool s_wasWlsu = false;
+  const bool isWlsuNow = (g_currentStation == WLSU_RADIO);
+  if (isWlsuNow != s_wasWlsu) {
+    s_wasWlsu = isWlsuNow;
+    char msg[96] = {};
+    std::snprintf(msg, sizeof(msg),
+                  isWlsuNow ? "Station state -> WLSU_RADIO (13)"
+                            : "Station state -> %u (left WLSU)",
+                  static_cast<unsigned>(g_currentStation));
+    WriteLog(msg);
   }
 }
 
