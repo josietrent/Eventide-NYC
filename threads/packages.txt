@@ -181,7 +181,7 @@ while true
     // TRACKER TOGGLE KEY HANDLER (O / P)
     // ==========================================
     if
-        not $Packages == PACKAGE_COUNT
+        $Packages < PACKAGE_COUNT
     then
         if
             Pad.IsKeyPressed(KeyCode.O)
@@ -287,7 +287,7 @@ while true
         else
             if and
                 $BarrierCOM == 1
-                $PackIndex >= 55
+                $PackIndex >= 58
             then
                 Text.PrintHelp('PACK_SH')
             else
@@ -306,7 +306,7 @@ while true
                     end
                     if and
                         $BarrierCOM == 1
-                        $PackIndex >= 55
+                        $PackIndex >= 58
                     then
                         0@ = 0
                     end
@@ -348,7 +348,7 @@ while true
                 end
             else
                 if and
-                    $PackIndex >= 55
+                    $PackIndex >= 58
                     $BarrierCOM == 1
                 then
                     if not 2@ == 2
@@ -740,83 +740,101 @@ then
 end
 if $PackIndex == 55
 then
+    $PackCoordX = 125.53
+    $PackCoordY = -42.74
+    $PackCoordZ = 17.30
+end
+if $PackIndex == 56
+then
+    $PackCoordX = -251.33
+    $PackCoordY = -23.71
+    $PackCoordZ = 1.28
+end
+if $PackIndex == 57
+then
+    $PackCoordX = 132.13
+    $PackCoordY = 271.57
+    $PackCoordZ = 4.92
+end
+if $PackIndex == 58
+then
     $PackCoordX = -150.99
     $PackCoordY = 784.43
     $PackCoordZ = 146.03
 end
-if $PackIndex == 56
+if $PackIndex == 59
 then
     $PackCoordX = -193.01
     $PackCoordY = 364.40
     $PackCoordZ = 84.95
 end
-if $PackIndex == 57
+if $PackIndex == 60
 then
     $PackCoordX = -562.38
     $PackCoordY = 310.61
     $PackCoordZ = 70.80
 end
-if $PackIndex == 58
+if $PackIndex == 61
 then
     $PackCoordX = -1040.00
     $PackCoordY = 542.43
     $PackCoordZ = 64.79
 end
-if $PackIndex == 59
+if $PackIndex == 62
 then
     $PackCoordX = -1385.74
     $PackCoordY = 568.86
     $PackCoordZ = 77.64
 end
-if $PackIndex == 60
+if $PackIndex == 63
 then
     $PackCoordX = -1365.51
     $PackCoordY = -22.18
     $PackCoordZ = 51.71
 end
-if $PackIndex == 61
+if $PackIndex == 64
 then
     $PackCoordX = -1433.74
     $PackCoordY = -437.54
     $PackCoordZ = 22.08
 end
-if $PackIndex == 62
+if $PackIndex == 65
 then
     $PackCoordX = -1616.32
     $PackCoordY = -780.96
     $PackCoordZ = 12.66
 end
-if $PackIndex == 63
+if $PackIndex == 66
 then
     $PackCoordX = -1557.19
     $PackCoordY = -866.96
     $PackCoordZ = 18.66
 end
-if $PackIndex == 64
+if $PackIndex == 67
 then
     $PackCoordX = -1491.04
     $PackCoordY = -1057.51
     $PackCoordZ = 3.48
 end
-if $PackIndex == 65
+if $PackIndex == 68
 then
     $PackCoordX = -886.09
     $PackCoordY = -1331.87
     $PackCoordZ = 1.32
 end
-if $PackIndex == 66
+if $PackIndex == 69
 then
     $PackCoordX = -1060.24
     $PackCoordY = -1162.36
     $PackCoordZ = 3.45
 end
-if $PackIndex == 67
+if $PackIndex == 70
 then
     $PackCoordX = -846.15
     $PackCoordY = -649.64
     $PackCoordZ = 14.34
 end
-if $PackIndex == 68
+if $PackIndex == 71
 then
     $PackCoordX = -1209.33
     $PackCoordY = -184.39
