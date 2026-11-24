@@ -1,22 +1,33 @@
 #define WIN32_LEAN_AND_MEAN
 #include <cstdint>
+#include <cstring>
 #include <windows.h>
 
 namespace {
 
 // GTA III v1.0 addresses (verified against gta3.exe)
-constexpr uintptr_t ADDR_HOOK_PLAYER_CONTROL_WALK = 0x004F051D;
-constexpr uintptr_t ADDR_HOOK_SET_ATTACK_ANIM = 0x004E6410;
-constexpr uintptr_t ADDR_WALK_SKIP_ATTACK = 0x004F06B0;
-constexpr uintptr_t ADDR_WALK_CONTINUE = 0x004F052A;
+constexpr uintptr_t ADDR_FIND_PLAYER_PED = 0x004A1150;
+constexpr uintptr_t ADDR_HOOK_SET_ATTACK_BAT =
+    0x004E674E; // 6 bytes: mov ebx, eax; or dword ptr [ebx+30h], 1
+constexpr uintptr_t ADDR_HOOK_ATTACK_TURN_RATE =
+    0x004C74A8; // 9 bytes: cmp dword ptr [ebx+224h], 10h; jne 0x004C74BF
+constexpr uintptr_t ADDR_TURN_PENALTY_APPLY = 0x004C74B1;
+constexpr uintptr_t ADDR_TURN_PENALTY_SKIP = 0x004C74BF;
 
 constexpr uint32_t WEAPONTYPE_BASEBALLBAT = 1;
+constexpr int32_t ANIM_WEAPON_BAT_H = 0x2F;
+constexpr int32_t ANIM_WEAPON_BAT_V = 0x30;
 
-bool g_patched = false;
+constexpr uint32_t ASSOC_PARTIAL = 0x10;
+constexpr uint32_t ASSOC_MOVEMENT = 0x20;
+constexpr uint32_t ASSOC_TRANSLATE = 0x40;
 
-// Checks whether ped is player holding a baseball bat
+void *GetPlayerPed() {
+  return reinterpret_cast<void *(__cdecl *)()>(ADDR_FIND_PLAYER_PED)();
+}
+
 bool __stdcall IsPlayerWithBat(void *pPed) {
-  if (!pPed)
+  if (!pPed || pPed != GetPlayerPed())
     return false;
   auto *pBytes = reinterpret_cast<uint8_t *>(pPed);
   // In CPed, offset 0x498 is m_currentWeapon (int8)
@@ -29,89 +40,133 @@ bool __stdcall IsPlayerWithBat(void *pPed) {
   return wepType == WEAPONTYPE_BASEBALLBAT;
 }
 
-// Hook at 0x004F051D (7 bytes: cmp dword ptr [esi+224h], 10h; jz 0x4F06B0)
-__declspec(naked) void Hook_PlayerControlWalk_AttackCheck() {
-  __asm {
-    cmp dword ptr [esi + 0x224], 0x10
-    jnz continue_walk
+bool IsLowerBodyBone(const char *boneName) {
+  static constexpr const char *kLowerBodyBones[] = {
+      "Swaist",     "Supperlegr", "Slowerlegr", "Sfootr",
+      "Supperlegl", "Slowerlegl", "Sfootl",
+  };
+  for (const char *bone : kLowerBodyBones) {
+    if (std::strcmp(boneName, bone) == 0)
+      return true;
+  }
+  return false;
+}
 
-    pushfd
+void __stdcall OnBatAttackAnimCreated(void *pPed, void *pAssoc) {
+  if (!pAssoc || !IsPlayerWithBat(pPed))
+    return;
+
+  auto *assoc = reinterpret_cast<uint8_t *>(pAssoc);
+  const int32_t animId = *reinterpret_cast<int32_t *>(assoc + 0x2C);
+  if (animId != ANIM_WEAPON_BAT_H && animId != ANIM_WEAPON_BAT_V)
+    return;
+
+  // Keep bat swing as an upper-body partial anim with no root translation lock
+  uint32_t &flags = *reinterpret_cast<uint32_t *>(assoc + 0x30);
+  flags = (flags | ASSOC_PARTIAL) & ~(ASSOC_MOVEMENT | ASSOC_TRANSLATE);
+
+  // WEAPON_bat_h / WEAPON_bat_v include full-body keyframes in ped.ifp; clear
+  // lower-body bone sequences on this association so walk/run/sprint drives
+  // legs.
+  const int32_t numNodes = *reinterpret_cast<int32_t *>(assoc + 0x0C);
+  auto *nodeArray = *reinterpret_cast<uint8_t **>(assoc + 0x10);
+  if (!nodeArray || numNodes <= 0)
+    return;
+
+  for (int32_t i = 0; i < numNodes; ++i) {
+    uint8_t *node = nodeArray + i * 0x1C;
+    auto *seq = *reinterpret_cast<uint8_t **>(node + 0x14);
+    if (!seq)
+      continue;
+    const char *boneName = reinterpret_cast<const char *>(seq + 0x08);
+    if (IsLowerBodyBone(boneName)) {
+      *reinterpret_cast<uintptr_t *>(node + 0x14) = 0;
+    }
+  }
+}
+
+// Hook at 0x004E674E (6 bytes: mov ebx, eax; or dword ptr [ebx+30h], 1)
+// eax = CAnimBlendAssociation*, ebp = CPed*
+__declspec(naked) void Hook_SetAttackBatAnim() {
+  __asm {
+    mov ebx, eax
+    or dword ptr [ebx + 0x30], 1
+
     push eax
     push ecx
     push edx
-    push esi
-    call IsPlayerWithBat
-    test al, al
+    push ebx
+    push ebp
+    call OnBatAttackAnimCreated
     pop edx
     pop ecx
     pop eax
-    popfd
-    jnz continue_walk // Allow movement if holding baseball bat
-
-    push ADDR_WALK_SKIP_ATTACK
-    ret
-
-  continue_walk:
-    push ADDR_WALK_CONTINUE
     ret
   }
 }
 
-// Hook at 0x004E6410 (4 bytes: or dword ptr [esi+30h], 1)
-// esi holds pAnimBlendAssoc, ebp holds CPed*
-__declspec(naked) void Hook_SetAttackAnimFlags() {
+// Hook at 0x004C74A8 (9 bytes: cmp dword ptr [ebx+224h], 10h; jne 0x004C74BF)
+// ebx = CPed*, FPU stack must remain untouched
+__declspec(naked) void Hook_AttackTurnRate() {
   __asm {
-    or dword ptr [esi + 0x30], 1 // original ASSOC_RUNNING (0x01)
-    pushfd
+    cmp dword ptr [ebx + 0x224], 0x10
+    jne skip_penalty
+
     push eax
     push ecx
     push edx
-    push ebp // CPed*
+    push ebx
     call IsPlayerWithBat
     test al, al
     pop edx
     pop ecx
     pop eax
-    popfd
-    jz done
-    or dword ptr [esi + 0x30], 0x10 // ASSOC_PARTIAL: blend as partial on upper body
-  done:
+    jnz skip_penalty
+
+    push ADDR_TURN_PENALTY_APPLY
     ret
+
+  skip_penalty:
+    push ADDR_TURN_PENALTY_SKIP
+    ret
+  }
+}
+
+void WriteCallNop(uintptr_t addr, void *target, size_t totalBytes) {
+  DWORD oldProtect = 0;
+  auto *dst = reinterpret_cast<uint8_t *>(addr);
+  if (VirtualProtect(dst, totalBytes, PAGE_EXECUTE_READWRITE, &oldProtect)) {
+    const int32_t rel =
+        static_cast<int32_t>(reinterpret_cast<uintptr_t>(target) - (addr + 5));
+    dst[0] = 0xE8;
+    *reinterpret_cast<int32_t *>(dst + 1) = rel;
+    for (size_t i = 5; i < totalBytes; ++i)
+      dst[i] = 0x90;
+    VirtualProtect(dst, totalBytes, oldProtect, &oldProtect);
+    FlushInstructionCache(GetCurrentProcess(), dst, totalBytes);
+  }
+}
+
+void WriteJumpNop(uintptr_t addr, void *target, size_t totalBytes) {
+  DWORD oldProtect = 0;
+  auto *dst = reinterpret_cast<uint8_t *>(addr);
+  if (VirtualProtect(dst, totalBytes, PAGE_EXECUTE_READWRITE, &oldProtect)) {
+    const int32_t rel =
+        static_cast<int32_t>(reinterpret_cast<uintptr_t>(target) - (addr + 5));
+    dst[0] = 0xE9;
+    *reinterpret_cast<int32_t *>(dst + 1) = rel;
+    for (size_t i = 5; i < totalBytes; ++i)
+      dst[i] = 0x90;
+    VirtualProtect(dst, totalBytes, oldProtect, &oldProtect);
+    FlushInstructionCache(GetCurrentProcess(), dst, totalBytes);
   }
 }
 
 void InstallHooks() {
-  DWORD oldProtect = 0;
-
-  // 1. Hook CPlayerPed::PlayerControlWalk attack lockout (0x004F051D, 13 bytes
-  // original: 83 BE 24 02 00 00 10 0F 84 86 01 00 00)
-  auto *targetWalk = reinterpret_cast<uint8_t *>(ADDR_HOOK_PLAYER_CONTROL_WALK);
-  if (VirtualProtect(targetWalk, 13, PAGE_EXECUTE_READWRITE, &oldProtect)) {
-    const int32_t rel = static_cast<int32_t>(
-        reinterpret_cast<uintptr_t>(&Hook_PlayerControlWalk_AttackCheck) -
-        (ADDR_HOOK_PLAYER_CONTROL_WALK + 5));
-    targetWalk[0] = 0xE9;
-    *reinterpret_cast<int32_t *>(targetWalk + 1) = rel;
-    for (int i = 5; i < 13; ++i)
-      targetWalk[i] = 0x90; // nop remainder
-    VirtualProtect(targetWalk, 13, oldProtect, &oldProtect);
-    FlushInstructionCache(GetCurrentProcess(), targetWalk, 13);
-  }
-
-  // 2. Hook CPed::SetAttack anim flags (0x004E6410, call our helper via 5-byte
-  // call)
-  auto *targetAnim = reinterpret_cast<uint8_t *>(ADDR_HOOK_SET_ATTACK_ANIM);
-  if (VirtualProtect(targetAnim, 5, PAGE_EXECUTE_READWRITE, &oldProtect)) {
-    const int32_t rel = static_cast<int32_t>(
-        reinterpret_cast<uintptr_t>(&Hook_SetAttackAnimFlags) -
-        (ADDR_HOOK_SET_ATTACK_ANIM + 5));
-    targetAnim[0] = 0xE8;
-    *reinterpret_cast<int32_t *>(targetAnim + 1) = rel;
-    VirtualProtect(targetAnim, 5, oldProtect, &oldProtect);
-    FlushInstructionCache(GetCurrentProcess(), targetAnim, 5);
-  }
-
-  g_patched = true;
+  WriteCallNop(ADDR_HOOK_SET_ATTACK_BAT,
+               reinterpret_cast<void *>(&Hook_SetAttackBatAnim), 6);
+  WriteJumpNop(ADDR_HOOK_ATTACK_TURN_RATE,
+               reinterpret_cast<void *>(&Hook_AttackTurnRate), 9);
 }
 
 } // namespace
