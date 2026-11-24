@@ -1,6 +1,15 @@
 {$CLEO .cs}
 {$USE CLEO}
 {$INCLUDE ../utils/globals.txt}
+
+// CLEO-only world spawn globals (kept in unused 4900..4999 band so main.scm varSpace stays frozen at 5166)
+Alloc($StallionNewportGen, 4900)
+Alloc($StallionNewportCreated, 4901)
+Alloc($YakuzaNewportGen, 4902)
+Alloc($YakuzaNewportCreated, 4903)
+Alloc($InfernusNewportGen, 4904)
+Alloc($InfernusNewportCreated, 4905)
+
 nop
 
 script_name 'WORLD'

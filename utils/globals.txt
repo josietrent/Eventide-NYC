@@ -1,5 +1,7 @@
 // Pinned global variable slots shared between main.scm and standalone CLEO scripts/missions.
 // Keep indices >= 5000 (above GTA III's CustomVariables.ini range and well below $3FFF).
+// NOTE: Do NOT add new slots above 5166 here — expanding main.scm's varSpace breaks existing savegames.
+// Allocate new CLEO-only globals in the unused 4900..4999 band inside threads/*.txt instead.
 
 Alloc($player, 5000)
 Alloc($scplayer, 5001)
@@ -180,9 +182,3 @@ Alloc($ShotgunSiloBlipIND, 5163)
 Alloc($UziBlipIND, 5164)
 Alloc($AK47RoofBlipIND, 5165)
 Alloc($AK47BlipCOM, 5166)
-Alloc($StallionNewportGen, 5167)
-Alloc($StallionNewportCreated, 5168)
-Alloc($YakuzaNewportGen, 5169)
-Alloc($YakuzaNewportCreated, 5170)
-Alloc($InfernusNewportGen, 5171)
-Alloc($InfernusNewportCreated, 5172)
