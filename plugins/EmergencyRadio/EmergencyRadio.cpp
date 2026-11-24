@@ -1,4 +1,5 @@
 #define WIN32_LEAN_AND_MEAN
+#include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <cstdio>
@@ -13,25 +14,48 @@ namespace {
 constexpr uintptr_t ADDR_MUSIC_MANAGER = 0x8F3964;
 constexpr uintptr_t ADDR_AUDIO_MANAGER = 0x880FC0;
 constexpr uintptr_t ADDR_SAMPLE_MANAGER = 0x7341E0;
+constexpr uintptr_t ADDR_SAMPLE_MUSIC_VOL =
+    ADDR_SAMPLE_MANAGER + 0x01;                                    // 0..127
+constexpr uintptr_t ADDR_SAMPLE_INIT = ADDR_SAMPLE_MANAGER + 0x56; // uint8_t
+constexpr uintptr_t ADDR_DIG_DRIVER = 0x8F1A24;                    // HDIGDRIVER
 constexpr uintptr_t ADDR_THE_TEXT = 0x941520;
 constexpr uintptr_t ADDR_THE_CAMERA = 0x6FACF8;
-constexpr uintptr_t ADDR_USER_PAUSE = 0x95CD7C;
-constexpr uintptr_t ADDR_CODE_PAUSE = 0x95CDB1;
+constexpr uintptr_t ADDR_GAME_STATE = 0x8F5838;         // int32_t (9 = game)
+constexpr uintptr_t ADDR_MENU_ACTIVE = 0x8F5AE9;        // uint8_t
+constexpr uintptr_t ADDR_ACTIVATE_SAVE_MENU = 0x8F5E2B; // uint8_t
+constexpr uintptr_t ADDR_MENU_SCREEN = 0x8F5F20;        // int32_t
+constexpr uintptr_t ADDR_USER_PAUSE = 0x95CD7C;         // uint8_t
+constexpr uintptr_t ADDR_CODE_PAUSE = 0x95CDB1;         // uint8_t
 constexpr uintptr_t ADDR_REPLAY_MODE = 0x95CD5B;
 constexpr uintptr_t ADDR_RS_MAX_WIDTH = 0x8F436C;
 constexpr uintptr_t ADDR_RS_MAX_HEIGHT = 0x8F4370;
+constexpr uintptr_t ADDR_COLLISION_IN_MEMORY = 0x941514; // 1=IND, 2=COM, 3=SUB
 
 constexpr uintptr_t ADDR_NUM_RETUNE_PRESSES = 0x650B80;
 constexpr uintptr_t ADDR_RETUNE_COUNTER = 0x650B84;
 constexpr uintptr_t ADDR_CURRENT_STATION_PTR = 0x650B9C;
 constexpr uintptr_t ADDR_DISPLAY_TIMER = 0x650BA1;
 
+// Miles Sound System (Mss32.dll) IAT pointers in GTA III v1.0
+constexpr uintptr_t IAT_AIL_OPEN_STREAM = 0x61D5C8;
+constexpr uintptr_t IAT_AIL_STREAM_MS_POSITION = 0x61D5CC;
+constexpr uintptr_t IAT_AIL_CLOSE_STREAM = 0x61D5D0;
+constexpr uintptr_t IAT_AIL_PAUSE_STREAM = 0x61D5FC;
+constexpr uintptr_t IAT_AIL_SET_STREAM_LOOP_COUNT = 0x61D65C;
+constexpr uintptr_t IAT_AIL_SERVICE_STREAM = 0x61D660;
+constexpr uintptr_t IAT_AIL_START_STREAM = 0x61D664;
+constexpr uintptr_t IAT_AIL_SET_STREAM_MS_POSITION = 0x61D668;
+constexpr uintptr_t IAT_AIL_SET_STREAM_VOLUME = 0x61D66C;
+constexpr uintptr_t IAT_AIL_STREAM_STATUS = 0x61D674;
+
 // Functions
 constexpr uintptr_t ADDR_FIND_PLAYER_VEHICLE = 0x4A10C0;
 constexpr uintptr_t ADDR_FIND_PLAYER_PED = 0x4A1150;
 constexpr uintptr_t ADDR_TEXT_GET = 0x52C5A0;
 constexpr uintptr_t ADDR_SAMPLE_IS_MP3_AVAILABLE = 0x566490;
+constexpr uintptr_t ADDR_SAMPLE_TERMINATE = 0x566DC0;
 constexpr uintptr_t ADDR_SAMPLE_SET_STREAMED_VOL = 0x5681D0;
+constexpr uintptr_t ADDR_AUDIO_SERVICE = 0x57AA60;
 
 constexpr uintptr_t ADDR_FONT_PRINT_STRING = 0x500F50;
 constexpr uintptr_t ADDR_FONT_DRAW_FONTS = 0x501B50;
@@ -69,10 +93,10 @@ constexpr size_t OFF_MUSIC_PREV_PLAYER_IN_CAR = 0x09;
 constexpr size_t OFF_MUSIC_PLAYER_IN_CAR = 0x0A;
 constexpr size_t OFF_MUSIC_RADIO_SET_BY_SCRIPT = 0x94F;
 
-constexpr size_t OFF_AUDIO_WAS_PAUSED = 0x4B0E;
 constexpr size_t OFF_CAM_WIDESCREEN = 0x70;
 constexpr size_t OFF_PAD_DISABLE_CONTROLS = 0xDF;
 
+constexpr size_t OFF_ENTITY_POS = 0x34; // float[3] m_matrix.pos
 constexpr size_t OFF_ENTITY_STATUS_BYTE = 0x50;
 constexpr size_t OFF_ENTITY_MODEL_INDEX = 0x5C;
 constexpr size_t OFF_PED_STATE = 0x224;
@@ -93,6 +117,12 @@ constexpr uint8_t POLICE_RADIO = 10;
 constexpr uint8_t RADIO_OFF = 11;
 constexpr uint8_t STREAMED_SOUND_CITY_AMBIENT = 11;
 constexpr uint8_t STREAMED_SOUND_WATER_AMBIENT = 12;
+constexpr uint8_t WLSU_RADIO = 13;
+
+constexpr int32_t GS_PLAYING_GAME = 9;
+constexpr int32_t MENUPAGE_SOUND_SETTINGS = 5;
+constexpr int32_t LEVEL_COMMERCIAL = 2;
+constexpr int32_t SMP_DONE = 2;
 
 constexpr int16_t MI_AMBULAN = 106;
 constexpr int16_t MI_POLICE = 116;
@@ -107,6 +137,10 @@ constexpr int16_t FONT_HEADING = 2;
 // 18:39 into GAME.wav (in milliseconds)
 constexpr int32_t EMERGENCY_GAME_FM_POS_MS = (18 * 60 + 39) * 1000;
 
+// WLSU 88.5 - Liberty Campus transmitter coordinates (centered on UNIVERS)
+constexpr float WLSU_TX_X = 180.0f;
+constexpr float WLSU_TX_Y = -240.0f;
+
 struct CRGBA {
   uint8_t r;
   uint8_t g;
@@ -120,11 +154,31 @@ using MusicUint8Fn = uint8_t(__thiscall *)(void *self);
 using MusicUsesPoliceRadioFn = bool(__thiscall *)(void *self, void *veh);
 using MusicSetRadioByScriptFn = void(__thiscall *)(void *self, uint8_t station,
                                                    int32_t pos);
+using AudioServiceFn = void(__thiscall *)(void *self);
+using SampleTerminateFn = void(__thiscall *)(void *self);
 using SampleIsMP3AvailFn = bool(__thiscall *)(void *self);
 using SampleSetStreamedVolFn = void(__thiscall *)(void *self, uint8_t vol,
                                                   uint8_t pan,
                                                   uint8_t isAmbience,
                                                   int32_t channel);
+
+using AilOpenStreamFn = uint32_t(__stdcall *)(uint32_t digDriver,
+                                              const char *filename,
+                                              int32_t streamMem);
+using AilCloseStreamFn = void(__stdcall *)(uint32_t stream);
+using AilPauseStreamFn = void(__stdcall *)(uint32_t stream, int32_t onoff);
+using AilServiceStreamFn = void(__stdcall *)(uint32_t stream, int32_t fillup);
+using AilStartStreamFn = void(__stdcall *)(uint32_t stream);
+using AilStreamStatusFn = int32_t(__stdcall *)(uint32_t stream);
+using AilSetStreamLoopCountFn = void(__stdcall *)(uint32_t stream,
+                                                  int32_t count);
+using AilStreamMsPositionFn = void(__stdcall *)(uint32_t stream,
+                                                int32_t *totalMs,
+                                                int32_t *currentMs);
+using AilSetStreamMsPositionFn = void(__stdcall *)(uint32_t stream,
+                                                   int32_t posMs);
+using AilSetStreamVolumeFn = void(__stdcall *)(uint32_t stream, int32_t volume);
+using AilLastErrorFn = const char *(__stdcall *)();
 
 using FindPlayerVehicleFn = void *(__cdecl *)();
 using FindPlayerPedFn = void *(__cdecl *)();
@@ -151,18 +205,29 @@ struct HookEntry {
   bool active = false;
 };
 
+std::string g_asiDir;
+std::string g_exeDir;
 std::string g_logPath;
 std::vector<HookEntry> g_hooks;
 bool g_deferredInstalled = false;
+
+CRITICAL_SECTION g_wlsuLock;
+bool g_wlsuLockInit = false;
+volatile bool g_shuttingDown = false;
+bool g_windowInactive = false;
+bool g_focusLost = false;
 
 MusicBoolFn g_origInitialise = nullptr;
 MusicVoidFn g_origResetMusicAfterReload = nullptr;
 MusicVoidFn g_origServiceGameMode = nullptr;
 MusicVoidFn g_origServiceAmbience = nullptr;
 MusicBoolFn g_origPlayerInCar = nullptr;
+MusicUint8Fn g_origGetCarTuning = nullptr;
 MusicUint8Fn g_origGetNextCarTuning = nullptr;
 MusicUsesPoliceRadioFn g_origUsesPoliceRadio = nullptr;
 MusicVoidFn g_origDisplayRadioStationName = nullptr;
+AudioServiceFn g_origAudioService = nullptr;
+SampleTerminateFn g_origSampleTerminate = nullptr;
 
 void *g_lastPlayerVeh = nullptr;
 uint8_t g_currentStation = RADIO_OFF;
@@ -170,11 +235,31 @@ bool g_emergencyStationApplied = false;
 int32_t g_onFootRadioFade = 100;
 DWORD g_lastFadeTick = 0;
 int32_t g_pendingScrollSteps = 0;
+int32_t g_wrappedRetuneBonus = 0;
 WNDPROC g_origWndProc = nullptr;
 HWND g_gameHwnd = nullptr;
 
+// WLSU 88.5 dual-stream Miles state
+uint32_t g_wlsuStream = 0;
+uint32_t g_wlsuStaticStream = 0;
+bool g_wlsuPaused = false;
+int32_t g_wlsuLastProgVol = -1;
+int32_t g_wlsuLastStaticVol = -1;
+int32_t g_wlsuSavedPosMs = 0;
+int32_t g_wlsuTotalMs = 0;
+bool g_wlsuHasSavedPos = false;
+uint64_t g_wlsuActivePlayMs = 0;
+uint64_t g_wlsuAnchorPlayMs = 0;
+DWORD g_wlsuLastServiceTick = 0;
+DWORD g_wlsuProgRetryTick = 0;
+DWORD g_wlsuStaticRetryTick = 0;
+DWORD g_wlsuResolveRetryTick = 0;
+std::string g_wlsuProgPath;
+std::string g_wlsuStaticPath;
+
 const wchar_t kPoliceScannerLabel[] = L"Police Scanner";
 const wchar_t kRadioOffLabel[] = L"Radio Off";
+const wchar_t kWlsuLabel[] = L"WLSU 88.5 - Liberty Campus";
 
 void WriteLog(const char *line) {
   if (g_logPath.empty() || !line) {
@@ -192,17 +277,26 @@ void WriteLog(const char *line) {
   CloseHandle(f);
 }
 
+std::string DirOfPath(const std::string &fullPath) {
+  const size_t pos = fullPath.find_last_of("\\/");
+  if (pos == std::string::npos) {
+    return std::string();
+  }
+  return fullPath.substr(0, pos);
+}
+
 void InitLogPath(HMODULE hModule) {
-  (void)hModule;
   char buf[MAX_PATH] = {};
+  if (GetModuleFileNameA(hModule, buf, MAX_PATH) > 0) {
+    g_asiDir = DirOfPath(buf);
+  }
   if (GetModuleFileNameA(nullptr, buf, MAX_PATH) > 0) {
-    std::string full(buf);
-    const size_t pos = full.find_last_of("\\/");
-    if (pos != std::string::npos) {
-      g_logPath = full.substr(0, pos) + "\\EmergencyRadio.log";
-    } else {
-      g_logPath = "EmergencyRadio.log";
-    }
+    g_exeDir = DirOfPath(buf);
+  }
+  if (!g_exeDir.empty()) {
+    g_logPath = g_exeDir + "\\EmergencyRadio.log";
+  } else if (!g_asiDir.empty()) {
+    g_logPath = g_asiDir + "\\EmergencyRadio.log";
   } else {
     g_logPath = "EmergencyRadio.log";
   }
@@ -212,6 +306,212 @@ void InitLogPath(HMODULE hModule) {
   if (f != INVALID_HANDLE_VALUE) {
     CloseHandle(f);
   }
+}
+
+std::string ResolveAudioAsset(const char *fileName) {
+  if (!fileName || !fileName[0]) {
+    return std::string();
+  }
+  if (!g_asiDir.empty()) {
+    const std::string cands[] = {
+        g_asiDir + "\\audio\\EC\\" + fileName,
+        g_asiDir + "\\audio\\" + fileName,
+        g_asiDir + "\\" + fileName,
+    };
+    for (const auto &cand : cands) {
+      if (GetFileAttributesA(cand.c_str()) != INVALID_FILE_ATTRIBUTES) {
+        return cand;
+      }
+    }
+  }
+  if (!g_exeDir.empty()) {
+    const std::string cands[] = {
+        g_exeDir + "\\audio\\EC\\" + fileName,
+        g_exeDir + "\\audio\\" + fileName,
+    };
+    for (const auto &cand : cands) {
+      if (GetFileAttributesA(cand.c_str()) != INVALID_FILE_ATTRIBUTES) {
+        return cand;
+      }
+    }
+  }
+  const std::string relCands[] = {
+      std::string("audio\\EC\\") + fileName,
+      std::string("audio\\") + fileName,
+  };
+  for (const auto &rel : relCands) {
+    if (GetFileAttributesA(rel.c_str()) != INVALID_FILE_ATTRIBUTES) {
+      return rel;
+    }
+  }
+  return std::string();
+}
+
+void EnsureAudioPathsResolved(DWORD now) {
+  if (!g_wlsuProgPath.empty() && !g_wlsuStaticPath.empty()) {
+    return;
+  }
+  if (now < g_wlsuResolveRetryTick) {
+    return;
+  }
+  g_wlsuResolveRetryTick = now + 1000;
+  if (g_wlsuProgPath.empty()) {
+    g_wlsuProgPath = ResolveAudioAsset("WLSU.mp3");
+    if (!g_wlsuProgPath.empty()) {
+      std::string msg = "Resolved WLSU program: " + g_wlsuProgPath;
+      WriteLog(msg.c_str());
+    }
+  }
+  if (g_wlsuStaticPath.empty()) {
+    g_wlsuStaticPath = ResolveAudioAsset("WLSU_static.wav");
+    if (!g_wlsuStaticPath.empty()) {
+      std::string msg = "Resolved WLSU static: " + g_wlsuStaticPath;
+      WriteLog(msg.c_str());
+    }
+  }
+}
+
+inline uint32_t AilOpenStream(uint32_t digDriver, const char *filename) {
+  auto fn = *reinterpret_cast<const AilOpenStreamFn *>(IAT_AIL_OPEN_STREAM);
+  return (fn && digDriver && filename) ? fn(digDriver, filename, 0) : 0;
+}
+
+inline void AilCloseStream(uint32_t stream) {
+  auto fn = *reinterpret_cast<const AilCloseStreamFn *>(IAT_AIL_CLOSE_STREAM);
+  if (fn && stream) {
+    fn(stream);
+  }
+}
+
+inline void AilPauseStream(uint32_t stream, int32_t pause) {
+  auto fn = *reinterpret_cast<const AilPauseStreamFn *>(IAT_AIL_PAUSE_STREAM);
+  if (fn && stream) {
+    fn(stream, pause);
+  }
+}
+
+inline void AilStartStream(uint32_t stream) {
+  auto fn = *reinterpret_cast<const AilStartStreamFn *>(IAT_AIL_START_STREAM);
+  if (fn && stream) {
+    fn(stream);
+  }
+}
+
+inline void AilServiceStream(uint32_t stream, int32_t fillup) {
+  auto fn =
+      *reinterpret_cast<const AilServiceStreamFn *>(IAT_AIL_SERVICE_STREAM);
+  if (fn && stream) {
+    fn(stream, fillup);
+  }
+}
+
+inline int32_t AilStreamStatus(uint32_t stream) {
+  auto fn = *reinterpret_cast<const AilStreamStatusFn *>(IAT_AIL_STREAM_STATUS);
+  return (fn && stream) ? fn(stream) : 0;
+}
+
+inline void AilSetStreamLoopCount(uint32_t stream, int32_t count) {
+  auto fn = *reinterpret_cast<const AilSetStreamLoopCountFn *>(
+      IAT_AIL_SET_STREAM_LOOP_COUNT);
+  if (fn && stream) {
+    fn(stream, count);
+  }
+}
+
+inline bool AilStreamMsPosition(uint32_t stream, int32_t *totalMs,
+                                int32_t *currentMs) {
+  auto fn = *reinterpret_cast<const AilStreamMsPositionFn *>(
+      IAT_AIL_STREAM_MS_POSITION);
+  if (!fn || !stream) {
+    return false;
+  }
+  fn(stream, totalMs, currentMs);
+  return true;
+}
+
+inline void AilSetStreamMsPosition(uint32_t stream, int32_t posMs) {
+  auto fn = *reinterpret_cast<const AilSetStreamMsPositionFn *>(
+      IAT_AIL_SET_STREAM_MS_POSITION);
+  if (fn && stream) {
+    fn(stream, posMs);
+  }
+}
+
+inline void AilSetStreamVolume(uint32_t stream, int32_t volume) {
+  auto fn = *reinterpret_cast<const AilSetStreamVolumeFn *>(
+      IAT_AIL_SET_STREAM_VOLUME);
+  if (fn && stream) {
+    fn(stream, volume);
+  }
+}
+
+const char *GetAilLastError() {
+  HMODULE mss = GetModuleHandleA("Mss32.dll");
+  if (!mss) {
+    return "Mss32.dll not loaded";
+  }
+  auto fn = reinterpret_cast<AilLastErrorFn>(
+      GetProcAddress(mss, "_AIL_last_error@0"));
+  if (!fn) {
+    return "AIL_last_error unavailable";
+  }
+  const char *err = fn();
+  return (err && err[0]) ? err : "(empty)";
+}
+
+bool IsMilesReady() {
+  return (*reinterpret_cast<const uint8_t *>(ADDR_SAMPLE_INIT) != 0) &&
+         (*reinterpret_cast<const uint32_t *>(ADDR_DIG_DRIVER) != 0);
+}
+
+void ResetWlsuStreamHandles(bool clearSavedPos) {
+  g_wlsuStream = 0;
+  g_wlsuStaticStream = 0;
+  g_wlsuPaused = false;
+  g_wlsuLastProgVol = -1;
+  g_wlsuLastStaticVol = -1;
+  if (clearSavedPos) {
+    g_wlsuSavedPosMs = 0;
+    g_wlsuTotalMs = 0;
+    g_wlsuHasSavedPos = false;
+    g_wlsuAnchorPlayMs = 0;
+  }
+}
+
+void CloseWlsuStreams(bool savePosition) {
+  if (g_wlsuStream == 0 && g_wlsuStaticStream == 0) {
+    if (!savePosition) {
+      ResetWlsuStreamHandles(true);
+    }
+    return;
+  }
+  if (!IsMilesReady()) {
+    ResetWlsuStreamHandles(!savePosition);
+    return;
+  }
+
+  if (g_wlsuStream != 0) {
+    if (savePosition) {
+      int32_t totalMs = 0;
+      int32_t curMs = -1;
+      if (AilStreamMsPosition(g_wlsuStream, &totalMs, &curMs) && curMs >= 0) {
+        g_wlsuSavedPosMs = curMs;
+        g_wlsuTotalMs = totalMs;
+        g_wlsuAnchorPlayMs = g_wlsuActivePlayMs;
+        g_wlsuHasSavedPos = true;
+      }
+    }
+    AilSetStreamVolume(g_wlsuStream, 0);
+    AilPauseStream(g_wlsuStream, 1);
+    AilCloseStream(g_wlsuStream);
+  }
+  if (g_wlsuStaticStream != 0) {
+    AilSetStreamVolume(g_wlsuStaticStream, 0);
+    AilPauseStream(g_wlsuStaticStream, 1);
+    AilCloseStream(g_wlsuStaticStream);
+  }
+
+  ResetWlsuStreamHandles(!savePosition);
 }
 
 size_t DecodeX86InsnLen(const uint8_t *p) {
@@ -452,8 +752,29 @@ bool InstallDetour(uintptr_t addr, void *hookFn, FnPtr *outOrig) {
   return true;
 }
 
+void UpdateWlsuStreams();
+
 LRESULT CALLBACK SubclassWndProc(HWND hwnd, UINT uMsg, WPARAM wParam,
                                  LPARAM lParam) {
+  WNDPROC origProc = g_origWndProc;
+
+  if (uMsg == WM_DESTROY || uMsg == WM_NCDESTROY) {
+    g_shuttingDown = true;
+    if (g_wlsuLockInit) {
+      EnterCriticalSection(&g_wlsuLock);
+      CloseWlsuStreams(false);
+      LeaveCriticalSection(&g_wlsuLock);
+    }
+    if (origProc && GetWindowLongPtrA(hwnd, GWLP_WNDPROC) ==
+                        reinterpret_cast<LONG_PTR>(SubclassWndProc)) {
+      SetWindowLongPtrA(hwnd, GWLP_WNDPROC,
+                        reinterpret_cast<LONG_PTR>(origProc));
+    }
+    g_origWndProc = nullptr;
+    g_gameHwnd = nullptr;
+    return CallWindowProcA(origProc, hwnd, uMsg, wParam, lParam);
+  }
+
   if (uMsg == WM_MOUSEWHEEL) {
     const short delta = GET_WHEEL_DELTA_WPARAM(wParam);
     if (delta > 0) {
@@ -461,8 +782,22 @@ LRESULT CALLBACK SubclassWndProc(HWND hwnd, UINT uMsg, WPARAM wParam,
     } else if (delta < 0) {
       g_pendingScrollSteps -= 1;
     }
+  } else if (!g_shuttingDown) {
+    if (uMsg == WM_ACTIVATEAPP) {
+      g_windowInactive = (wParam == FALSE);
+      UpdateWlsuStreams();
+    } else if (uMsg == WM_ACTIVATE) {
+      g_windowInactive = (LOWORD(wParam) == WA_INACTIVE);
+      UpdateWlsuStreams();
+    } else if (uMsg == WM_KILLFOCUS) {
+      g_focusLost = true;
+      UpdateWlsuStreams();
+    } else if (uMsg == WM_SETFOCUS) {
+      g_focusLost = false;
+      UpdateWlsuStreams();
+    }
   }
-  return CallWindowProcA(g_origWndProc, hwnd, uMsg, wParam, lParam);
+  return CallWindowProcA(origProc, hwnd, uMsg, wParam, lParam);
 }
 
 HWND GetGameHwnd() {
@@ -491,21 +826,30 @@ void InstallWindowHook() {
     g_origWndProc = reinterpret_cast<WNDPROC>(SetWindowLongPtrA(
         hwnd, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(SubclassWndProc)));
     if (g_origWndProc) {
-      WriteLog("Mouse wheel WindowProc subclass installed OK");
+      WriteLog("WindowProc subclass installed OK");
     }
   }
 }
 
 void RemoveWindowHook() {
-  if (g_origWndProc && g_gameHwnd) {
-    SetWindowLongPtrA(g_gameHwnd, GWLP_WNDPROC,
-                      reinterpret_cast<LONG_PTR>(g_origWndProc));
+  if (g_origWndProc && g_gameHwnd && IsWindow(g_gameHwnd)) {
+    if (GetWindowLongPtrA(g_gameHwnd, GWLP_WNDPROC) ==
+        reinterpret_cast<LONG_PTR>(SubclassWndProc)) {
+      SetWindowLongPtrA(g_gameHwnd, GWLP_WNDPROC,
+                        reinterpret_cast<LONG_PTR>(g_origWndProc));
+    }
     g_origWndProc = nullptr;
     g_gameHwnd = nullptr;
   }
 }
 
 void RemoveAllHooks() {
+  g_shuttingDown = true;
+  if (g_wlsuLockInit) {
+    EnterCriticalSection(&g_wlsuLock);
+    CloseWlsuStreams(false);
+    LeaveCriticalSection(&g_wlsuLock);
+  }
   RemoveWindowHook();
   for (auto it = g_hooks.rbegin(); it != g_hooks.rend(); ++it) {
     if (!it->active) {
@@ -536,8 +880,23 @@ bool IsMP3ChannelAvailable() {
   return isMP3Avail(reinterpret_cast<void *>(ADDR_SAMPLE_MANAGER));
 }
 
+bool IsWlsuAvailable() {
+  return *reinterpret_cast<const int32_t *>(ADDR_COLLISION_IN_MEMORY) ==
+         LEVEL_COMMERCIAL;
+}
+
 inline uint8_t &MusicU8(void *self, size_t off) {
   return *reinterpret_cast<uint8_t *>(reinterpret_cast<uintptr_t>(self) + off);
+}
+
+inline float GetEntityPosX(const void *entity) {
+  return *reinterpret_cast<const float *>(reinterpret_cast<uintptr_t>(entity) +
+                                          OFF_ENTITY_POS);
+}
+
+inline float GetEntityPosY(const void *entity) {
+  return *reinterpret_cast<const float *>(reinterpret_cast<uintptr_t>(entity) +
+                                          OFF_ENTITY_POS + sizeof(float));
 }
 
 inline uint8_t GetEntityStatus(const void *entity) {
@@ -562,17 +921,36 @@ inline uint8_t &VehRadioStation(void *veh) {
                                       OFF_VEH_RADIO_STATION);
 }
 
-uint8_t AdvanceRadioStation(uint8_t current, int32_t presses, bool mp3Avail) {
-  static constexpr uint8_t kStationsWithMP3[] = {
-      HEAD_RADIO, DOUBLE_CLEF, JAH_RADIO,  RISE_FM,   LIPS_106,     GAME_FM,
-      MSX_FM,     FLASHBACK,   CHATTERBOX, USERTRACK, POLICE_RADIO, RADIO_OFF};
-  static constexpr uint8_t kStationsNoMP3[] = {
+uint8_t AdvanceRadioStation(uint8_t current, int32_t presses, bool mp3Avail,
+                            bool wlsuAvail) {
+  static constexpr uint8_t kStationsNoMP3NoWlsu[] = {
       HEAD_RADIO, DOUBLE_CLEF, JAH_RADIO,  RISE_FM,      LIPS_106, GAME_FM,
       MSX_FM,     FLASHBACK,   CHATTERBOX, POLICE_RADIO, RADIO_OFF};
+  static constexpr uint8_t kStationsWithMP3NoWlsu[] = {
+      HEAD_RADIO, DOUBLE_CLEF, JAH_RADIO,  RISE_FM,   LIPS_106,     GAME_FM,
+      MSX_FM,     FLASHBACK,   CHATTERBOX, USERTRACK, POLICE_RADIO, RADIO_OFF};
+  static constexpr uint8_t kStationsNoMP3WithWlsu[] = {
+      HEAD_RADIO, DOUBLE_CLEF, JAH_RADIO,  RISE_FM,    LIPS_106,     GAME_FM,
+      MSX_FM,     FLASHBACK,   CHATTERBOX, WLSU_RADIO, POLICE_RADIO, RADIO_OFF};
+  static constexpr uint8_t kStationsWithMP3WithWlsu[] = {
+      HEAD_RADIO, DOUBLE_CLEF,  JAH_RADIO, RISE_FM,    LIPS_106,
+      GAME_FM,    MSX_FM,       FLASHBACK, CHATTERBOX, WLSU_RADIO,
+      USERTRACK,  POLICE_RADIO, RADIO_OFF};
 
-  const uint8_t *list = mp3Avail ? kStationsWithMP3 : kStationsNoMP3;
-  const int32_t count = static_cast<int32_t>(mp3Avail ? sizeof(kStationsWithMP3)
-                                                      : sizeof(kStationsNoMP3));
+  const uint8_t *list = nullptr;
+  int32_t count = 0;
+  if (wlsuAvail) {
+    list = mp3Avail ? kStationsWithMP3WithWlsu : kStationsNoMP3WithWlsu;
+    count = static_cast<int32_t>(mp3Avail ? sizeof(kStationsWithMP3WithWlsu)
+                                          : sizeof(kStationsNoMP3WithWlsu));
+  } else {
+    list = mp3Avail ? kStationsWithMP3NoWlsu : kStationsNoMP3NoWlsu;
+    count = static_cast<int32_t>(mp3Avail ? sizeof(kStationsWithMP3NoWlsu)
+                                          : sizeof(kStationsNoMP3NoWlsu));
+    if (current == WLSU_RADIO) {
+      current = CHATTERBOX;
+    }
+  }
 
   int32_t idx = count - 1; // Default to RADIO_OFF if unknown
   for (int32_t i = 0; i < count; ++i) {
@@ -626,6 +1004,27 @@ bool __fastcall Hook_UsesPoliceRadio(void *, uintptr_t, void *) {
   return false;
 }
 
+uint8_t __fastcall Hook_GetCarTuning(void *self, uintptr_t) {
+  const uint8_t orig = g_origGetCarTuning(self);
+  auto findPlayerVeh =
+      reinterpret_cast<FindPlayerVehicleFn>(ADDR_FIND_PLAYER_VEHICLE);
+  void *veh = findPlayerVeh();
+  if (!veh) {
+    return orig;
+  }
+  uint8_t &station = VehRadioStation(veh);
+  if (station == WLSU_RADIO) {
+    if (!IsWlsuAvailable()) {
+      station =
+          AdvanceRadioStation(WLSU_RADIO, 1, IsMP3ChannelAvailable(), false);
+      g_currentStation = station;
+      return station;
+    }
+    return RADIO_OFF;
+  }
+  return orig;
+}
+
 uint8_t __fastcall Hook_GetNextCarTuning(void *, uintptr_t) {
   auto findPlayerVeh =
       reinterpret_cast<FindPlayerVehicleFn>(ADDR_FIND_PLAYER_VEHICLE);
@@ -637,14 +1036,19 @@ uint8_t __fastcall Hook_GetNextCarTuning(void *, uintptr_t) {
   int32_t &numRetunePresses =
       *reinterpret_cast<int32_t *>(ADDR_NUM_RETUNE_PRESSES);
   uint8_t &station = VehRadioStation(veh);
+  const int32_t totalPresses = numRetunePresses + g_wrappedRetuneBonus;
+  g_wrappedRetuneBonus = 0;
 
-  if (numRetunePresses != 0) {
-    station =
-        AdvanceRadioStation(station, numRetunePresses, IsMP3ChannelAvailable());
+  const bool wlsuAvail = IsWlsuAvailable();
+  const bool mp3Avail = IsMP3ChannelAvailable();
+  if (totalPresses != 0) {
+    station = AdvanceRadioStation(station, totalPresses, mp3Avail, wlsuAvail);
     numRetunePresses = 0;
+  } else if (station == WLSU_RADIO && !wlsuAvail) {
+    station = AdvanceRadioStation(WLSU_RADIO, 1, mp3Avail, false);
   }
   g_currentStation = station;
-  return station;
+  return (station == WLSU_RADIO) ? RADIO_OFF : station;
 }
 
 void __fastcall Hook_DisplayRadioStationName(void *self, uintptr_t) {
@@ -671,21 +1075,33 @@ void __fastcall Hook_DisplayRadioStationName(void *self, uintptr_t) {
     currentStation = nullptr;
   }
 
-  uint8_t curRadio =
-      inCar ? MusicU8(self, OFF_MUSIC_NEXT_TRACK) : g_currentStation;
+  uint8_t curRadio = g_currentStation;
+  if (inCar) {
+    auto findPlayerVeh =
+        reinterpret_cast<FindPlayerVehicleFn>(ADDR_FIND_PLAYER_VEHICLE);
+    void *veh = findPlayerVeh();
+    if (veh) {
+      curRadio = VehRadioStation(veh);
+    } else {
+      curRadio = MusicU8(self, OFF_MUSIC_NEXT_TRACK);
+    }
+  }
   if (curRadio == STREAMED_SOUND_CITY_AMBIENT ||
       curRadio == STREAMED_SOUND_WATER_AMBIENT) {
     curRadio = RADIO_OFF;
-  } else if (curRadio > STREAMED_SOUND_WATER_AMBIENT) {
+  } else if (curRadio > STREAMED_SOUND_WATER_AMBIENT &&
+             curRadio != WLSU_RADIO) {
     return;
   }
 
   const int32_t numRetunePresses =
       *reinterpret_cast<const int32_t *>(ADDR_NUM_RETUNE_PRESSES);
   const bool mp3Avail = IsMP3ChannelAvailable();
+  const bool wlsuAvail = IsWlsuAvailable();
   const uint8_t targetStation =
-      inCar ? AdvanceRadioStation(curRadio, numRetunePresses, mp3Avail)
-            : curRadio;
+      inCar
+          ? AdvanceRadioStation(curRadio, numRetunePresses, mp3Avail, wlsuAvail)
+          : curRadio;
 
   static const char *const kStationTextKeys[9] = {
       "FEA_FM0", "FEA_FM1", "FEA_FM2", "FEA_FM3", "FEA_FM4",
@@ -706,13 +1122,16 @@ void __fastcall Hook_DisplayRadioStationName(void *self, uintptr_t) {
     label = kPoliceScannerLabel;
   } else if (targetStation == RADIO_OFF) {
     label = kRadioOffLabel;
+  } else if (targetStation == WLSU_RADIO) {
+    label = kWlsuLabel;
   } else {
     return;
   }
 
+  const uint8_t nextNative = MusicU8(self, OFF_MUSIC_NEXT_TRACK);
+  const uint8_t playingNative = MusicU8(self, OFF_MUSIC_PLAYING_TRACK);
   if (currentStation != label ||
-      (MusicU8(self, OFF_MUSIC_NEXT_TRACK) == USERTRACK &&
-       MusicU8(self, OFF_MUSIC_PLAYING_TRACK) != USERTRACK)) {
+      (nextNative == USERTRACK && playingNative != USERTRACK)) {
     currentStation = label;
     displayTimer = 60;
   } else {
@@ -773,9 +1192,274 @@ bool IsCutsceneActive() {
   }
   auto padGet = reinterpret_cast<PadGetFn>(ADDR_PAD_GET_PAD);
   void *pad = padGet(0);
-  return pad && (*reinterpret_cast<const uint8_t *>(
-                     reinterpret_cast<uintptr_t>(pad) +
-                     OFF_PAD_DISABLE_CONTROLS) != 0);
+  return pad &&
+         (*reinterpret_cast<const uint8_t *>(reinterpret_cast<uintptr_t>(pad) +
+                                             OFF_PAD_DISABLE_CONTROLS) != 0);
+}
+
+bool IsWlsuPausedByGameState() {
+  if (*reinterpret_cast<const int32_t *>(ADDR_GAME_STATE) != GS_PLAYING_GAME) {
+    return true;
+  }
+  const bool fgLost =
+      (g_gameHwnd != nullptr) && (GetForegroundWindow() != g_gameHwnd);
+  if (g_windowInactive || g_focusLost || fgLost) {
+    return true;
+  }
+  const uint8_t userPause = *reinterpret_cast<const uint8_t *>(ADDR_USER_PAUSE);
+  const uint8_t codePause = *reinterpret_cast<const uint8_t *>(ADDR_CODE_PAUSE);
+  const uint8_t menuActive =
+      *reinterpret_cast<const uint8_t *>(ADDR_MENU_ACTIVE);
+  const uint8_t activateSaveMenu =
+      *reinterpret_cast<const uint8_t *>(ADDR_ACTIVATE_SAVE_MENU);
+  const int32_t menuScreen =
+      *reinterpret_cast<const int32_t *>(ADDR_MENU_SCREEN);
+
+  if (codePause != 0 || activateSaveMenu != 0) {
+    return true;
+  }
+  if (menuActive != 0 && menuScreen == MENUPAGE_SOUND_SETTINGS) {
+    return false;
+  }
+  return (userPause != 0) || (menuActive != 0);
+}
+
+void ComputeWlsuSignalMix(float *outProgGain, float *outStaticGain) {
+  auto findPlayerVeh =
+      reinterpret_cast<FindPlayerVehicleFn>(ADDR_FIND_PLAYER_VEHICLE);
+  auto findPlayerPed = reinterpret_cast<FindPlayerPedFn>(ADDR_FIND_PLAYER_PED);
+
+  void *entity = findPlayerVeh();
+  if (!entity) {
+    entity = findPlayerPed();
+  }
+  if (!entity) {
+    *outProgGain = 1.0f;
+    *outStaticGain = 0.0f;
+    return;
+  }
+
+  const float dx = GetEntityPosX(entity) - WLSU_TX_X;
+  const float dy = GetEntityPosY(entity) - WLSU_TX_Y;
+  const float dist = std::sqrt(dx * dx + dy * dy);
+
+  if (dist <= 350.0f) {
+    *outProgGain = 1.0f;
+    *outStaticGain = 0.0f;
+  } else if (dist <= 400.0f) {
+    const float t = (dist - 350.0f) / 50.0f;
+    *outProgGain = 1.0f - 0.025f * t;
+    *outStaticGain = 0.10f * t;
+  } else if (dist <= 850.0f) {
+    const float t = (dist - 400.0f) / 450.0f;
+    *outProgGain = 0.975f - 0.225f * t;
+    *outStaticGain = 0.10f + 0.25f * t;
+  } else if (dist <= 1100.0f) {
+    const float t = (dist - 850.0f) / 250.0f;
+    *outProgGain = 0.75f - 0.60f * t;
+    *outStaticGain = 0.35f + 0.65f * t;
+  } else {
+    float t = (dist - 1100.0f) / 150.0f;
+    if (t > 1.0f) {
+      t = 1.0f;
+    }
+    *outProgGain = 0.15f * (1.0f - t);
+    *outStaticGain = 1.0f;
+  }
+}
+
+void UpdateWlsuStreams() {
+  if (!g_wlsuLockInit || g_shuttingDown) {
+    return;
+  }
+  EnterCriticalSection(&g_wlsuLock);
+
+  if (g_shuttingDown) {
+    LeaveCriticalSection(&g_wlsuLock);
+    return;
+  }
+
+  if (!IsMilesReady()) {
+    ResetWlsuStreamHandles(true);
+    LeaveCriticalSection(&g_wlsuLock);
+    return;
+  }
+
+  const DWORD now = GetTickCount();
+  uint32_t dt =
+      (g_wlsuLastServiceTick != 0) ? (now - g_wlsuLastServiceTick) : 0;
+  if (dt > 250) {
+    dt = 250;
+  }
+  g_wlsuLastServiceTick = now;
+
+  const bool paused = IsWlsuPausedByGameState();
+  if (!paused &&
+      *reinterpret_cast<const int32_t *>(ADDR_GAME_STATE) == GS_PLAYING_GAME) {
+    g_wlsuActivePlayMs += dt;
+  }
+
+  const bool wantWlsu = (*reinterpret_cast<const int32_t *>(ADDR_GAME_STATE) ==
+                         GS_PLAYING_GAME) &&
+                        (g_currentStation == WLSU_RADIO) && IsWlsuAvailable();
+
+  if (!wantWlsu) {
+    if (g_wlsuStream != 0 || g_wlsuStaticStream != 0) {
+      CloseWlsuStreams(true);
+    }
+    LeaveCriticalSection(&g_wlsuLock);
+    return;
+  }
+
+  EnsureAudioPathsResolved(now);
+  const uint32_t digDriver =
+      *reinterpret_cast<const uint32_t *>(ADDR_DIG_DRIVER);
+
+  if (g_wlsuStream == 0 && !g_wlsuProgPath.empty() &&
+      now >= g_wlsuProgRetryTick) {
+    const uint32_t s = AilOpenStream(digDriver, g_wlsuProgPath.c_str());
+    if (s != 0) {
+      AilSetStreamLoopCount(s, 0);
+      int32_t totalMs = 0;
+      int32_t curMs = 0;
+      AilStreamMsPosition(s, &totalMs, &curMs);
+      if (totalMs > 0) {
+        g_wlsuTotalMs = totalMs;
+        int32_t startMs = 0;
+        if (g_wlsuHasSavedPos) {
+          const uint64_t elapsed = g_wlsuActivePlayMs - g_wlsuAnchorPlayMs;
+          startMs = static_cast<int32_t>(
+              (static_cast<uint64_t>(g_wlsuSavedPosMs) + elapsed) %
+              static_cast<uint64_t>(totalMs));
+        } else {
+          startMs = static_cast<int32_t>((static_cast<uint64_t>(now) * 17u) %
+                                         static_cast<uint64_t>(totalMs));
+        }
+        AilSetStreamMsPosition(s, startMs);
+      }
+      AilSetStreamVolume(s, 0);
+      AilStartStream(s);
+      AilPauseStream(s, paused ? 1 : 0);
+      AilServiceStream(s, 0);
+      g_wlsuStream = s;
+      g_wlsuLastProgVol = 0;
+      g_wlsuPaused = paused;
+      WriteLog("Started WLSU.mp3 stream");
+    } else {
+      g_wlsuProgRetryTick = now + 1000;
+      std::string err =
+          std::string("WLSU.mp3 open FAILED: ") + GetAilLastError();
+      WriteLog(err.c_str());
+    }
+  }
+
+  if (g_wlsuStaticStream == 0 && !g_wlsuStaticPath.empty() &&
+      now >= g_wlsuStaticRetryTick) {
+    const uint32_t s = AilOpenStream(digDriver, g_wlsuStaticPath.c_str());
+    if (s != 0) {
+      AilSetStreamLoopCount(s, 0);
+      AilSetStreamVolume(s, 0);
+      AilStartStream(s);
+      AilPauseStream(s, paused ? 1 : 0);
+      AilServiceStream(s, 0);
+      g_wlsuStaticStream = s;
+      g_wlsuLastStaticVol = 0;
+      WriteLog("Started WLSU_static.wav stream");
+    } else {
+      g_wlsuStaticRetryTick = now + 1000;
+      std::string err =
+          std::string("WLSU_static.wav open FAILED: ") + GetAilLastError();
+      WriteLog(err.c_str());
+    }
+  }
+
+  if (paused) {
+    if (!g_wlsuPaused) {
+      if (g_wlsuStream != 0) {
+        AilSetStreamVolume(g_wlsuStream, 0);
+        AilPauseStream(g_wlsuStream, 1);
+        g_wlsuLastProgVol = 0;
+      }
+      if (g_wlsuStaticStream != 0) {
+        AilSetStreamVolume(g_wlsuStaticStream, 0);
+        AilPauseStream(g_wlsuStaticStream, 1);
+        g_wlsuLastStaticVol = 0;
+      }
+      g_wlsuPaused = true;
+    }
+    LeaveCriticalSection(&g_wlsuLock);
+    return;
+  }
+
+  if (g_wlsuPaused) {
+    if (g_wlsuStream != 0) {
+      AilPauseStream(g_wlsuStream, 0);
+    }
+    if (g_wlsuStaticStream != 0) {
+      AilPauseStream(g_wlsuStaticStream, 0);
+    }
+    g_wlsuPaused = false;
+  }
+
+  // Fallback loop safety in case a stream ended naturally
+  if (g_wlsuStream != 0 && AilStreamStatus(g_wlsuStream) == SMP_DONE) {
+    AilSetStreamMsPosition(g_wlsuStream, 0);
+    AilStartStream(g_wlsuStream);
+  }
+  if (g_wlsuStaticStream != 0 &&
+      AilStreamStatus(g_wlsuStaticStream) == SMP_DONE) {
+    AilSetStreamMsPosition(g_wlsuStaticStream, 0);
+    AilStartStream(g_wlsuStaticStream);
+  }
+
+  uint8_t musicVol = *reinterpret_cast<const uint8_t *>(ADDR_SAMPLE_MUSIC_VOL);
+  if (musicVol > 127) {
+    musicVol = 127;
+  }
+
+  float progGain = 1.0f;
+  float staticGain = 0.0f;
+  ComputeWlsuSignalMix(&progGain, &staticGain);
+
+  const bool wideScreen = *reinterpret_cast<const uint8_t *>(
+                              ADDR_THE_CAMERA + OFF_CAM_WIDESCREEN) != 0;
+  float envScale = wideScreen ? 0.0f : 1.0f;
+  if (!Hook_PlayerInCar(reinterpret_cast<void *>(ADDR_MUSIC_MANAGER), 0)) {
+    envScale *= (static_cast<float>(g_onFootRadioFade) / 100.0f);
+  }
+  if (*reinterpret_cast<const int32_t *>(ADDR_RETUNE_COUNTER) > 0) {
+    envScale *= 0.25f;
+  }
+
+  int32_t progVol = static_cast<int32_t>(
+      static_cast<float>(musicVol) * progGain * envScale + 0.5f);
+  int32_t staticVol = static_cast<int32_t>(
+      static_cast<float>(musicVol) * staticGain * envScale + 0.5f);
+  if (progVol < 0)
+    progVol = 0;
+  if (progVol > 127)
+    progVol = 127;
+  if (staticVol < 0)
+    staticVol = 0;
+  if (staticVol > 127)
+    staticVol = 127;
+
+  if (g_wlsuStream != 0) {
+    AilServiceStream(g_wlsuStream, 0);
+    if (progVol != g_wlsuLastProgVol) {
+      AilSetStreamVolume(g_wlsuStream, progVol);
+      g_wlsuLastProgVol = progVol;
+    }
+  }
+  if (g_wlsuStaticStream != 0) {
+    AilServiceStream(g_wlsuStaticStream, 0);
+    if (staticVol != g_wlsuLastStaticVol) {
+      AilSetStreamVolume(g_wlsuStaticStream, staticVol);
+      g_wlsuLastStaticVol = staticVol;
+    }
+  }
+
+  LeaveCriticalSection(&g_wlsuLock);
 }
 
 void __fastcall Hook_ServiceAmbience(void *self, uintptr_t) {
@@ -810,6 +1494,16 @@ void __fastcall Hook_ServiceAmbience(void *self, uintptr_t) {
     }
   }
 
+  if (g_currentStation == WLSU_RADIO) {
+    MusicU8(self, OFF_MUSIC_NEXT_TRACK) = RADIO_OFF;
+    auto serviceTrack = reinterpret_cast<MusicBoolFn>(ADDR_MUSIC_SERVICE_TRACK);
+    serviceTrack(self);
+    auto setStreamedVol =
+        reinterpret_cast<SampleSetStreamedVolFn>(ADDR_SAMPLE_SET_STREAMED_VOL);
+    setStreamedVol(reinterpret_cast<void *>(ADDR_SAMPLE_MANAGER), 0, 63, 0, 0);
+    return;
+  }
+
   MusicU8(self, OFF_MUSIC_NEXT_TRACK) = g_currentStation;
   auto serviceTrack = reinterpret_cast<MusicBoolFn>(ADDR_MUSIC_SERVICE_TRACK);
   auto serviceVolume = reinterpret_cast<MusicVoidFn>(ADDR_MUSIC_SERVICE_VOLUME);
@@ -817,7 +1511,8 @@ void __fastcall Hook_ServiceAmbience(void *self, uintptr_t) {
     serviceVolume(self);
   }
 
-  const int32_t retuneCounter = *reinterpret_cast<const int32_t *>(ADDR_RETUNE_COUNTER);
+  const int32_t retuneCounter =
+      *reinterpret_cast<const int32_t *>(ADDR_RETUNE_COUNTER);
   const uint8_t appliedVol = static_cast<uint8_t>(
       retuneCounter > 0 ? (g_onFootRadioFade >> 2) : g_onFootRadioFade);
   auto setStreamedVol =
@@ -833,6 +1528,8 @@ void __fastcall Hook_ServiceGameMode(void *self, uintptr_t) {
       reinterpret_cast<FindPlayerVehicleFn>(ADDR_FIND_PLAYER_VEHICLE);
   void *veh = findPlayerVeh();
   const bool inCar = Hook_PlayerInCar(self, 0);
+  const bool wlsuAvail = IsWlsuAvailable();
+  const bool mp3Avail = IsMP3ChannelAvailable();
 
   if (inCar && veh) {
     g_onFootRadioFade = 100;
@@ -859,8 +1556,13 @@ void __fastcall Hook_ServiceGameMode(void *self, uintptr_t) {
         g_currentStation = GAME_FM;
       } else if (g_currentStation != RADIO_OFF && !radioSetByScript) {
         // Seamless transition into car: vehicle tunes to our on-foot station!
+        if (g_currentStation == WLSU_RADIO && !wlsuAvail) {
+          g_currentStation =
+              AdvanceRadioStation(WLSU_RADIO, 1, mp3Avail, false);
+        }
         VehRadioStation(veh) = g_currentStation;
-        MusicU8(self, OFF_MUSIC_NEXT_TRACK) = g_currentStation;
+        MusicU8(self, OFF_MUSIC_NEXT_TRACK) =
+            (g_currentStation == WLSU_RADIO) ? RADIO_OFF : g_currentStation;
       } else {
         g_currentStation = VehRadioStation(veh);
       }
@@ -868,9 +1570,23 @@ void __fastcall Hook_ServiceGameMode(void *self, uintptr_t) {
       g_currentStation = VehRadioStation(veh);
     }
 
+    if (g_currentStation == WLSU_RADIO && !wlsuAvail) {
+      g_currentStation = AdvanceRadioStation(WLSU_RADIO, 1, mp3Avail, false);
+      VehRadioStation(veh) = g_currentStation;
+      MusicU8(self, OFF_MUSIC_NEXT_TRACK) = g_currentStation;
+      *reinterpret_cast<int32_t *>(ADDR_RETUNE_COUNTER) = 30;
+      *reinterpret_cast<int32_t *>(ADDR_NUM_RETUNE_PRESSES) = 0;
+      *reinterpret_cast<uint8_t *>(ADDR_DISPLAY_TIMER) = 60;
+      *reinterpret_cast<const wchar_t **>(ADDR_CURRENT_STATION_PTR) = nullptr;
+      auto playOneShot =
+          reinterpret_cast<AudioPlayOneShotFn>(ADDR_AUDIO_PLAY_ONE_SHOT);
+      playOneShot(reinterpret_cast<void *>(ADDR_AUDIO_MANAGER), 0,
+                  SOUND_FRONTEND_RADIO_CHANGE, 1.0f);
+    }
+
     if (g_pendingScrollSteps != 0) {
-      const bool mp3Avail = IsMP3ChannelAvailable();
-      const int32_t stationCount = mp3Avail ? 12 : 11;
+      const int32_t stationCount =
+          11 + (mp3Avail ? 1 : 0) + (wlsuAvail ? 1 : 0);
 
       // In GTA III, ADDR_NUM_RETUNE_PRESSES must be positive.
       // Scrolling down (-1) is equivalent to advancing (stationCount - 1)
@@ -882,7 +1598,9 @@ void __fastcall Hook_ServiceGameMode(void *self, uintptr_t) {
       forwardSteps %= stationCount;
 
       if (forwardSteps != 0) {
-        *reinterpret_cast<int32_t *>(ADDR_NUM_RETUNE_PRESSES) += forwardSteps;
+        int32_t &presses =
+            *reinterpret_cast<int32_t *>(ADDR_NUM_RETUNE_PRESSES);
+        presses = (presses + forwardSteps) % stationCount;
         *reinterpret_cast<int32_t *>(ADDR_RETUNE_COUNTER) = 30;
         auto playOneShot =
             reinterpret_cast<AudioPlayOneShotFn>(ADDR_AUDIO_PLAY_ONE_SHOT);
@@ -897,6 +1615,18 @@ void __fastcall Hook_ServiceGameMode(void *self, uintptr_t) {
 
     // Discard any mouse wheel steps on foot so weapon cycling is never hijacked
     g_pendingScrollSteps = 0;
+
+    if (g_currentStation == WLSU_RADIO && !wlsuAvail) {
+      g_currentStation = AdvanceRadioStation(WLSU_RADIO, 1, mp3Avail, false);
+      *reinterpret_cast<int32_t *>(ADDR_RETUNE_COUNTER) = 30;
+      *reinterpret_cast<int32_t *>(ADDR_NUM_RETUNE_PRESSES) = 0;
+      *reinterpret_cast<uint8_t *>(ADDR_DISPLAY_TIMER) = 60;
+      *reinterpret_cast<const wchar_t **>(ADDR_CURRENT_STATION_PTR) = nullptr;
+      auto playOneShot =
+          reinterpret_cast<AudioPlayOneShotFn>(ADDR_AUDIO_PLAY_ONE_SHOT);
+      playOneShot(reinterpret_cast<void *>(ADDR_AUDIO_MANAGER), 0,
+                  SOUND_FRONTEND_RADIO_CHANGE, 1.0f);
+    }
 
     static bool s_wasRKeyDown = false;
     const bool focused = !g_gameHwnd || GetForegroundWindow() == g_gameHwnd;
@@ -926,8 +1656,8 @@ void __fastcall Hook_ServiceGameMode(void *self, uintptr_t) {
         !paused && !wideScreen && !controlsDisabled && (rJustDown || padRetune);
 
     if (retuneTriggered) {
-      const bool mp3Avail = IsMP3ChannelAvailable();
-      g_currentStation = AdvanceRadioStation(g_currentStation, 1, mp3Avail);
+      g_currentStation =
+          AdvanceRadioStation(g_currentStation, 1, mp3Avail, wlsuAvail);
 
       *reinterpret_cast<int32_t *>(ADDR_RETUNE_COUNTER) = 30;
       *reinterpret_cast<int32_t *>(ADDR_NUM_RETUNE_PRESSES) = 0;
@@ -941,16 +1671,57 @@ void __fastcall Hook_ServiceGameMode(void *self, uintptr_t) {
     }
   }
 
+  // Shield >11 presses (e.g. 12 when scrolling down with 13 stations) from
+  // gta3.exe's hardcoded `if (numRetunePresses > 11) numRetunePresses -= 11;`
+  int32_t &presses = *reinterpret_cast<int32_t *>(ADDR_NUM_RETUNE_PRESSES);
+  if (presses > 11) {
+    g_wrappedRetuneBonus = presses - 1;
+    presses = 1;
+  } else {
+    g_wrappedRetuneBonus = 0;
+  }
+
   g_origServiceGameMode(self);
+
+  if (g_wrappedRetuneBonus != 0) {
+    if (presses != 0) {
+      const int32_t stationCount =
+          11 + (mp3Avail ? 1 : 0) + (wlsuAvail ? 1 : 0);
+      presses = (presses + g_wrappedRetuneBonus) % stationCount;
+    }
+    g_wrappedRetuneBonus = 0;
+  }
+}
+
+void __fastcall Hook_AudioService(void *self, uintptr_t) {
+  g_origAudioService(self);
+  if (!g_shuttingDown) {
+    UpdateWlsuStreams();
+  }
+}
+
+void __fastcall Hook_SampleTerminate(void *self, uintptr_t) {
+  if (g_wlsuLockInit) {
+    EnterCriticalSection(&g_wlsuLock);
+    CloseWlsuStreams(false);
+    LeaveCriticalSection(&g_wlsuLock);
+  }
+  g_origSampleTerminate(self);
 }
 
 void __fastcall Hook_ResetMusicAfterReload(void *self, uintptr_t) {
+  if (g_wlsuLockInit) {
+    EnterCriticalSection(&g_wlsuLock);
+    CloseWlsuStreams(false);
+    LeaveCriticalSection(&g_wlsuLock);
+  }
   g_lastPlayerVeh = nullptr;
   g_currentStation = RADIO_OFF;
   g_emergencyStationApplied = false;
   g_onFootRadioFade = 100;
   g_lastFadeTick = 0;
   g_pendingScrollSteps = 0;
+  g_wrappedRetuneBonus = 0;
   *reinterpret_cast<const wchar_t **>(ADDR_CURRENT_STATION_PTR) = nullptr;
   g_origResetMusicAfterReload(self);
 }
@@ -973,6 +1744,8 @@ void InstallDeferredHooks() {
                       &g_origServiceAmbience);
   ok &= InstallDetour(ADDR_MUSIC_PLAYER_IN_CAR, &Hook_PlayerInCar,
                       &g_origPlayerInCar);
+  ok &= InstallDetour(ADDR_MUSIC_GET_CAR_TUNING, &Hook_GetCarTuning,
+                      &g_origGetCarTuning);
   ok &= InstallDetour(ADDR_MUSIC_GET_NEXT_CAR_TUNING, &Hook_GetNextCarTuning,
                       &g_origGetNextCarTuning);
   ok &= InstallDetour(ADDR_MUSIC_USES_POLICE_RADIO, &Hook_UsesPoliceRadio,
@@ -980,6 +1753,10 @@ void InstallDeferredHooks() {
   ok &= InstallDetour(ADDR_MUSIC_DISPLAY_RADIO_NAME,
                       &Hook_DisplayRadioStationName,
                       &g_origDisplayRadioStationName);
+  ok &= InstallDetour(ADDR_AUDIO_SERVICE, &Hook_AudioService,
+                      &g_origAudioService);
+  ok &= InstallDetour(ADDR_SAMPLE_TERMINATE, &Hook_SampleTerminate,
+                      &g_origSampleTerminate);
 
   WriteLog(ok ? "EmergencyRadio hooks installed OK"
               : "EmergencyRadio hooks partial/failed");
@@ -1004,11 +1781,18 @@ bool InstallBootHook() {
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD reason, LPVOID lpReserved) {
   if (reason == DLL_PROCESS_ATTACH) {
     DisableThreadLibraryCalls(hModule);
+    InitializeCriticalSection(&g_wlsuLock);
+    g_wlsuLockInit = true;
     InitLogPath(hModule);
     InstallBootHook();
   } else if (reason == DLL_PROCESS_DETACH) {
+    g_shuttingDown = true;
     if (lpReserved == nullptr) {
       RemoveAllHooks();
+    }
+    if (g_wlsuLockInit) {
+      DeleteCriticalSection(&g_wlsuLock);
+      g_wlsuLockInit = false;
     }
   }
   return TRUE;

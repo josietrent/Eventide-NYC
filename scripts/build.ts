@@ -127,8 +127,12 @@ async function findMsvcX86Toolchain(): Promise<{
   includes: string[];
   libs: string[];
 } | null> {
-  const vswhere =
-    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Installer\\vswhere.exe";
+  const vswhere = join(
+    Deno.env.get("ProgramFiles(x86)") || "C:\\Program Files (x86)",
+    "Microsoft Visual Studio",
+    "Installer",
+    "vswhere.exe",
+  );
   let vsPath = "";
   try {
     const out = await new Deno.Command(vswhere, {
@@ -143,13 +147,14 @@ async function findMsvcX86Toolchain(): Promise<{
       ],
     }).output();
     if (out.success) {
-      vsPath =
-        new TextDecoder().decode(out.stdout).trim().split(/\r?\n/)[0] || "";
+      vsPath = new TextDecoder().decode(out.stdout).trim();
     }
   } catch {
-    // vswhere unavailable
+    return null;
   }
-  if (!vsPath) return null;
+  if (!vsPath) {
+    return null;
+  }
 
   const msvcBase = join(vsPath, "VC", "Tools", "MSVC");
   const msvcVersions: string[] = [];
@@ -160,64 +165,74 @@ async function findMsvcX86Toolchain(): Promise<{
   } catch {
     return null;
   }
-  msvcVersions.sort().reverse();
+  msvcVersions.sort((a, b) => b.localeCompare(a, undefined, { numeric: true }));
 
   let msvcDir = "";
   let clExe = "";
   for (const ver of msvcVersions) {
     const root = join(msvcBase, ver);
-    for (const host of ["Hostx64", "Hostx86"]) {
-      const candidate = join(root, "bin", host, "x86", "cl.exe");
-      try {
-        if ((await Deno.stat(candidate)).isFile) {
-          msvcDir = root;
-          clExe = candidate;
-          break;
-        }
-      } catch {
-        // Try next
+    const candidate = join(root, "bin", "Hostx64", "x86", "cl.exe");
+    try {
+      if (Deno.statSync(candidate).isFile) {
+        msvcDir = root;
+        clExe = candidate;
+        break;
       }
+    } catch {
+      // Try next MSVC version
     }
-    if (clExe) break;
   }
-  if (!clExe) return null;
+  if (!clExe) {
+    return null;
+  }
 
-  const sdkRoots = [
-    "D:\\Windows Kits\\10",
-    "C:\\Program Files (x86)\\Windows Kits\\10",
-    "C:\\Program Files\\Windows Kits\\10",
-  ];
+  const sdkRoots: string[] = [];
+  const envSdk = Deno.env.get("WindowsSdkDir");
+  if (envSdk) sdkRoots.push(envSdk);
+  sdkRoots.push(
+    join(
+      Deno.env.get("ProgramFiles(x86)") || "C:\\Program Files (x86)",
+      "Windows Kits",
+      "10",
+    ),
+  );
+  const vsDriveMatch = vsPath.match(/^[A-Za-z]:/);
+  if (vsDriveMatch) {
+    sdkRoots.push(join(`${vsDriveMatch[0]}\\`, "Windows Kits", "10"));
+  }
+  sdkRoots.push("D:\\Windows Kits\\10");
+
   for (const sdkRoot of sdkRoots) {
     const incBase = join(sdkRoot, "Include");
     const sdkVersions: string[] = [];
     try {
       for await (const entry of Deno.readDir(incBase)) {
-        if (entry.isDirectory) sdkVersions.push(entry.name);
+        if (entry.isDirectory && entry.name.startsWith("10.")) {
+          sdkVersions.push(entry.name);
+        }
       }
     } catch {
       continue;
     }
-    sdkVersions.sort().reverse();
+    sdkVersions.sort((a, b) =>
+      b.localeCompare(a, undefined, { numeric: true }),
+    );
     for (const ver of sdkVersions) {
-      try {
-        if ((await Deno.stat(join(incBase, ver, "um", "windows.h"))).isFile) {
-          return {
-            clExe,
-            includes: [
-              join(msvcDir, "include"),
-              join(incBase, ver, "ucrt"),
-              join(incBase, ver, "um"),
-              join(incBase, ver, "shared"),
-            ],
-            libs: [
-              join(msvcDir, "lib", "x86"),
-              join(sdkRoot, "Lib", ver, "ucrt", "x86"),
-              join(sdkRoot, "Lib", ver, "um", "x86"),
-            ],
-          };
-        }
-      } catch {
-        // Try next SDK version
+      if (await allExist([join(incBase, ver, "um", "windows.h")])) {
+        return {
+          clExe,
+          includes: [
+            join(msvcDir, "include"),
+            join(incBase, ver, "ucrt"),
+            join(incBase, ver, "shared"),
+            join(incBase, ver, "um"),
+          ],
+          libs: [
+            join(msvcDir, "lib", "x86"),
+            join(sdkRoot, "Lib", ver, "ucrt", "x86"),
+            join(sdkRoot, "Lib", ver, "um", "x86"),
+          ],
+        };
       }
     }
   }
@@ -915,7 +930,7 @@ if (shouldRun(15, "cyrillic")) {
   say.done(`  Packaged modloader/${modName}/${basename(txdOutput)}`);
 }
 
-// Step 16: EmergencyRadio ASI Plugin
+// Step 16: EmergencyRadio ASI Plugin (also hosts WLSU 88.5 - Liberty Campus)
 if (shouldRun(16, "emergencyradio")) {
   say.heading("Step 16 (emergencyradio): Compiling EmergencyRadio.asi...");
   const asiInput = join(cwd, "plugins", "EmergencyRadio", "EmergencyRadio.cpp");
@@ -929,6 +944,32 @@ if (shouldRun(16, "emergencyradio")) {
 
   await Deno.copyFile(asiOutput, join(modStagingDir, basename(asiOutput)));
   say.done(`  Packaged modloader/${modName}/${basename(asiOutput)}`);
+
+  const wlsuAudioFiles = ["WLSU.mp3", "WLSU_static.wav"];
+  const audioStagingDir = join(modStagingDir, "audio");
+  for (const fileName of wlsuAudioFiles) {
+    const candidates = [
+      join(cwd, "audio", fileName),
+      join(cwd, "plugins", "EmergencyRadio", "audio", fileName),
+      join(cwd, "plugins", "EmergencyRadio", fileName),
+    ];
+    let srcPath: string | null = null;
+    for (const candidate of candidates) {
+      if (await allExist([candidate])) {
+        srcPath = candidate;
+        break;
+      }
+    }
+    if (srcPath) {
+      await ensureDir(audioStagingDir);
+      await Deno.copyFile(srcPath, join(audioStagingDir, fileName));
+      say.done(`  Packaged modloader/${modName}/audio/${fileName}`);
+    } else {
+      say.info(
+        `  Optional audio asset not found yet (skipped): audio/${fileName}`,
+      );
+    }
+  }
 }
 
 // Step 17: FleeOnShot ASI Plugin
