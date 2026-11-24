@@ -128,6 +128,7 @@ constexpr uint8_t WLSU_RADIO = 13;
 
 constexpr int32_t GS_PLAYING_GAME = 9;
 constexpr int32_t MENUPAGE_SOUND_SETTINGS = 5;
+constexpr int32_t LEVEL_INDUSTRIAL = 1;
 constexpr int32_t LEVEL_COMMERCIAL = 2;
 constexpr int32_t SMP_DONE = 2;
 
@@ -149,9 +150,10 @@ constexpr int16_t FONT_HEADING = 2;
 // 18:39 into GAME.wav (in milliseconds)
 constexpr int32_t EMERGENCY_GAME_FM_POS_MS = (18 * 60 + 39) * 1000;
 
-// WLSU 88.5 transmitter coordinates (centered on Liberty Campus / UNIVERS)
-constexpr float WLSU_TX_X = 180.0f;
-constexpr float WLSU_TX_Y = -240.0f;
+// WLSU 88.5 transmitter coordinates (rooftop antenna on Liberty Campus /
+// newuni_gz)
+constexpr float WLSU_TX_X = 179.6f;
+constexpr float WLSU_TX_Y = -300.0f;
 
 struct CRGBA {
   uint8_t r;
@@ -245,6 +247,7 @@ void *g_lastPlayerVeh = nullptr;
 uint8_t g_currentStation = RADIO_OFF;
 bool g_emergencyStationApplied = false;
 bool g_wasWastedOrBusted = false;
+bool g_onMansionRoof = false;
 int32_t g_onFootRadioFade = 100;
 DWORD g_lastFadeTick = 0;
 int32_t g_pendingScrollSteps = 0;
@@ -893,11 +896,6 @@ bool IsMP3ChannelAvailable() {
   return isMP3Avail(reinterpret_cast<void *>(ADDR_SAMPLE_MANAGER));
 }
 
-bool IsWlsuAvailable() {
-  return *reinterpret_cast<const int32_t *>(ADDR_COLLISION_IN_MEMORY) ==
-         LEVEL_COMMERCIAL;
-}
-
 inline uint8_t &MusicU8(void *self, size_t off) {
   return *reinterpret_cast<uint8_t *>(reinterpret_cast<uintptr_t>(self) + off);
 }
@@ -915,6 +913,48 @@ inline float GetEntityPosY(const void *entity) {
 inline float GetEntityPosZ(const void *entity) {
   return *reinterpret_cast<const float *>(reinterpret_cast<uintptr_t>(entity) +
                                           OFF_ENTITY_POS + 2 * sizeof(float));
+}
+
+bool IsPlayerOnMansionRoof() {
+  if (*reinterpret_cast<const int32_t *>(ADDR_COLLISION_IN_MEMORY) !=
+      LEVEL_INDUSTRIAL) {
+    g_onMansionRoof = false;
+    return false;
+  }
+
+  auto findPlayerVeh =
+      reinterpret_cast<FindPlayerVehicleFn>(ADDR_FIND_PLAYER_VEHICLE);
+  auto findPlayerPed = reinterpret_cast<FindPlayerPedFn>(ADDR_FIND_PLAYER_PED);
+  void *entity = findPlayerVeh();
+  if (!entity) {
+    entity = findPlayerPed();
+  }
+  if (!entity) {
+    g_onMansionRoof = false;
+    return false;
+  }
+
+  const float px = GetEntityPosX(entity);
+  const float py = GetEntityPosY(entity);
+  const float pz = GetEntityPosZ(entity);
+
+  if (!g_onMansionRoof) {
+    g_onMansionRoof = (px >= 1448.0f && px <= 1492.0f && py >= -202.0f &&
+                       py <= -162.0f && pz >= 59.5f);
+  } else {
+    g_onMansionRoof = (px >= 1446.5f && px <= 1493.5f && py >= -203.5f &&
+                       py <= -160.5f && pz >= 58.6f);
+  }
+  return g_onMansionRoof;
+}
+
+bool IsWlsuAvailable() {
+  if (*reinterpret_cast<const int32_t *>(ADDR_COLLISION_IN_MEMORY) ==
+      LEVEL_COMMERCIAL) {
+    g_onMansionRoof = false;
+    return true;
+  }
+  return IsPlayerOnMansionRoof();
 }
 
 inline uint8_t GetEntityStatus(const void *entity) {
@@ -1403,6 +1443,23 @@ void ComputeWlsuSignalMix(float *outProgGain, float *outStaticGain) {
   const float px = GetEntityPosX(entity);
   const float py = GetEntityPosY(entity);
   const float pz = GetEntityPosZ(entity);
+
+  if (*reinterpret_cast<const int32_t *>(ADDR_COLLISION_IN_MEMORY) !=
+          LEVEL_COMMERCIAL &&
+      IsPlayerOnMansionRoof()) {
+    // Elevated line-of-sight fringe pickup from Salvatore's Mansion Roof
+    // (~1.3 km across the river from the Liberty Campus rooftop antenna).
+    float elev = (pz - 59.5f) / 12.0f;
+    if (elev < 0.0f) {
+      elev = 0.0f;
+    } else if (elev > 1.0f) {
+      elev = 1.0f;
+    }
+    *outProgGain = 0.19f + 0.09f * elev;
+    *outStaticGain = 0.88f - 0.10f * elev;
+    return;
+  }
+
   const float dx = px - WLSU_TX_X;
   const float dy = py - WLSU_TX_Y;
   const float dist = std::sqrt(dx * dx + dy * dy);
@@ -1958,6 +2015,7 @@ void __fastcall Hook_ResetMusicAfterReload(void *self, uintptr_t) {
   g_currentStation = RADIO_OFF;
   g_emergencyStationApplied = false;
   g_wasWastedOrBusted = false;
+  g_onMansionRoof = false;
   g_onFootRadioFade = 100;
   g_lastFadeTick = 0;
   g_pendingScrollSteps = 0;
