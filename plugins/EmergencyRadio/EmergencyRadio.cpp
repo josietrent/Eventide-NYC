@@ -30,6 +30,8 @@ constexpr uintptr_t ADDR_REPLAY_MODE = 0x95CD5B;
 constexpr uintptr_t ADDR_RS_MAX_WIDTH = 0x8F436C;
 constexpr uintptr_t ADDR_RS_MAX_HEIGHT = 0x8F4370;
 constexpr uintptr_t ADDR_COLLISION_IN_MEMORY = 0x941514; // 1=IND, 2=COM, 3=SUB
+constexpr uintptr_t ADDR_WORLD_PLAYERS = 0x9412F0;   // CPlayerInfo Players[]
+constexpr uintptr_t ADDR_PLAYER_IN_FOCUS = 0x95CD61; // uint8_t
 
 constexpr uintptr_t ADDR_NUM_RETUNE_PRESSES = 0x650B80;
 constexpr uintptr_t ADDR_RETUNE_COUNTER = 0x650B84;
@@ -87,6 +89,10 @@ constexpr uintptr_t ADDR_AUDIO_PLAY_ONE_SHOT = 0x57A500;
 constexpr uint16_t SOUND_FRONTEND_RADIO_CHANGE = 0x9F;
 
 // Struct field offsets (validated against GTA III v1.0)
+constexpr size_t SIZEOF_PLAYER_INFO = 0x13C;
+constexpr size_t OFF_PLAYERINFO_WB_STATE =
+    0xD8; // uint8_t (0=playing, 1=wasted, 2=busted)
+
 constexpr size_t OFF_MUSIC_NEXT_TRACK = 0x03;
 constexpr size_t OFF_MUSIC_PLAYING_TRACK = 0x04;
 constexpr size_t OFF_MUSIC_PREV_PLAYER_IN_CAR = 0x09;
@@ -100,6 +106,7 @@ constexpr size_t OFF_ENTITY_POS = 0x34; // float[3] m_matrix.pos
 constexpr size_t OFF_ENTITY_STATUS_BYTE = 0x50;
 constexpr size_t OFF_ENTITY_MODEL_INDEX = 0x5C;
 constexpr size_t OFF_PED_STATE = 0x224;
+constexpr size_t OFF_PED_HEALTH = 0x2C0; // float
 constexpr size_t OFF_VEH_RADIO_STATION = 0x229;
 
 // Game constants
@@ -124,10 +131,15 @@ constexpr int32_t MENUPAGE_SOUND_SETTINGS = 5;
 constexpr int32_t LEVEL_COMMERCIAL = 2;
 constexpr int32_t SMP_DONE = 2;
 
+constexpr uint8_t WBSTATE_WASTED = 1;
+constexpr uint8_t WBSTATE_BUSTED = 2;
+
 constexpr int16_t MI_AMBULAN = 106;
 constexpr int16_t MI_POLICE = 116;
 
 constexpr uint8_t STATUS_WRECKED = 5;
+constexpr int32_t PEDSTATE_DIE = 48;
+constexpr int32_t PEDSTATE_DEAD = 49;
 constexpr int32_t PEDSTATE_DRAG_FROM_CAR = 51;
 constexpr int32_t PEDSTATE_EXIT_CAR = 54;
 constexpr int32_t PEDSTATE_ARRESTED = 56;
@@ -232,6 +244,7 @@ SampleTerminateFn g_origSampleTerminate = nullptr;
 void *g_lastPlayerVeh = nullptr;
 uint8_t g_currentStation = RADIO_OFF;
 bool g_emergencyStationApplied = false;
+bool g_wasWastedOrBusted = false;
 int32_t g_onFootRadioFade = 100;
 DWORD g_lastFadeTick = 0;
 int32_t g_pendingScrollSteps = 0;
@@ -921,6 +934,39 @@ inline int32_t GetPedState(const void *ped) {
                                             OFF_PED_STATE);
 }
 
+inline float GetPedHealth(const void *ped) {
+  return *reinterpret_cast<const float *>(reinterpret_cast<uintptr_t>(ped) +
+                                          OFF_PED_HEALTH);
+}
+
+bool IsPlayerWastedOrBusted() {
+  const uint8_t focus =
+      *reinterpret_cast<const uint8_t *>(ADDR_PLAYER_IN_FOCUS);
+  if (focus < 2) {
+    const uintptr_t playerInfo =
+        ADDR_WORLD_PLAYERS + static_cast<size_t>(focus) * SIZEOF_PLAYER_INFO;
+    const uint8_t wbState = *reinterpret_cast<const uint8_t *>(
+        playerInfo + OFF_PLAYERINFO_WB_STATE);
+    if (wbState == WBSTATE_WASTED || wbState == WBSTATE_BUSTED) {
+      return true;
+    }
+  }
+
+  auto findPlayerPed = reinterpret_cast<FindPlayerPedFn>(ADDR_FIND_PLAYER_PED);
+  void *ped = findPlayerPed();
+  if (ped) {
+    const int32_t pedState = GetPedState(ped);
+    if (pedState == PEDSTATE_DIE || pedState == PEDSTATE_DEAD ||
+        pedState == PEDSTATE_ARRESTED) {
+      return true;
+    }
+    if (GetPedHealth(ped) <= 0.0f) {
+      return true;
+    }
+  }
+  return false;
+}
+
 inline uint8_t &VehRadioStation(void *veh) {
   return *reinterpret_cast<uint8_t *>(reinterpret_cast<uintptr_t>(veh) +
                                       OFF_VEH_RADIO_STATION);
@@ -973,6 +1019,10 @@ uint8_t AdvanceRadioStation(uint8_t current, int32_t presses, bool mp3Avail,
 }
 
 bool __fastcall Hook_PlayerInCar(void *self, uintptr_t) {
+  if (IsPlayerWastedOrBusted()) {
+    return false;
+  }
+
   if (g_origPlayerInCar(self)) {
     return true;
   }
@@ -1057,6 +1107,12 @@ uint8_t __fastcall Hook_GetNextCarTuning(void *, uintptr_t) {
 }
 
 void __fastcall Hook_DisplayRadioStationName(void *self, uintptr_t) {
+  if (IsPlayerWastedOrBusted()) {
+    *reinterpret_cast<uint8_t *>(ADDR_DISPLAY_TIMER) = 0;
+    *reinterpret_cast<const wchar_t **>(ADDR_CURRENT_STATION_PTR) = nullptr;
+    return;
+  }
+
   const bool paused =
       (*reinterpret_cast<const uint8_t *>(ADDR_USER_PAUSE) != 0) ||
       (*reinterpret_cast<const uint8_t *>(ADDR_CODE_PAUSE) != 0);
@@ -1555,8 +1611,9 @@ void UpdateWlsuStreams() {
   float staticGain = 0.0f;
   ComputeWlsuSignalMix(&progGain, &staticGain);
 
-  const bool wideScreen = *reinterpret_cast<const uint8_t *>(
-                              ADDR_THE_CAMERA + OFF_CAM_WIDESCREEN) != 0;
+  const bool wideScreen = (*reinterpret_cast<const uint8_t *>(
+                               ADDR_THE_CAMERA + OFF_CAM_WIDESCREEN) != 0) &&
+                          !IsPlayerWastedOrBusted();
   float envScale = wideScreen ? 0.0f : 1.0f;
   if (!Hook_PlayerInCar(reinterpret_cast<void *>(ADDR_MUSIC_MANAGER), 0)) {
     envScale *= (static_cast<float>(g_onFootRadioFade) / 100.0f);
@@ -1611,7 +1668,8 @@ void __fastcall Hook_ServiceAmbience(void *self, uintptr_t) {
   }
   g_lastFadeTick = now;
 
-  const int32_t targetVol = IsCutsceneActive() ? 0 : 100;
+  const bool wastedOrBusted = IsPlayerWastedOrBusted();
+  const int32_t targetVol = (wastedOrBusted || IsCutsceneActive()) ? 0 : 100;
   int32_t step = static_cast<int32_t>((dt * 100) / 600);
   if (step < 1) {
     step = 1;
@@ -1626,6 +1684,22 @@ void __fastcall Hook_ServiceAmbience(void *self, uintptr_t) {
     if (g_onFootRadioFade > targetVol) {
       g_onFootRadioFade = targetVol;
     }
+  }
+
+  if (wastedOrBusted && g_onFootRadioFade == 0) {
+    g_currentStation = RADIO_OFF;
+    g_onFootRadioFade = 100;
+    g_lastFadeTick = 0;
+    *reinterpret_cast<uint8_t *>(ADDR_DISPLAY_TIMER) = 0;
+    *reinterpret_cast<const wchar_t **>(ADDR_CURRENT_STATION_PTR) = nullptr;
+    MusicU8(self, OFF_MUSIC_NEXT_TRACK) = RADIO_OFF;
+    auto serviceTrack = reinterpret_cast<MusicBoolFn>(ADDR_MUSIC_SERVICE_TRACK);
+    serviceTrack(self);
+    auto setStreamedVol =
+        reinterpret_cast<SampleSetStreamedVolFn>(ADDR_SAMPLE_SET_STREAMED_VOL);
+    setStreamedVol(reinterpret_cast<void *>(ADDR_SAMPLE_MANAGER), 0, 63, 0, 0);
+    g_origServiceAmbience(self);
+    return;
   }
 
   if (g_currentStation == WLSU_RADIO) {
@@ -1657,6 +1731,25 @@ void __fastcall Hook_ServiceAmbience(void *self, uintptr_t) {
 
 void __fastcall Hook_ServiceGameMode(void *self, uintptr_t) {
   InstallWindowHook();
+
+  const bool wastedOrBusted = IsPlayerWastedOrBusted();
+  if (wastedOrBusted) {
+    g_wasWastedOrBusted = true;
+    g_pendingScrollSteps = 0;
+    *reinterpret_cast<uint8_t *>(ADDR_DISPLAY_TIMER) = 0;
+    *reinterpret_cast<const wchar_t **>(ADDR_CURRENT_STATION_PTR) = nullptr;
+  } else if (g_wasWastedOrBusted) {
+    g_wasWastedOrBusted = false;
+    g_lastPlayerVeh = nullptr;
+    g_currentStation = RADIO_OFF;
+    g_onFootRadioFade = 100;
+    g_lastFadeTick = 0;
+    g_pendingScrollSteps = 0;
+    g_wrappedRetuneBonus = 0;
+    *reinterpret_cast<uint8_t *>(ADDR_DISPLAY_TIMER) = 0;
+    *reinterpret_cast<const wchar_t **>(ADDR_CURRENT_STATION_PTR) = nullptr;
+    MusicU8(self, OFF_MUSIC_NEXT_TRACK) = RADIO_OFF;
+  }
 
   auto findPlayerVeh =
       reinterpret_cast<FindPlayerVehicleFn>(ADDR_FIND_PLAYER_VEHICLE);
@@ -1750,7 +1843,7 @@ void __fastcall Hook_ServiceGameMode(void *self, uintptr_t) {
     // Discard any mouse wheel steps on foot so weapon cycling is never hijacked
     g_pendingScrollSteps = 0;
 
-    if (g_currentStation == WLSU_RADIO && !wlsuAvail) {
+    if (!wastedOrBusted && g_currentStation == WLSU_RADIO && !wlsuAvail) {
       g_currentStation = AdvanceRadioStation(WLSU_RADIO, 1, mp3Avail, false);
       *reinterpret_cast<int32_t *>(ADDR_RETUNE_COUNTER) = 30;
       *reinterpret_cast<int32_t *>(ADDR_NUM_RETUNE_PRESSES) = 0;
@@ -1786,8 +1879,8 @@ void __fastcall Hook_ServiceGameMode(void *self, uintptr_t) {
         (*reinterpret_cast<const uint8_t *>(reinterpret_cast<uintptr_t>(pad) +
                                             OFF_PAD_DISABLE_CONTROLS) != 0);
 
-    const bool retuneTriggered =
-        !paused && !wideScreen && !controlsDisabled && (rJustDown || padRetune);
+    const bool retuneTriggered = !paused && !wideScreen && !controlsDisabled &&
+                                 !wastedOrBusted && (rJustDown || padRetune);
 
     if (retuneTriggered) {
       g_currentStation =
@@ -1864,6 +1957,7 @@ void __fastcall Hook_ResetMusicAfterReload(void *self, uintptr_t) {
   g_lastPlayerVeh = nullptr;
   g_currentStation = RADIO_OFF;
   g_emergencyStationApplied = false;
+  g_wasWastedOrBusted = false;
   g_onFootRadioFade = 100;
   g_lastFadeTick = 0;
   g_pendingScrollSteps = 0;
