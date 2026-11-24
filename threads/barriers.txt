@@ -74,14 +74,25 @@ while $BarrierIND == true
             if or
                 Player.IsInZone($player, 'COM_EAS')
                 Player.IsInZone($player, 'COM_ZON')
-                Player.IsInZone($player, 'SUB_ZON')
                 Player.IsInZone($player, 'AIRPORT')
                 Player.IsInZone($player, 'PROJECT')
                 Player.IsInZone($player, 'SWANKS')
                 Player.IsInZone($player, 'SUB_IND')
                 Player.IsInZone($player, 'BIG_DAM')
+                Player.IsInZone($player, 'SUB_ZO2')
+                Player.IsInZone($player, 'SUB_ZO3')
             then
                 goto @BarrierTeleport
+            end
+            if
+                Player.IsInZone($player, 'SUB_ZON')
+            then
+                4@, 5@, 6@ = Player.GetCoordinates($player)
+                if
+                    4@ < -320.0
+                then
+                    goto @BarrierTeleport
+                end
             end
         end
     end
@@ -109,14 +120,25 @@ while $BarrierIND == true
             if or
                 Player.IsInZone($player, 'COM_EAS')
                 Player.IsInZone($player, 'COM_ZON')
-                Player.IsInZone($player, 'SUB_ZON')
                 Player.IsInZone($player, 'AIRPORT')
                 Player.IsInZone($player, 'PROJECT')
                 Player.IsInZone($player, 'SWANKS')
                 Player.IsInZone($player, 'SUB_IND')
                 Player.IsInZone($player, 'BIG_DAM')
+                Player.IsInZone($player, 'SUB_ZO2')
+                Player.IsInZone($player, 'SUB_ZO3')
             then
                 goto @BarrierTeleport
+            end
+            if
+                Player.IsInZone($player, 'SUB_ZON')
+            then
+                4@, 5@, 6@ = Player.GetCoordinates($player)
+                if
+                    4@ < -320.0
+                then
+                    goto @BarrierTeleport
+                end
             end
             break // Exit countdown loop back to monitoring
         end

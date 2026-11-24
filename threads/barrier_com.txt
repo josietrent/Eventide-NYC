@@ -8,6 +8,9 @@ script_name 'BARCOM'
 const MODEL_HELIX_BARRIER = 1299
 
 int waitCount = 0
+float px = 0.0
+float py = 0.0
+float pz = 0.0
 
 while not Player.IsPlaying($player)
     wait 250
@@ -118,17 +121,31 @@ while $BarrierCOM == 1
         continue
     end
 
-    // Anti-bypass: prevent entering Shoreside Vale (by boat, Dodo, Lift Bridge, or tunnel clip) while $BarrierCOM == 1
+    // Anti-bypass: prevent entering Shoreside Vale (by boat, Dodo, Lift Bridge, or tunnel clip) while $BarrierCOM == 1.
+    // SUB_ZON's east boundary (X = -266.895) overlaps Staunton's west-facing Aspatria piers (com_landnew2, minX = -305.0),
+    // so only enforce SUB_ZON west of the channel boundary (X < -320.0; Wichita Gardens cliffs start at X = -381.8).
     if or
-        Player.IsInZone($player, 'SUB_ZON')
         Player.IsInZone($player, 'AIRPORT')
         Player.IsInZone($player, 'PROJECT')
         Player.IsInZone($player, 'SWANKS')
         Player.IsInZone($player, 'SUB_IND')
         Player.IsInZone($player, 'BIG_DAM')
+        Player.IsInZone($player, 'SUB_ZO2')
+        Player.IsInZone($player, 'SUB_ZO3')
         Player.IsInArea3D($player, -450.0, -655.0, 35.0, -145.0, -607.0, 120.0, False)
     then
         gosub @BarrierComTeleport
+    else
+        if
+            Player.IsInZone($player, 'SUB_ZON')
+        then
+            px, py, pz = Player.GetCoordinates($player)
+            if
+                px < -320.0
+            then
+                gosub @BarrierComTeleport
+            end
+        end
     end
 end
 
