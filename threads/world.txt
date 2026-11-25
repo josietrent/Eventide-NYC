@@ -21,6 +21,7 @@ while not Player.IsPlaying($player)
     wait 0
 end
 
+$BarrierIND = 0 // TEMP: unlock Staunton barrier for antenna testing
 Camera.SetFadingColor(40, 0, 70)
 if $BarrierIND == 0
 then
@@ -42,6 +43,7 @@ while true
     end
 end
 
+$BarrierIND = 0 // TEMP: unlock Staunton barrier for antenna testing
 Camera.SetFadingColor(40, 0, 70)
 if $BarrierIND == 0
 then
