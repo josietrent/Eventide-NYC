@@ -35,10 +35,12 @@ constexpr uintptr_t ADDR_PREFS_SHOW_HUD =
 constexpr uintptr_t ADDR_CODE_PAUSE = 0x95CDB1; // CTimer::m_CodePause
 
 // Functions
+constexpr uintptr_t ADDR_ANIM_BLEND = 0x403710;
 constexpr uintptr_t ADDR_STREAMING_REQUEST_MODEL = 0x407EA0;
 constexpr uintptr_t ADDR_STREAMING_LOAD_ALL = 0x40A440;
 constexpr uintptr_t ADDR_STREAMING_LOAD_SCENE = 0x40A6D0;
 constexpr uintptr_t ADDR_STREAMING_SET_DELETABLE = 0x40A820;
+constexpr uintptr_t ADDR_COLLISION_PROCESS_COL_MODELS = 0x410BE0;
 constexpr uintptr_t ADDR_JOIN_CAR_GOTO_COORS = 0x41FA00;
 constexpr uintptr_t ADDR_SCRIPTS_PROCESS = 0x439040;
 constexpr uintptr_t ADDR_CLEAR_SPACE_FOR_ENTITY = 0x454060;
@@ -48,13 +50,16 @@ constexpr uintptr_t ADDR_GET_DIST_COM_TO_BASE = 0x4755C0;
 constexpr uintptr_t ADDR_PLACEABLE_SET_HEADING = 0x49FA00;
 constexpr uintptr_t ADDR_FIND_PLAYER_VEHICLE = 0x4A10C0;
 constexpr uintptr_t ADDR_FIND_PLAYER_PED = 0x4A1150;
+constexpr uintptr_t ADDR_ENTITY_REGISTER_REF = 0x4A7480;
 constexpr uintptr_t ADDR_TIMER_UPDATE = 0x4ACF70;
 constexpr uintptr_t ADDR_TIMER_STOP = 0x4AD480;
 constexpr uintptr_t ADDR_WORLD_ADD = 0x4AE930;
 constexpr uintptr_t ADDR_FIND_GROUND_Z = 0x4B3A80;
+constexpr uintptr_t ADDR_ZONES_GET_LEVEL = 0x4B6910;
 constexpr uintptr_t ADDR_MATRIX_UPDATE_RW = 0x4B8EC0;
 constexpr uintptr_t ADDR_CIV_PED_CTOR = 0x4BFF30;
 constexpr uintptr_t ADDR_CIV_PED_NEW = 0x4C5220;
+constexpr uintptr_t ADDR_PED_STOP_CLUMP_ATOMIC = 0x4C5D50;
 constexpr uintptr_t ADDR_PED_WARP_INTO_CAR = 0x4D7D20;
 constexpr uintptr_t ADDR_PED_SET_OBJECTIVE_ENT = 0x4D83E0;
 constexpr uintptr_t ADDR_FONT_PRINT_STRING = 0x500F50;
@@ -76,6 +81,7 @@ constexpr uintptr_t ADDR_FONT_SET_DROP_SHADOW_POS = 0x501E70;
 constexpr uintptr_t ADDR_HUD_DRAW = 0x5052A0;
 constexpr uintptr_t ADDR_AUTOMOBILE_CTOR = 0x53E3E0;
 constexpr uintptr_t ADDR_AUTOMOBILE_NEW = 0x551120;
+constexpr uintptr_t ADDR_AUTOMOBILE_DELETE = 0x551150;
 constexpr uintptr_t ADDR_MUSIC_INITIALISE = 0x57CF70;
 
 // CPool layout
@@ -95,13 +101,17 @@ constexpr int16_t FONT_STANDARD = 0; // font2 (subtitles & HUD prompts)
 constexpr int16_t FONT_PAGER = 1;    // pager LCD (dark glyphs)
 constexpr int16_t FONT_HEADING = 2;  // font1 (Pricedown headings)
 
-// CEntity / CPhysical
+// CEntity / CPhysical / CColModel
 constexpr size_t OFF_ENTITY_VTABLE = 0x00;
 constexpr size_t OFF_ENTITY_POS = 0x34;
+constexpr size_t OFF_ENTITY_RW_OBJECT = 0x4C;
 constexpr size_t OFF_ENTITY_FLAGS_50 = 0x50;
+constexpr size_t OFF_ENTITY_FLAGS_51 = 0x51;
 constexpr size_t OFF_ENTITY_MODEL_INDEX = 0x5C;
 constexpr size_t OFF_PHYSICAL_MOVE_SPEED = 0x78;
 constexpr size_t OFF_PHYSICAL_TURN_SPEED = 0x84;
+constexpr size_t OFF_COLMODEL_NUM_LINES = 0x32;
+constexpr size_t COLPOINT_SIZE = 40;
 
 constexpr uint8_t ENTITY_TYPE_MASK = 0x07;
 constexpr uint8_t ENTITY_TYPE_VEHICLE = 2;
@@ -131,6 +141,7 @@ constexpr size_t OFF_VEH_GAS_PEDAL = 0x1EC;                   // float
 constexpr size_t OFF_VEH_BRAKE_PEDAL = 0x1F0;                 // float
 constexpr size_t OFF_VEH_CREATED_BY = 0x1F4;                  // uint8_t
 constexpr size_t OFF_VEH_FLAGS_1F5 = 0x1F5;                   // uint8_t
+constexpr size_t OFF_VEH_FLAGS_1F6 = 0x1F6;                   // uint8_t
 constexpr size_t OFF_VEH_HEALTH = 0x200;                      // float
 constexpr size_t OFF_VEH_RADIO_STATION = 0x229;               // uint8_t
 constexpr size_t OFF_VEH_CLASS = 0x284;                       // uint32_t
@@ -152,25 +163,31 @@ constexpr uint8_t TEMPACT_WAIT = 1;
 constexpr uint8_t TEMPACT_REVERSE = 2;
 
 // CPed offsets
-constexpr size_t OFF_PED_FLAGS_156 = 0x156;  // uint8_t
-constexpr size_t OFF_PED_FLAGS_157 = 0x157;  // uint8_t
-constexpr size_t OFF_PED_FLAGS_15A = 0x15A;  // uint8_t
-constexpr size_t OFF_PED_CREATED_BY = 0x160; // uint8_t
-constexpr size_t OFF_PED_OBJECTIVE = 0x164;  // uint32_t
-constexpr size_t OFF_PED_STATE = 0x224;      // uint32_t
-constexpr size_t OFF_PED_HEALTH = 0x2C0;     // float
-constexpr size_t OFF_PED_IN_VEHICLE = 0x314; // uint8_t
-constexpr size_t OFF_PED_WANTED = 0x53C;     // CWanted*
-constexpr size_t OFF_WANTED_LEVEL = 0x18;    // int32_t
+constexpr size_t OFF_PED_AREA_CODE = 0x124;    // uint8_t
+constexpr size_t OFF_PED_FLAGS_156 = 0x156;    // uint8_t
+constexpr size_t OFF_PED_FLAGS_157 = 0x157;    // uint8_t
+constexpr size_t OFF_PED_FLAGS_15A = 0x15A;    // uint8_t
+constexpr size_t OFF_PED_CREATED_BY = 0x160;   // uint8_t
+constexpr size_t OFF_PED_OBJECTIVE = 0x164;    // uint32_t
+constexpr size_t OFF_PED_VEHICLE_ANIM = 0x1D8; // CAnimBlendAssociation*
+constexpr size_t OFF_PED_STATE = 0x224;        // uint32_t
+constexpr size_t OFF_PED_HEALTH = 0x2C0;       // float
+constexpr size_t OFF_PED_VEHICLE = 0x310;      // CVehicle*
+constexpr size_t OFF_PED_IN_VEHICLE = 0x314;   // uint8_t
+constexpr size_t OFF_PED_WANTED = 0x53C;       // CWanted*
+constexpr size_t OFF_WANTED_LEVEL = 0x18;      // int32_t
 
 constexpr uint8_t RANDOM_CHAR = 1;
 constexpr uint8_t MISSION_CHAR = 2;
 constexpr uint32_t PEDTYPE_CIVMALE = 4;
+constexpr uint32_t PEDSTATE_DRIVING = 44;
 constexpr uint32_t PEDSTATE_DIE = 48;
 constexpr uint32_t PEDSTATE_DEAD = 49;
 constexpr uint32_t OBJECTIVE_LEAVE_CAR = 13;
 constexpr uint32_t OBJECTIVE_ENTER_CAR_AS_PASSENGER = 14;
 constexpr uint32_t OBJECTIVE_ENTER_CAR_AS_DRIVER = 15;
+constexpr uint32_t ANIM_STD_CAR_SIT = 0x6F;
+constexpr uint32_t ANIM_STD_CAR_SIT_LO = 0x70;
 
 // Model IDs (data/default.ide)
 constexpr int32_t MI_MALE01 = 7;
@@ -358,6 +375,11 @@ constexpr size_t kLoopCount = sizeof(kPortlandLoop) / sizeof(kPortlandLoop[0]);
 using MusicBoolFn = bool(__thiscall *)(void *self);
 using ScriptsProcessFn = void(__cdecl *)();
 using HudDrawFn = void(__cdecl *)();
+using ProcessColModelsFn = int(__cdecl *)(const void *matA, const void *colA,
+                                          const void *matB, const void *colB,
+                                          void *aSphereColPoints,
+                                          void *aLineColPoints,
+                                          float *aLineMaxTouchDist);
 using FindPlayerPedFn = void *(__cdecl *)();
 using FindPlayerVehicleFn = void *(__cdecl *)();
 using StreamingReqModelFn = void(__cdecl *)(int32_t model, int32_t flags);
@@ -367,17 +389,22 @@ using StreamingSetDelFn = void(__cdecl *)(int32_t model);
 using TimerVoidFn = void(__cdecl *)();
 using WorldAddFn = void(__cdecl *)(void *entity);
 using FindGroundZFn = float(__cdecl *)(float x, float y);
+using ZonesGetLevelFn = int(__cdecl *)(const Vec3 *pos);
 using ClearSpaceFn = void(__cdecl *)(const Vec3 *pos, void *entity);
 using CameraFadeFn = void(__thiscall *)(void *camera, float durationSec,
                                         int16_t direction);
 using JoinGotoCoorsFn = bool(__cdecl *)(void *veh, float x, float y, float z,
                                         bool arg);
 using AutomobileNewFn = void *(__cdecl *)(uint32_t size);
+using AutomobileDelFn = void(__cdecl *)(void *veh);
 using AutomobileCtorFn = void *(__thiscall *)(void *self, int32_t modelIndex,
                                               uint8_t createdBy);
 using CivPedNewFn = void *(__cdecl *)(uint32_t size);
 using CivPedCtorFn = void *(__thiscall *)(void *self, uint32_t pedType,
                                           int32_t modelIndex);
+using AnimBlendFn = void *(__cdecl *)(void *clump, uint32_t assocGroup,
+                                      uint32_t animId, float delta);
+using EntityRegRefFn = void(__thiscall *)(void *entity, void **ref);
 using GetDistToBaseFn = float(__thiscall *)(void *entity);
 using SetHeadingFn = void(__thiscall *)(void *entity, float rad);
 using ThisVoidFn = void(__thiscall *)(void *self);
@@ -427,6 +454,7 @@ int g_skipKey = 'N';
 MusicBoolFn g_origInitialise = nullptr;
 ScriptsProcessFn g_origScriptsProcess = nullptr;
 HudDrawFn g_origHudDraw = nullptr;
+ProcessColModelsFn g_origProcessColModels = nullptr;
 
 // Active bus state
 void *g_bus = nullptr;
@@ -1129,6 +1157,7 @@ bool SpawnTransitBusForStop(size_t targetWpIdx, const Vec3 &playerPos,
   }
 
   auto vehNew = reinterpret_cast<AutomobileNewFn>(ADDR_AUTOMOBILE_NEW);
+  auto vehDelete = reinterpret_cast<AutomobileDelFn>(ADDR_AUTOMOBILE_DELETE);
   auto vehCtor = reinterpret_cast<AutomobileCtorFn>(ADDR_AUTOMOBILE_CTOR);
   auto pedNew = reinterpret_cast<CivPedNewFn>(ADDR_CIV_PED_NEW);
   auto pedCtor = reinterpret_cast<CivPedCtorFn>(ADDR_CIV_PED_CTOR);
@@ -1141,13 +1170,23 @@ bool SpawnTransitBusForStop(size_t targetWpIdx, const Vec3 &playerPos,
       reinterpret_cast<ThisVoidFn>(ADDR_ENTITY_UPDATE_RW_FRAME);
   auto clearSpace = reinterpret_cast<ClearSpaceFn>(ADDR_CLEAR_SPACE_FOR_ENTITY);
   auto worldAdd = reinterpret_cast<WorldAddFn>(ADDR_WORLD_ADD);
-  auto setObj =
-      reinterpret_cast<PedSetObjectiveEntFn>(ADDR_PED_SET_OBJECTIVE_ENT);
-  auto warpIntoCar = reinterpret_cast<PedWarpIntoCarFn>(ADDR_PED_WARP_INTO_CAR);
+  auto registerRef = reinterpret_cast<EntityRegRefFn>(ADDR_ENTITY_REGISTER_REF);
+  auto blendAnim = reinterpret_cast<AnimBlendFn>(ADDR_ANIM_BLEND);
+  auto stopClumpAtomic =
+      reinterpret_cast<ThisVoidFn>(ADDR_PED_STOP_CLUMP_ATOMIC);
+  auto getZoneLevel = reinterpret_cast<ZonesGetLevelFn>(ADDR_ZONES_GET_LEVEL);
 
+  // Allocate both pool slots before constructing or adding to world so failure
+  // never leaves a driverless vehicle behind.
   void *veh = vehNew(VEHICLE_POOL_STRIDE);
   if (!veh)
     return false;
+  void *driver = pedNew(PED_POOL_STRIDE);
+  if (!driver) {
+    vehDelete(veh);
+    return false;
+  }
+
   vehCtor(veh, busModel, MISSION_VEHICLE);
   FieldAt<uint8_t>(veh, OFF_VEH_RADIO_STATION) = RADIO_OFF;
 
@@ -1164,8 +1203,8 @@ bool SpawnTransitBusForStop(size_t targetWpIdx, const Vec3 &playerPos,
   uint8_t &flags50 = FieldAt<uint8_t>(veh, OFF_ENTITY_FLAGS_50);
   flags50 = (flags50 & 0x07) | (STATUS_PHYSICS << 3);
   FieldAt<uint8_t>(veh, OFF_VEH_FLAGS_1F5) =
-      (FieldAt<uint8_t>(veh, OFF_VEH_FLAGS_1F5) & 0xD7) |
-      0x08; // engine on, handbrake off
+      (FieldAt<uint8_t>(veh, OFF_VEH_FLAGS_1F5) & 0xCF) |
+      0x10; // engine on, handbrake off
   FieldAt<float>(veh, OFF_VEH_STEER_ANGLE) = 0.0f;
   FieldAt<float>(veh, OFF_VEH_GAS_PEDAL) = 0.0f;
   FieldAt<float>(veh, OFF_VEH_BRAKE_PEDAL) = 0.0f;
@@ -1176,11 +1215,8 @@ bool SpawnTransitBusForStop(size_t targetWpIdx, const Vec3 &playerPos,
 
   worldAdd(veh);
 
-  void *driver = pedNew(PED_POOL_STRIDE);
-  if (!driver) {
-    FieldAt<uint8_t>(veh, OFF_VEH_CREATED_BY) = RANDOM_VEHICLE;
-    return false;
-  }
+  // Attach the driver directly using the exact CREATE_CHAR_INSIDE_CAR
+  // (0x0129 / 0x43E660) sequence so pDriver is always bound immediately.
   pedCtor(driver, PEDTYPE_CIVMALE, MI_MALE01);
   FieldAt<uint8_t>(driver, OFF_PED_CREATED_BY) = MISSION_CHAR;
   FieldAt<uint8_t>(driver, OFF_PED_FLAGS_156) &= 0xFD;
@@ -1188,9 +1224,27 @@ bool SpawnTransitBusForStop(size_t targetWpIdx, const Vec3 &playerPos,
   FieldAt<float>(driver, OFF_ENTITY_POS + 0) = worldSpawn.x;
   FieldAt<float>(driver, OFF_ENTITY_POS + 4) = worldSpawn.y;
   FieldAt<float>(driver, OFF_ENTITY_POS + 8) = worldSpawn.z;
+  FieldAt<uint32_t>(driver, OFF_PED_STATE) = PEDSTATE_DRIVING;
 
-  setObj(driver, OBJECTIVE_ENTER_CAR_AS_DRIVER, veh);
-  warpIntoCar(driver, veh);
+  FieldAt<void *>(veh, OFF_VEH_DRIVER) = driver;
+  registerRef(driver, &FieldAt<void *>(veh, OFF_VEH_DRIVER));
+  FieldAt<void *>(driver, OFF_PED_VEHICLE) = veh;
+  registerRef(veh, &FieldAt<void *>(driver, OFF_PED_VEHICLE));
+  FieldAt<uint8_t>(driver, OFF_PED_IN_VEHICLE) = 1;
+  FieldAt<uint8_t>(driver, OFF_ENTITY_FLAGS_51) &= 0xFE;
+
+  void *clump = FieldAt<void *>(driver, OFF_ENTITY_RW_OBJECT);
+  if (clump) {
+    const uint32_t animId = (FieldAt<uint8_t>(veh, OFF_VEH_FLAGS_1F6) & 0x08)
+                                ? ANIM_STD_CAR_SIT_LO
+                                : ANIM_STD_CAR_SIT;
+    FieldAt<void *>(driver, OFF_PED_VEHICLE_ANIM) =
+        blendAnim(clump, 0, animId, 100.0f);
+  }
+  stopClumpAtomic(driver);
+  FieldAt<uint8_t>(driver, OFF_PED_AREA_CODE) =
+      static_cast<uint8_t>(getZoneLevel(&worldSpawn));
+  worldAdd(driver);
 
   g_bus = veh;
   g_driver = driver;
@@ -1856,6 +1910,52 @@ void DrawBusHud() {
   drawFonts();
 }
 
+int __cdecl Hook_ProcessColModels(const void *matA, const void *colA,
+                                  const void *matB, const void *colB,
+                                  void *aSphereColPoints, void *aLineColPoints,
+                                  float *aLineMaxTouchDist) {
+  // Multiple vanilla callers (0x4541FE, 0x4CC2D8, 0x530880, etc.) pass NULL
+  // for line outputs even when colA is a vehicle with 4 suspension lines,
+  // causing CCollision::TestLineTriangle (0x40F669) to dereference NULL.
+  if ((!aLineColPoints || !aLineMaxTouchDist) && colA) {
+    const int16_t numLines = FieldAt<int16_t>(colA, OFF_COLMODEL_NUM_LINES);
+    if (numLines > 0) {
+      constexpr size_t kScratchLines = 64;
+      const size_t count = static_cast<size_t>(numLines);
+      if (count <= kScratchLines) {
+        alignas(16) uint8_t scratchColPoints[kScratchLines * COLPOINT_SIZE];
+        float scratchTouchDist[kScratchLines];
+        if (!aLineColPoints) {
+          std::memset(scratchColPoints, 0, count * COLPOINT_SIZE);
+          aLineColPoints = scratchColPoints;
+        }
+        if (!aLineMaxTouchDist) {
+          for (size_t i = 0; i < count; ++i) {
+            scratchTouchDist[i] = 1.0f;
+          }
+          aLineMaxTouchDist = scratchTouchDist;
+        }
+        return g_origProcessColModels(matA, colA, matB, colB, aSphereColPoints,
+                                      aLineColPoints, aLineMaxTouchDist);
+      }
+      std::vector<uint8_t> heapColPoints;
+      std::vector<float> heapTouchDist;
+      if (!aLineColPoints) {
+        heapColPoints.assign(count * COLPOINT_SIZE, 0);
+        aLineColPoints = heapColPoints.data();
+      }
+      if (!aLineMaxTouchDist) {
+        heapTouchDist.assign(count, 1.0f);
+        aLineMaxTouchDist = heapTouchDist.data();
+      }
+      return g_origProcessColModels(matA, colA, matB, colB, aSphereColPoints,
+                                    aLineColPoints, aLineMaxTouchDist);
+    }
+  }
+  return g_origProcessColModels(matA, colA, matB, colB, aSphereColPoints,
+                                aLineColPoints, aLineMaxTouchDist);
+}
+
 void __cdecl Hook_ScriptsProcess() {
   g_origScriptsProcess();
   UpdateBusTransit(TimeMs());
@@ -1871,11 +1971,16 @@ void InstallDeferredHooks() {
     return;
   g_deferredInstalled = true;
 
+  const bool okCol =
+      InstallDetour(ADDR_COLLISION_PROCESS_COL_MODELS, &Hook_ProcessColModels,
+                    &g_origProcessColModels);
   const bool okScr = InstallDetour(ADDR_SCRIPTS_PROCESS, &Hook_ScriptsProcess,
                                    &g_origScriptsProcess);
   const bool okHud =
       InstallDetour(ADDR_HUD_DRAW, &Hook_HudDraw, &g_origHudDraw);
 
+  WriteLog(okCol ? "Collision::ProcessColModels hook (0x410BE0) OK"
+                 : "Collision::ProcessColModels hook (0x410BE0) FAILED");
   WriteLog(okScr ? "ScriptsProcess hook (0x439040) OK"
                  : "ScriptsProcess hook (0x439040) FAILED");
   WriteLog(okHud ? "HudDraw hook (0x5052A0) OK"
