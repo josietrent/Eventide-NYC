@@ -79,7 +79,7 @@ constexpr uintptr_t ADDR_FONT_SET_ALPHA_FADE = 0x501DD0;
 constexpr uintptr_t ADDR_FONT_SET_DROP_COLOR = 0x501DE0;
 constexpr uintptr_t ADDR_FONT_SET_DROP_SHADOW_POS = 0x501E70;
 constexpr uintptr_t ADDR_HUD_DRAW = 0x5052A0;
-constexpr uintptr_t ADDR_AUTOMOBILE_CTOR = 0x53E3E0;
+constexpr uintptr_t ADDR_AUTOMOBILE_CTOR = 0x52C6B0;
 constexpr uintptr_t ADDR_AUTOMOBILE_NEW = 0x551120;
 constexpr uintptr_t ADDR_AUTOMOBILE_DELETE = 0x551150;
 constexpr uintptr_t ADDR_MUSIC_INITIALISE = 0x57CF70;
@@ -119,6 +119,7 @@ constexpr uint8_t STATUS_PHYSICS = 3;
 constexpr uint8_t STATUS_WRECKED = 5;
 
 // CVehicle / CAutopilot offsets
+constexpr size_t OFF_VEH_AREA_CODE = 0x124;                   // uint8_t
 constexpr size_t OFF_VEH_AUTOPILOT_CURR_NODE = 0x12C;         // int32_t
 constexpr size_t OFF_VEH_AUTOPILOT_NEXT_NODE = 0x130;         // int32_t
 constexpr size_t OFF_VEH_AUTOPILOT_PREV_DIR = 0x140;          // int32_t
@@ -142,6 +143,7 @@ constexpr size_t OFF_VEH_BRAKE_PEDAL = 0x1F0;                 // float
 constexpr size_t OFF_VEH_CREATED_BY = 0x1F4;                  // uint8_t
 constexpr size_t OFF_VEH_FLAGS_1F5 = 0x1F5;                   // uint8_t
 constexpr size_t OFF_VEH_FLAGS_1F6 = 0x1F6;                   // uint8_t
+constexpr size_t OFF_VEH_FLAGS_1F7 = 0x1F7;                   // uint8_t
 constexpr size_t OFF_VEH_HEALTH = 0x200;                      // float
 constexpr size_t OFF_VEH_RADIO_STATION = 0x229;               // uint8_t
 constexpr size_t OFF_VEH_CLASS = 0x284;                       // uint32_t
@@ -1205,6 +1207,8 @@ bool SpawnTransitBusForStop(size_t targetWpIdx, const Vec3 &playerPos,
   FieldAt<uint8_t>(veh, OFF_VEH_FLAGS_1F5) =
       (FieldAt<uint8_t>(veh, OFF_VEH_FLAGS_1F5) & 0xCF) |
       0x10; // engine on, handbrake off
+  FieldAt<uint8_t>(veh, OFF_VEH_FLAGS_1F7) =
+      (FieldAt<uint8_t>(veh, OFF_VEH_FLAGS_1F7) & 0xFB) | 0x04;
   FieldAt<float>(veh, OFF_VEH_STEER_ANGLE) = 0.0f;
   FieldAt<float>(veh, OFF_VEH_GAS_PEDAL) = 0.0f;
   FieldAt<float>(veh, OFF_VEH_BRAKE_PEDAL) = 0.0f;
@@ -1213,6 +1217,8 @@ bool SpawnTransitBusForStop(size_t targetWpIdx, const Vec3 &playerPos,
   updateRwMat(reinterpret_cast<uint8_t *>(veh) + 4);
   updateRwFrame(veh);
 
+  const uint8_t areaCode = static_cast<uint8_t>(getZoneLevel(&worldSpawn));
+  FieldAt<uint8_t>(veh, OFF_VEH_AREA_CODE) = areaCode;
   worldAdd(veh);
 
   // Attach the driver directly using the exact CREATE_CHAR_INSIDE_CAR
@@ -1242,8 +1248,7 @@ bool SpawnTransitBusForStop(size_t targetWpIdx, const Vec3 &playerPos,
         blendAnim(clump, 0, animId, 100.0f);
   }
   stopClumpAtomic(driver);
-  FieldAt<uint8_t>(driver, OFF_PED_AREA_CODE) =
-      static_cast<uint8_t>(getZoneLevel(&worldSpawn));
+  FieldAt<uint8_t>(driver, OFF_PED_AREA_CODE) = areaCode;
   worldAdd(driver);
 
   g_bus = veh;
