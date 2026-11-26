@@ -19,6 +19,7 @@ import { say } from "./log.ts";
 import { buildMenuTxd, buildSingleTextureTxd } from "./build-menu-txd.ts";
 import { buildCyrillicFontAtlas } from "./build-cyrillic-font.ts";
 import { buildTxdFromPngDir } from "./build-ped-txds.ts";
+import { buildBusBlipTxd } from "./build-bus-blip-txd.ts";
 
 // Bisection / filtering arguments
 const args = Deno.args;
@@ -1005,9 +1006,11 @@ if (shouldRun(22, "trafficlaw")) {
   say.done(`  Packaged modloader/${modName}/${basename(asiOutput)}`);
 }
 
-// Step 23: ShortRangeBlips ASI Plugin
+// Step 23: ShortRangeBlips ASI Plugin & Bus Stop Blip TXD
 if (shouldRun(23, "shortrangeblips")) {
-  say.heading("Step 23 (shortrangeblips): Compiling ShortRangeBlips.asi...");
+  say.heading(
+    "Step 23 (shortrangeblips): Compiling ShortRangeBlips.asi & Bus Blip TXD...",
+  );
   const asiInput = join(
     cwd,
     "plugins",
@@ -1020,10 +1023,44 @@ if (shouldRun(23, "shortrangeblips")) {
     "ShortRangeBlips",
     "ShortRangeBlips.asi",
   );
+  const iniInput = join(
+    cwd,
+    "plugins",
+    "ShortRangeBlips",
+    "ShortRangeBlips.ini",
+  );
+  const busGenScript = join(cwd, "scripts", "build-bus-blip-txd.ts");
+  const busPngOutput = join(cwd, "plugins", "ShortRangeBlips", "busblip64.png");
+  const busTxdOutput = join(
+    cwd,
+    "plugins",
+    "ShortRangeBlips",
+    "eventide_busblip.txd",
+  );
+  const busHash = await sha256(await Deno.readFile(busGenScript));
+  if (
+    forceArg ||
+    !(await allExist([busPngOutput, busTxdOutput])) ||
+    hashCache[busTxdOutput] !== busHash
+  ) {
+    await buildBusBlipTxd(busPngOutput, busTxdOutput);
+    await saveHash(busTxdOutput, busHash);
+    say.pass("Generated busblip64.png & eventide_busblip.txd");
+  } else {
+    say.skip("  Up to date: eventide_busblip.txd");
+  }
+
   await compileAsiIfChanged(asiInput, asiOutput, join(stagingDir, "obj"));
 
   await Deno.copyFile(asiOutput, join(modStagingDir, basename(asiOutput)));
+  await Deno.copyFile(iniInput, join(modStagingDir, basename(iniInput)));
+  await Deno.copyFile(
+    busTxdOutput,
+    join(modStagingDir, basename(busTxdOutput)),
+  );
   say.done(`  Packaged modloader/${modName}/${basename(asiOutput)}`);
+  say.done(`  Packaged modloader/${modName}/${basename(iniInput)}`);
+  say.done(`  Packaged modloader/${modName}/${basename(busTxdOutput)}`);
 }
 
 // Step 24: BatMove ASI Plugin
@@ -1035,6 +1072,20 @@ if (shouldRun(24, "batmove")) {
 
   await Deno.copyFile(asiOutput, join(modStagingDir, basename(asiOutput)));
   say.done(`  Packaged modloader/${modName}/${basename(asiOutput)}`);
+}
+
+// Step 25: BusTransit ASI Plugin
+if (shouldRun(25, "bustransit")) {
+  say.heading("Step 25 (bustransit): Compiling BusTransit.asi...");
+  const asiInput = join(cwd, "plugins", "BusTransit", "BusTransit.cpp");
+  const asiOutput = join(cwd, "plugins", "BusTransit", "BusTransit.asi");
+  const iniInput = join(cwd, "plugins", "BusTransit", "BusTransit.ini");
+  await compileAsiIfChanged(asiInput, asiOutput, join(stagingDir, "obj"));
+
+  await Deno.copyFile(asiOutput, join(modStagingDir, basename(asiOutput)));
+  await Deno.copyFile(iniInput, join(modStagingDir, basename(iniInput)));
+  say.done(`  Packaged modloader/${modName}/${basename(asiOutput)}`);
+  say.done(`  Packaged modloader/${modName}/${basename(iniInput)}`);
 }
 
 // Step 18: Custom Map Overrides (IPL/IDE)
