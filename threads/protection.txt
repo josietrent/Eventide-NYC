@@ -17,6 +17,8 @@ int RouteState = 0
 int SkipArmed = 0
 int PursuitReady = 0
 int FarWarningActive = 0
+int DeadbeatCarHealth = 1000
+int BailoutProofActive = 0
 
 $onmission = 1
 $OnProtectionMission = 1
@@ -324,6 +326,11 @@ while true
         Text.PrintString("You wrecked his car before getting Louie's money!", 5000)
         jump @Protection_Fail
     end
+    Car.GetHealth(DeadbeatCar, DeadbeatCarHealth)
+    if DeadbeatCarHealth < 200
+    then
+        jump @Protection_FleeOnFoot
+    end
     if
         Char.LocateAnyMeans2D(Deadbeat, 1199.00, -438.00, 4.0, 4.0, False)
     then
@@ -365,6 +372,11 @@ while true
     then
         Text.PrintString("You wrecked his car before getting Louie's money!", 5000)
         jump @Protection_Fail
+    end
+    Car.GetHealth(DeadbeatCar, DeadbeatCarHealth)
+    if DeadbeatCarHealth < 200
+    then
+        jump @Protection_FleeOnFoot
     end
     if
         Char.IsInCar(Deadbeat, DeadbeatCar)
@@ -434,10 +446,12 @@ while true
         jump @Protection_Fail
     end
 
-    // Check if the player pulled him out, flipped the car, or trapped it long enough
+    // Check if the player pulled him out, flipped the car, damaged it below 200 health, or trapped it long enough
+    Car.GetHealth(DeadbeatCar, DeadbeatCarHealth)
     if or
         not Char.IsInCar(Deadbeat, DeadbeatCar)
         Car.IsUpsidedown(DeadbeatCar)
+        DeadbeatCarHealth < 200
     then
         jump @Protection_FleeOnFoot
     end
@@ -620,16 +634,26 @@ then
     if Car.IsStillAlive(DeadbeatCar)
     then
         Car.LockDoors(DeadbeatCar, CarLock.Unlocked)
+        Car.GetHealth(DeadbeatCar, DeadbeatCarHealth)
+        if DeadbeatCarHealth < 250
+        then
+            BailoutProofActive = 1
+            Char.SetProofs(Deadbeat, False, True, True, False, False)
+        end
         if
             Char.IsInCar(Deadbeat, DeadbeatCar)
         then
+            Car.SetCruiseSpeed(DeadbeatCar, 0.0)
             Char.SetObjLeaveCar(Deadbeat, DeadbeatCar)
             while true
                 wait 0
-                if or
-                    not Player.IsPlaying($player)
-                    not Char.IsStillAlive(Deadbeat)
+                if not Player.IsPlaying($player)
                 then
+                    jump @Protection_Fail
+                end
+                if not Char.IsStillAlive(Deadbeat)
+                then
+                    Text.PrintString("Oh shit, he's dead?!", 5000)
                     jump @Protection_Fail
                 end
                 if not Car.IsStillAlive(DeadbeatCar)
@@ -649,6 +673,11 @@ then
     Text.PrintString("Oh shit, he's dead?!", 5000)
     jump @Protection_Fail
 end
+if BailoutProofActive == 1
+then
+    TIMERA = 0
+end
+Char.SetObjNoObj(Deadbeat)
 Char.SetObjGotoCoordOnFoot(Deadbeat, 1286.58, -327.17)
 Char.SetRunning(Deadbeat, True)
 
@@ -672,6 +701,13 @@ while not Char.IsDead(Deadbeat)
         not Player.IsPlaying($player)
     then
         jump @Protection_Fail
+    end
+    if and
+        BailoutProofActive == 1
+        TIMERA >= 4000
+    then
+        Char.SetProofs(Deadbeat, False, False, False, False, False)
+        BailoutProofActive = 0
     end
     if
         Char.IsStillAlive(Deadbeat)
