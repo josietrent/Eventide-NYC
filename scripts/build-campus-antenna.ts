@@ -1,7 +1,7 @@
 import { join } from "@std/path";
 import { ensureDir } from "@std/fs/ensure-dir";
 
-const RW_VER = 0x0800FFFF;
+const RW_VER = 0x0800ffff;
 const dec = new TextDecoder();
 const enc = new TextEncoder();
 
@@ -48,7 +48,9 @@ async function readGta3ImgEntry(
   for (let i = 0; i < dirBytes.length; i += 32) {
     const rawName = dirBytes.subarray(i + 8, i + 32);
     const z = rawName.indexOf(0);
-    const name = dec.decode(z >= 0 ? rawName.subarray(0, z) : rawName).toLowerCase();
+    const name = dec
+      .decode(z >= 0 ? rawName.subarray(0, z) : rawName)
+      .toLowerCase();
     if (name === target) {
       const off = dirDv.getUint32(i, true) * 2048;
       const size = dirDv.getUint32(i + 4, true) * 2048;
@@ -306,10 +308,7 @@ function buildAntennaDff(
 
   const geomExtChunk = rwChunk(
     0x03,
-    concat([
-      rwChunk(0x50e, binMeshBytes),
-      rwChunk(0x105, u32(0)),
-    ]),
+    concat([rwChunk(0x50e, binMeshBytes), rwChunk(0x105, u32(0))]),
   );
 
   const geometryChunk = rwChunk(
@@ -329,10 +328,7 @@ function buildAntennaDff(
     u32(0xffffffff),
     u32(0),
   ]);
-  const frameExt = rwChunk(
-    0x03,
-    rwChunk(0x0253f2fe, enc.encode(frameName)),
-  );
+  const frameExt = rwChunk(0x03, rwChunk(0x0253f2fe, enc.encode(frameName)));
   const frameListChunk = rwChunk(
     0x0e,
     concat([rwChunk(0x01, frameStruct), frameExt]),
@@ -401,16 +397,13 @@ function buildAntennaTxd(indRadioTxd: Uint8Array): Uint8Array {
   );
 }
 
-function buildAntennaColEntry(modelName: string, modelId: number): Uint8Array {
-  // COL v1 entry:
-  // 22B name + 2B modelId + 40B bounds + 4B nSpheres + 4B unknown + 4B nBoxes + 28B*1 + 4B nVerts + 12B*5 + 4B nFaces + 16B*4
-  const nBoxes = 1;
-  const nVerts = 5;
-  const nFaces = 4;
-  const bodySize =
-    24 + 40 + 4 + 4 + 4 + nBoxes * 28 + 4 + nVerts * 12 + 4 + nFaces * 16;
-  const out = new Uint8Array(8 + bodySize);
-  const dv = new DataView(out.buffer);
+function writeAntennaColBounds(
+  out: Uint8Array,
+  dv: DataView,
+  modelName: string,
+  modelId: number,
+  bodySize: number,
+): void {
   out.set(enc.encode("COLL"), 0);
   dv.setUint32(4, bodySize, true);
   out.set(enc.encode(modelName).subarray(0, 22), 8);
@@ -427,6 +420,19 @@ function buildAntennaColEntry(modelName: string, modelId: number): Uint8Array {
   dv.setFloat32(60, 3.0, true);
   dv.setFloat32(64, 3.0, true);
   dv.setFloat32(68, 40.0, true);
+}
+
+function buildAntennaColEntry(modelName: string, modelId: number): Uint8Array {
+  // COL v1 entry:
+  // 22B name + 2B modelId + 40B bounds + 4B nSpheres + 4B unknown + 4B nBoxes + 28B*1 + 4B nVerts + 12B*5 + 4B nFaces + 16B*4
+  const nBoxes = 1;
+  const nVerts = 5;
+  const nFaces = 4;
+  const bodySize =
+    24 + 40 + 4 + 4 + 4 + nBoxes * 28 + 4 + nVerts * 12 + 4 + nFaces * 16;
+  const out = new Uint8Array(8 + bodySize);
+  const dv = new DataView(out.buffer);
+  writeAntennaColBounds(out, dv, modelName, modelId, bodySize);
 
   let q = 72;
   dv.setUint32(q, 0, true); // nSpheres
@@ -478,6 +484,18 @@ function buildAntennaColEntry(modelName: string, modelId: number): Uint8Array {
   return out;
 }
 
+function buildAntennaLodColEntry(
+  modelName: string,
+  modelId: number,
+): Uint8Array {
+  // Bounds-only COL v1 entry (84-byte body, matching vanilla LOD* entries in comntop.col)
+  const bodySize = 24 + 40 + 4 + 4 + 4 + 4 + 4;
+  const out = new Uint8Array(8 + bodySize);
+  const dv = new DataView(out.buffer);
+  writeAntennaColBounds(out, dv, modelName, modelId, bodySize);
+  return out;
+}
+
 const repoDir = Deno.cwd();
 const envText = await Deno.readTextFile(join(repoDir, ".env"));
 const gta3Match = envText.match(/^GTA3=(.+)$/m);
@@ -510,7 +528,11 @@ const vanillaCol = await Deno.readFile(
 );
 await Deno.writeFile(
   join(comntopOutDir, "comntop.col"),
-  concat([vanillaCol, buildAntennaColEntry("com_antenna", 2072)]),
+  concat([
+    vanillaCol,
+    buildAntennaColEntry("com_antenna", 2072),
+    buildAntennaLodColEntry("LOD_antenna", 2073),
+  ]),
 );
 
 const vanillaIde = await Deno.readTextFile(
@@ -545,4 +567,6 @@ const patchedIpl = vanillaIpl.replace(
 if (patchedIpl === vanillaIpl) throw new Error("Failed to patch comNtop.ipl");
 await Deno.writeTextFile(join(comntopOutDir, "comNtop.ipl"), patchedIpl);
 
-console.log("Generated com_antenna.dff, LOD_antenna.dff, com_antenna.txd, comntop.col, comntop.ide, comNtop.ipl");
+console.log(
+  "Generated com_antenna.dff, LOD_antenna.dff, com_antenna.txd, comntop.col, comntop.ide, comNtop.ipl",
+);
